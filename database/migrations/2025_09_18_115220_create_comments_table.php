@@ -1,0 +1,40 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('comments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->string('name');
+            $table->string('advantage');
+            $table->string('disadvantage');
+            $table->boolean('is_buyer');
+            $table->boolean('suggestion');
+            $table->integer('like')->default(0);
+            $table->integer('dislike')->default(0);
+            $table->text('body');
+            $table->integer('commentable_id');
+            $table->string('commentable_type');
+            $table->string('status')->default(\App\Enums\CommentStatus::Draft->value);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('comments');
+    }
+};
