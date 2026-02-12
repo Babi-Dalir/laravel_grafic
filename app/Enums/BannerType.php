@@ -8,4 +8,5 @@ enum BannerType: string
     case MediumBanner = 'medium_banner';
     case SmallBanner = 'small_banner';
     case LargeBanner = 'large_banner';
+
 }
