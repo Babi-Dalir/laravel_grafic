@@ -26,53 +26,79 @@
 
 {{-- ایجکس برای سرچ زدن محصول در هدر صفحاتی که سرچ دارند --}}
 <script>
+    $(document).ready(function(){
 
-$(document).ready(function(){
+        let searchInput  = $('#ajax-search');
+        let searchResult = $('#search-result');
+        let resultList   = $('#search-result-list');
+        let closeBtn     = $('#close-search-result');
 
-    $('#ajax-search').on('keyup', function(){
-        let query = $(this).val();
+        // استفاده از input event برای پوشش همه حالت‌ها
+        searchInput.on('input', function(){
 
-        if(query.length < 2){
-            $('#search-result').hide();
-            return;
-        }
+            let query = $(this).val().trim();
 
-        $.ajax({
-            url: "{{ route('ajax.search') }}",
-            type: "GET",
-            data: { query: query },
-            success: function(response){
-                let html = '';
-
-                if(response.categories.length > 0){
-                    html += '<li class="search-title">دسته‌بندی‌ها</li>';
-                    response.categories.forEach(function(cat){
-                        html += `<li><a href="/search_category_product_list/${cat.slug}">${cat.name}</a></li>`;
-                    });
-                }
-
-                if(response.products.length > 0){
-                    html += '<li class="search-title">محصولات</li>';
-                    response.products.forEach(function(prod){
-                        html += `<li><a href="/single_products/${prod.slug}">${prod.name}</a></li>`;
-                    });
-                }
-
-                if(response.categories.length == 0 && response.products.length == 0){
-                    html += `<li class="empty-result">نتیجه‌ای برای «${query}» پیدا نشد</li>`;
-                }
-
-                $('#search-result-list').html(html);
-                $('#search-result').show();
+            // اگر خالی شد → کامل ریست
+            if(query.length === 0){
+                resultList.empty();
+                searchResult.hide();
+                closeBtn.hide();
+                return;
             }
+
+            // اگر کمتر از 2 کاراکتر بود → بسته شود
+            if(query.length < 2){
+                resultList.empty();
+                searchResult.hide();
+                closeBtn.hide();
+                return;
+            }
+
+            // نمایش ضربدر
+            closeBtn.show();
+
+            $.ajax({
+                url: "{{ route('ajax.search') }}",
+                type: "GET",
+                data: { query: query },
+                success: function(response){
+
+                    let html = '';
+
+                    if(response.categories.length > 0){
+                        html += '<li class="search-title">دسته‌بندی‌ها</li>';
+                        response.categories.forEach(function(cat){
+                            html += `<li><a href="/search_category_product_list/${cat.slug}">${cat.name}</a></li>`;
+                        });
+                    }
+
+                    if(response.products.length > 0){
+                        html += '<li class="search-title">محصولات</li>';
+                        response.products.forEach(function(prod){
+                            html += `<li><a href="/single_products/${prod.slug}">${prod.name}</a></li>`;
+                        });
+                    }
+
+                    if(response.categories.length == 0 && response.products.length == 0){
+                        html += `<li class="empty-result">نتیجه‌ای برای «${query}» پیدا نشد</li>`;
+                    }
+
+                    resultList.html(html);
+                    searchResult.show();
+                }
+            });
+
         });
-    });
 
-    $('#close-search-result').on('click', function(){
-        $('#ajax-search').val('');
-        $('#search-result').hide();
-    });
+        // دکمه ضربدر
+        closeBtn.on('click', function(){
+            searchInput.val('');
+            resultList.empty();
+            searchResult.hide();
+            closeBtn.hide();
+            searchInput.focus();
+        });
 
-});
+    });
 </script>
 {{-- ایجکس برای سرچ زدن محصول در هدر صفحاتی که سرچ دارند --}}ّ

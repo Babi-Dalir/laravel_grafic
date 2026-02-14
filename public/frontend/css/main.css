@@ -9311,3 +9311,26 @@ footer.mini-footer .copy-right-mini-footer {
     display: inline-block;
 }
 
+/*دکمه ضبدر سرچ*/
+
+#close-search-result {
+    position: absolute;
+    left: 45px;   /* چون RTL هستی */
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: none;
+    z-index: 10;
+}
+
+#close-search-result i {
+    font-size: 18px;
+    color: #999;
+}
+
+#close-search-result:hover i {
+    color: #333;
+}
