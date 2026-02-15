@@ -104,17 +104,6 @@ Route::resource('gift_carts', GiftCartController::class);
 //Ckeditor Route
 Route::post('upload_image_ckeditor', [GalleryController::class, 'ckeditorImage'])->name('ckeditor.upload');
 
-//Review Route
-Route::get('reviews/{id}', [ReviewController::class, 'index'])->name('product.reviews');
-
-Route::get('create_reviews/{product_id}', [ReviewController::class, 'create'])->name('create.product.reviews');
-
-Route::post('store_reviews/{product_id}', [ReviewController::class, 'store'])->name('store.product.reviews');
-
-Route::get('edit_reviews/{id}/{product_id}', [ReviewController::class, 'edit'])->name('edit.product.reviews');
-
-Route::put('update_reviews/{id}/{product_id}', [ReviewController::class, 'update'])->name('update.product.reviews');
-
 //Order Route
 //Route::group(['middleware' => ['can:لیست سفارشات']], function () {
 Route::get('order_list', [OrderController::class, 'orders'])->name('admin.orders.list');
