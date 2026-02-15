@@ -64,9 +64,6 @@ Route::resource('tags', TagController::class);
 Route::resource('products', ProductController::class);
 Route::get('products_trashed', [ProductController::class, "trashed"])->name('products.trashed');
 
-//guaranty Route
-Route::resource('guaranties', GuarantyController::class);
-
 //ProductPrice Route
 Route::get('product_prices/{id}', [ProductPriceController::class, 'index'])->name('product.prices');
 
