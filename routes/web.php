@@ -29,8 +29,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/user_cart', [HomeController::class, 'userCart'])->name('user.cart');
 
-    Route::get('/shopping_payment', [HomeController::class, 'shoppingPayment'])->name('user.shopping.payment');
-
     Route::get('/payment', [PaymentController::class, 'payment'])->name('payment');
 
     Route::get('/product_comment/{product_id}', [ProductController::class, 'productComment'])->name('product.comment');
