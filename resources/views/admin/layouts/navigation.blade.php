@@ -77,13 +77,6 @@
                 </ul>
             </li>
             <li>
-                <a href="#">شهر ها</a>
-                <ul>
-                    <li><a href="{{route('cities.create')}}">ایجاد شهر</a></li>
-                    <li><a href="{{route('cities.index')}}">لیست شهر ها</a></li>
-                </ul>
-            </li>
-            <li>
                 <a href="#">فروشندگان</a>
                 <ul>
                     <li><a href="{{route('seller.list')}}">لیست فروشندگان</a></li>

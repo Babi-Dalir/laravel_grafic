@@ -9,10 +9,6 @@ class Province extends Model
     protected $fillable=[
         'province'
     ];
-    public function cities()
-    {
-        return $this->hasMany(City::class);
-    }
     public static function createProvince($request)
     {
         Province::query()->create([
