@@ -70,13 +70,6 @@
                 </ul>
             </li>
             <li>
-                <a href="#">استان ها</a>
-                <ul>
-                    <li><a href="{{route('provinces.create')}}">ایجاد استان</a></li>
-                    <li><a href="{{route('provinces.index')}}">لیست استان ها</a></li>
-                </ul>
-            </li>
-            <li>
                 <a href="#">فروشندگان</a>
                 <ul>
                     <li><a href="{{route('seller.list')}}">لیست فروشندگان</a></li>

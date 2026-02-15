@@ -98,12 +98,6 @@ Route::resource('banners', BannerController::class);
 //Comment Route
 Route::get('users_comments', [CommentController::class, 'userComments'])->name('users.comments');
 
-//Province Route
-Route::resource('provinces', ProvinceController::class);
-
-//City Route
-Route::resource('cities', CityController::class);
-
 //Discount Route
 Route::resource('discounts', DiscountController::class);
 
