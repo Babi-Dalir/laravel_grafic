@@ -16,22 +16,10 @@ class ProductPrice extends Model
         'max_sell',
         'user_id',
         'product_id',
-        'color_id',
-        'guaranty_id',
         'spacial_start',
         'spacial_expiration',
         'status',
     ];
-
-    public function color()
-    {
-        return $this->belongsTo(Color::class);
-    }
-
-    public function guaranty()
-    {
-        return $this->belongsTo(Guaranty::class);
-    }
 
     public function product()
     {
@@ -57,8 +45,6 @@ class ProductPrice extends Model
             'count' => $request->input('count'),
             'max_sell' => $request->input('max_sell'),
             'product_id' => $product_id,
-            'color_id' => $request->input('color_id'),
-            'guaranty_id' => $request->input('guaranty_id'),
             'spacial_start' => $request->input('spacial_start') != null ? DateManager::shamsi_to_miladi($request->input('spacial_start')) : null,
             'spacial_expiration' => $request->input('spacial_expiration') != null ? DateManager::shamsi_to_miladi($request->input('spacial_expiration')) : null,
         ]);
@@ -66,16 +52,10 @@ class ProductPrice extends Model
             $product = Product::query()->find($product_id);
             if ($price < $less_price->price) {
                 self::getUpdateProduct($product, $price, $request);
-                self::getColors($product_id, $request, $product);
-            } else {
-                if ($product->guaranty_id == $request->input('guaranty_id')) {
-                    self::getColors($product_id, $request, $product);
-                }
             }
         } else {
             $product = Product::query()->find($product_id);
             self::getUpdateProduct($product, $price, $request);
-            self::getColors($product_id, $request, $product);
         }
     }
 
@@ -95,8 +75,6 @@ class ProductPrice extends Model
             'count' => $request->input('count'),
             'max_sell' => $request->input('max_sell'),
             'product_id' => $product_id,
-            'color_id' => $request->input('color_id'),
-            'guaranty_id' => $request->input('guaranty_id'),
             'spacial_start' => $request->input('spacial_start') != null ? DateManager::shamsi_to_miladi($request->input('spacial_start')) : null,
             'spacial_expiration' => $request->input('spacial_expiration') != null ? DateManager::shamsi_to_miladi($request->input('spacial_expiration')) : null,
         ]);
@@ -104,19 +82,6 @@ class ProductPrice extends Model
         $product = Product::query()->find($product_id);
         if ($price <= $less_price->price) {
             self::getUpdateProduct($product, $price, $request);
-            self::getColors($product_id, $request, $product);
-        } else {
-            if ($product->guaranty_id == $request->input('guaranty_id')) {
-                self::getColors($product_id, $request, $product);
-            }
-        }
-    }
-
-    public static function getColors($product_id, $request, $product)
-    {
-        $check = $product->colors()->where('color_id', $request->color_id)->exists();
-        if (!$check) {
-            $product->colors()->attach($request->input('color_id'));
         }
     }
 
@@ -128,7 +93,6 @@ class ProductPrice extends Model
             'discount' => $request->input('discount'),
             'count' => $request->input('count'),
             'max_sell' => $request->input('max_sell'),
-            'guaranty_id' => $request->input('guaranty_id'),
             'spacial_start' => $request->input('spacial_start') != null ? DateManager::shamsi_to_miladi($request->input('spacial_start')) : null,
             'spacial_expiration' => $request->input('spacial_expiration') != null ? DateManager::shamsi_to_miladi($request->input('spacial_expiration')) : null,
         ]);
@@ -139,8 +103,6 @@ class ProductPrice extends Model
         foreach ($carts as $cart) {
             $product_price = ProductPrice::query()
                 ->where('product_id', $cart->product_id)
-                ->where('color_id', $cart->color_id)
-                ->where('guaranty_id', $cart->guaranty_id)
                 ->first();
             $total_price += ($product_price->price) * $cart->count;
 

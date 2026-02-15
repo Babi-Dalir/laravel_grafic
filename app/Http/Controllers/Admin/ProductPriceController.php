@@ -30,10 +30,8 @@ class ProductPriceController extends Controller
     public function create($id)
     {
        $title = "ایجاد تنوع قیمت محصول";
-       $colors = Color::query()->pluck('name','id');
        $product = Product::query()->find($id);
-       $guaranties = Guaranty::query()->pluck('name','id');
-        return view('admin.product_prices.create',compact('title','colors','guaranties','product'));
+        return view('admin.product_prices.create',compact('title','product'));
     }
 
 
@@ -60,11 +58,9 @@ class ProductPriceController extends Controller
     public function edit(string $id,$product_id)
     {
         $title ="ویرایش تنوع قیمت محصول";
-        $guaranties = Guaranty::query()->pluck('name','id');
         $product = Product::query()->findOrfail($product_id);
         $product_price = ProductPrice::query()->findOrfail($id);
-        $colors = Color::query()->pluck('name','id');
-        return view('admin.product_prices.edit',compact('title','guaranties','product_price','product','colors'));
+        return view('admin.product_prices.edit',compact('title','product_price','product'));
     }
 
     /**

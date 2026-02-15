@@ -20,11 +20,9 @@ class Product extends Model
         'price',
         'discount',
         'count',
-        'max_sell',
         'viewed',
         'sold',
         'image',
-        'guaranty_id',
         'description',
         'spacial_start',
         'spacial_expiration',
@@ -43,11 +41,6 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class);
-    }
-
-    public function colors()
-    {
-        return $this->belongsToMany(Color::class, 'color_product');
     }
 
     public function tags()
@@ -75,24 +68,9 @@ class Product extends Model
         return $this->hasMany(Gallery::class);
     }
 
-    public function guaranty()
-    {
-        return $this->belongsTo(Guaranty::class);
-    }
-
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable');
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
-
-    public function productStars()
-    {
-        return $this->hasMany(ProductStar::class);
     }
 
     public function favorites()

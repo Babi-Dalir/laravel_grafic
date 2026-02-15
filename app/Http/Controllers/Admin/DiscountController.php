@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DiscountRequest;
 use App\Http\Requests\ProductPriceRequest;
-use App\Models\Color;
 use App\Models\Discount;
 use App\Models\Guaranty;
 use App\Models\Product;

@@ -33,8 +33,6 @@ class PaymentController extends Controller
         $shop_data = Session::get('shop_data');
         $user = auth()->user();
 
-        $address = Address::getUserAddress($user);
-
         $carts = UserCart::getUserCart($user);
 
         $total_price = ProductPrice::calculateTotalPriceInCart($carts,$total_price);
@@ -52,13 +50,11 @@ class PaymentController extends Controller
             $gif_cart_code_price = $result['gif_cart_code_price'];
         }
 
-        $order = Order::createOrder($user, $address, $total_price, $shop_data, $discount_code_price, $gif_cart_code_price);
+        $order = Order::createOrder($user, $total_price, $shop_data, $discount_code_price, $gif_cart_code_price);
 
         foreach ($carts as $cart) {
             $product_price = ProductPrice::query()
                 ->where('product_id', $cart->product_id)
-                ->where('color_id', $cart->color_id)
-                ->where('guaranty_id', $cart->guaranty_id)
                 ->first();
             $order_details[] = OrderDetail::createOrderDetail($order, $cart, $product_price);
         }

@@ -11,8 +11,6 @@ class OrderDetail extends Model
         'seller_id',
         'order_id',
         'product_id',
-        'color_id',
-        'guaranty_id',
         'main_price',
         'price',
         'discount',
@@ -30,14 +28,6 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(Product::class);
     }
-    public function color()
-    {
-        return $this->belongsTo(Color::class);
-    }
-    public function guaranty()
-    {
-        return $this->belongsTo(Guaranty::class);
-    }
 
     public static function createOrderDetail($order,$cart,$product_price)
     {
@@ -45,8 +35,6 @@ class OrderDetail extends Model
             'seller_id'=>$product_price->user_id,
             'order_id'=>$order->id,
             'product_id'=>$cart->product_id,
-            'color_id'=>$cart->color_id,
-            'guaranty_id'=>$cart->guaranty_id,
             'main_price'=>$product_price->main_price,
             'price'=>$product_price->price,
             'discount'=>$product_price->discount,

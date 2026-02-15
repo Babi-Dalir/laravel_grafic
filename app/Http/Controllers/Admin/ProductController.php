@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Color;
 use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\Tag;
