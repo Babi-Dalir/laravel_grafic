@@ -115,9 +115,6 @@ Route::get('edit_reviews/{id}/{product_id}', [ReviewController::class, 'edit'])-
 
 Route::put('update_reviews/{id}/{product_id}', [ReviewController::class, 'update'])->name('update.product.reviews');
 
-//Questions Route
-Route::get('users_questions', [QuestionController::class, 'userQuestions'])->name('users.questions');
-
 //Order Route
 //Route::group(['middleware' => ['can:لیست سفارشات']], function () {
 Route::get('order_list', [OrderController::class, 'orders'])->name('admin.orders.list');
