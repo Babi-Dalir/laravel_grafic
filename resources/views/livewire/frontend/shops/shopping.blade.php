@@ -117,17 +117,6 @@
                             </button>
                         </div>
                     @endif
-                    <!-- Start Modal location new -->
-                    <livewire:frontend.shops.add-address-modal/>
-                    <!-- End Modal location new -->
-
-                    <!-- Start Modal location edit -->
-                    <livewire:frontend.shops.edit-address-modal/>
-                    <!-- End Modal location edit -->
-
-                    <!-- Start Modal remove-location -->
-                    <livewire:frontend.shops.delete-address-modal/>
-                    <!-- End Modal remove-location -->
                 </div>
             </div>
             <form method="post" id="shipping-data-form" class="dt-sn dt-sn--box pt-3 pb-3">

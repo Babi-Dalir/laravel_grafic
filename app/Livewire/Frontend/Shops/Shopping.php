@@ -30,11 +30,6 @@ class Shopping extends Component
         'send_type' => 'required',
         'receive_time' => 'required|sometimes'
     ];
-    #[On('refreshAddressList')]
-    public function refreshAddressList()
-    {
-        $this->dispatch('$refresh');
-    }
 
     public function mount()
     {
@@ -78,25 +73,6 @@ class Shopping extends Component
 
     public function render()
     {
-        $addresses = Address::query()
-            ->where('user_id', auth()->user()->id)
-            ->orderByDesc('is_default')
-            ->get();
-        $address = Address::query()
-            ->where('user_id', auth()->user()->id)
-            ->where('is_default', true)
-            ->first();
-        if ($address){
-            $this->selected_address = $address;
-            $this->send_price = $this->selected_address->city->send_price;
-            $this->send_time = $this->selected_address->city->send_time;
-
-            if (Carbon::now()->addDays($this->send_time)->dayOfWeek == CarbonInterface::FRIDAY){
-                $this->receive_day = Carbon::now()->addDays($this->send_time +1);
-                $this->selected_day_index = 0;
-            }
-        }
-
         return view('livewire.frontend.shops.shopping', compact( 'addresses'));
     }
 }

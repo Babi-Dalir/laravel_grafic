@@ -70,12 +70,6 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{route('profile.addresses')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.addresses') class="active" @endif>
-                                <i class="mdi mdi-sign-direction"></i>
-                                آدرس ها
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{route('profile.seller')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.seller') class="active" @endif>
                                 <i class="mdi mdi-sign-direction"></i>
                                  درخواست فروشندگی

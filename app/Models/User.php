@@ -31,10 +31,6 @@ class User extends Authenticatable
         'status',
         'password',
     ];
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
-    }
     public function userProfile()
     {
         return $this->hasOne(UserProfile::class);

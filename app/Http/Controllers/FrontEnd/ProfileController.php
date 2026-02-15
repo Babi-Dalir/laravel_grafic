@@ -67,10 +67,6 @@ class ProfileController extends Controller
         $comments = Comment::query()->where('user_id',$user->id)->get();
         return view('frontend.profile.profile_comments',compact('comments'));
     }
-    public function profileAddresses()
-    {
-        return view('frontend.profile.profile_addresses');
-    }
 
     public function profileSeller()
     {
