@@ -48,10 +48,6 @@ class HomeController extends Controller
             ->where('type',CartType::Main->value)->count();
         return view('frontend.user_cart',compact('carts_count'));
     }
-    public function shopping()
-    {
-        return view('frontend.shopping');
-    }
 
     public function shoppingPayment()
     {
