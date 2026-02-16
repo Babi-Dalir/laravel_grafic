@@ -47,10 +47,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
-    public function productPrices()
-    {
-        return $this->hasMany(ProductPrice::class);
-    }
+//    public function productPrices()
+//    {
+//        return $this->hasMany(ProductPrice::class);
+//    }
     public function userTransactions()
     {
         return $this->hasMany(UserTransaction::class);
