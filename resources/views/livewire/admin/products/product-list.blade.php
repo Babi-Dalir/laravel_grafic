@@ -32,12 +32,9 @@
             <th class="text-center align-middle text-primary">نام محصول</th>
             <th class="text-center align-middle text-primary">نام شرکت</th>
             <th class="text-center align-middle text-primary">دسته بندی</th>
-            <th class="text-center align-middle text-primary">برند</th>
             <th class="text-center align-middle text-primary">ویژگی های محصول</th>
-            <th class="text-center align-middle text-primary">تنوع قیمت</th>
             <th class="text-center align-middle text-primary">گالری</th>
             @if(auth()->user()->is_admin)
-            <th class="text-center align-middle text-primary">نقد وبررسی</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             @endif
             <th class="text-center align-middle text-primary">ویرایش</th>
@@ -57,15 +54,9 @@
                 <td class="text-center align-middle">{{$product->name}}</td>
                 <td class="text-center align-middle">{{$product->user->seller?->company_name}}</td>
                 <td class="text-center align-middle">{{$product->category->name}}</td>
-                <td class="text-center align-middle">{{$product->brand->name}}</td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-secondary" href="{{route('create.product.properties',$product)}}">
                         ویژگی های محصول
-                    </a>
-                </td>
-                <td class="text-center align-middle">
-                    <a class="btn btn-outline-dark" href="{{route('product.prices',$product->id)}}">
-                        تنوع قیمت
                     </a>
                 </td>
                 <td class="text-center align-middle">
@@ -74,11 +65,6 @@
                     </a>
                 </td>
                 @if(auth()->user()->is_admin)
-                <td class="text-center align-middle">
-                    <a class="btn btn-outline-warning" href="{{route('product.reviews',$product->id)}}">
-                        نقد وبررسی
-                    </a>
-                </td>
                     <td class="text-center align-middle" wire:click="changeStatus({{$product->id}})">
                         @if($product->status === \App\Enums\ProductStatus::Active->value)
                             <span class="cursor-pointer badge badge-success">تایید شده</span>
@@ -91,7 +77,6 @@
                         @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
                             <span class="cursor-pointer badge badge-danger">غیر مجاز</span>
                         @endif
-
                     </td>
                 @endif
                 <td class="text-center align-middle">

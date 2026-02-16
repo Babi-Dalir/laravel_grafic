@@ -30,9 +30,8 @@ class ProductController extends Controller
     {
         $title = "ایجاد محصول";
         $categories = Category::getCategories();
-        $brands = Brand::query()->pluck('name','id');
-        $tags = Tag::query()->pluck('name','id');
-        return view('admin.products.create',compact('title','categories','brands','tags'));
+//        $tags = Tag::query()->pluck('name','id');
+        return view('admin.products.create',compact('title','categories'));
     }
 
 
@@ -60,10 +59,9 @@ class ProductController extends Controller
     {
         $title ="ویرایش محصول";
         $categories = Category::getCategories();
-        $brands = Brand::query()->pluck('name','id');
-        $tags = Tag::query()->pluck('name','id');
+//        $tags = Tag::query()->pluck('name','id');
         $product = Product::findOrfail($id);
-        return view('admin.products.edit',compact('title','categories','brands','tags','product'));
+        return view('admin.products.edit',compact('title','categories','product'));
     }
 
     /**
@@ -74,7 +72,6 @@ class ProductController extends Controller
         Product::updateProduct($request,$id);
         return redirect()->route('products.index')->with('message', 'محصول جدید با موفقیت ویرایش شد');
     }
-
 
     /**
      * Remove the specified resource from storage.
