@@ -16,7 +16,6 @@ class Category extends Model
         'slug',
         'image',
         'parent_id',
-
     ];
 
     public function parentCategory()
@@ -35,10 +34,10 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-    public function commission()
-    {
-        return $this->hasOne(Commission::class);
-    }
+//    public function commission()
+//    {
+//        return $this->hasOne(Commission::class);
+//    }
 
     public static function createCategory($request)
     {

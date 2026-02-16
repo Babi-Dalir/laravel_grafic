@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->index();
             $table->string('e_name');
-            $table->string('slug');
+            $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->integer('parent_id')->default(0);
             $table->softDeletes();
