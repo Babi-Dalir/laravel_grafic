@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email')->unique()->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('image')->nullable();
-            $table->boolean('is_admin')->default(false);
+            $table->decimal('wallet_balance', 15, 2)->default(0);// فقط برای فروشنده استفاده می‌شود
             $table->string('status')->default(\App\Enums\UserStatus::Active->value);
             $table->string('password');
             $table->rememberToken();

@@ -37,24 +37,6 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label  class="col-sm-2 col-form-label">واتس اپ</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control text-left"  dir="rtl" name="whatsapp" value="{{$user->whatsapp}}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label  class="col-sm-2 col-form-label">تلگرام</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control text-left"  dir="rtl" name="telegram" value="{{$user->telegram}}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label  class="col-sm-2 col-form-label">اینستاگرام</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control text-left"  dir="rtl" name="instagram" value="{{$user->instagram}}">
-                            </div>
-                        </div>
-                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="file"> آپلود عکس </label>
                             <input  class="col-sm-10 form-control-file" type="file" name="image" id="image">
                         </div>
@@ -62,7 +44,6 @@
                             <button type="submit" class="btn btn-success btn-uppercase">
                                 <i class="ti-check-box m-r-5"></i> ذخیره
                             </button>
-
                         </div>
                     </form>
                 </div>

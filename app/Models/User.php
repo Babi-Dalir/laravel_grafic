@@ -27,7 +27,7 @@ class User extends Authenticatable
         'mobile_verified_at',
         'email',
         'image',
-        'is_admin',
+        'wallet_balance',
         'status',
         'password',
     ];
@@ -86,7 +86,10 @@ class User extends Authenticatable
             'email' => $request->input('email'),
             'mobile'=>$request->input('mobile'),
             'password' => Hash::make($request->input('password')),
-            'image'=>ImageManager::saveImage('users',$request->image)
+            'image'=>$request->image
+                ? ImageManager::saveImage('users', $request->image)
+                : null,
+            'wallet_balance' => 0 // همیشه صفر هنگام ساخت
         ]);
     }
     public static function updateUser($request,$user)
@@ -99,4 +102,9 @@ class User extends Authenticatable
             'image'=>$request->image ? ImageManager::saveImage('users',$request->image) : $user->image
         ]);
     }
+    public function increaseWallet($amount)
+    {
+        $this->increment('wallet_balance', $amount);
+    }
+
 }
