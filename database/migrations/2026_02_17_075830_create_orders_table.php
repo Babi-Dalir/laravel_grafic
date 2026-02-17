@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('order_code')->unique();
             $table->string('transaction_id')->nullable();
-            $table->double('total_price');
+            $table->decimal('total_price', 15, 2);
 
             $table->double('discount_price')->nullable();
             $table->string('discount_code')->nullable();

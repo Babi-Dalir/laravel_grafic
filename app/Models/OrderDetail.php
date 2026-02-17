@@ -14,10 +14,8 @@ class OrderDetail extends Model
         'main_price',
         'price',
         'discount',
-        'count',
         'description',
         'status',
-
     ];
 
     public function order()
@@ -38,7 +36,6 @@ class OrderDetail extends Model
             'main_price'=>$product_price->main_price,
             'price'=>$product_price->price,
             'discount'=>$product_price->discount,
-            'count'=>$cart->count,
             'status'=>OrderDetailStatus::Waiting->value,
         ]);
     }

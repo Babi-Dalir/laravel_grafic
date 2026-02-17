@@ -10,11 +10,8 @@
         <tr>
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
-            <th class="text-center align-middle text-primary">رنگ</th>
-            <th class="text-center align-middle text-primary">گارانتی</th>
             <th class="text-center align-middle text-primary">قیمت</th>
             <th class="text-center align-middle text-primary">تخفیف</th>
-            <th class="text-center align-middle text-primary">تعداد</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
         </tr>
@@ -24,11 +21,8 @@
             <tr>
                 <td class="text-center align-middle">{{$order_details->firstItem()+$index}}</td>
                 <td class="text-center align-middle">{{$order_detail->product->name}}</td>
-                <td class="text-center align-middle">{{$order_detail->color->name}}</td>
-                <td class="text-center align-middle">{{$order_detail->guaranty->name}}</td>
                 <td class="text-center align-middle">{{number_format($order_detail->price)}}تومان </td>
                 <td class="text-center align-middle">{{$order_detail->discount}}%</td>
-                <td class="text-center align-middle">{{$order_detail->count}}</td>
                 <td class="text-center align-middle" wire:click="changeOrderDetailStatus({{$order_detail->id}})">
                     @if($order_detail->status === \App\Enums\OrderDetailStatus::Processing->value)
                         <span class="cursor-pointer badge badge-info">در حال پردازش</span>
