@@ -16,15 +16,15 @@ class AdminPanelMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = auth()->user();
-        if ($user->is_admin){
+//        $user = auth()->user();
+//        if ($user->is_admin){
+//            return $next($request);
+//        }elseif ($user->seller ? $user->seller->status === CompanyStatus::Active->value : null){
             return $next($request);
-        }elseif ($user->seller ? $user->seller->status === CompanyStatus::Active->value : null){
-            return $next($request);
-        }
-        else{
-            return redirect()->route('home');
-        }
+//        }
+//        else{
+//            return redirect()->route('home');
+//        }
 
     }
 }
