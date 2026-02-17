@@ -41,7 +41,7 @@ return new class extends Migration
             // ارتباط با فروشنده و دسته‌بندی
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
-
+            $table->string('file_extension', 10)->nullable(); // برای نمایش نوع فایل (PSD, AI, ZIP)
             $table->softDeletes();
             $table->timestamps();
         });

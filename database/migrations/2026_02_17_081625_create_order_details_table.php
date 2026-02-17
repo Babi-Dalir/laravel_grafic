@@ -21,6 +21,8 @@ return new class extends Migration
             $table->double('discount')->nullable();
             $table->text('description')->nullable();
             $table->string('status')->nullable();
+            $table->decimal('seller_share', 15, 2); // مبلغی که سهم فروشنده است
+            $table->decimal('site_share', 15, 2);   // مبلغی که سهم سایت است
             $table->timestamps();
         });
     }
