@@ -51,12 +51,6 @@ Route::resource('permissions', PermissionController::class);
 Route::resource('categories', CategoryController::class);
 Route::get('categories_trashed', [CategoryController::class, "trashed"])->name('categories.trashed');
 
-//brands Route
-Route::resource('brands', BrandController::class);
-
-//colors Route
-Route::resource('colors', ColorController::class);
-
 //tags Route
 Route::resource('tags', TagController::class);
 
