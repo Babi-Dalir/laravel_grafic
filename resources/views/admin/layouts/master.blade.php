@@ -51,6 +51,17 @@
 {{--        $dropdownParent:$('#parent')--}}
 {{--    })--}}
 {{--</script>--}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                // با استفاده از متد خود بوت‌استرپ برای بستن تمیز
+                $(alert).fadeOut('slow');
+            });
+        }, 5000); // 5000 میلی‌ثانیه = 5 ثانیه
+    });
+</script>
 @yield('scripts')
 </body>
 </html>

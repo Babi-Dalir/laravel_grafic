@@ -19,17 +19,17 @@ class FileManager
         }
     }
 
-    public static function saveDigitalFile($file, $productSlug)
+    public static function saveDigitalFile($file, $product_id)
     {
         if ($file) {
             // نام فایل امن
             $name = $file->hashName();
 
             // مسیر ذخیره سازی
-            $path = 'private_files/products/' . $productSlug;
+            $path = 'products/' . $product_id;
 
             // ذخیره فایل در استوریج
-            Storage::disk('local')->putFileAs($path, $file, $name);
+            Storage::disk('digital_files')->putFileAs($path, $file, $name);
 
             return $name;
         }
@@ -37,13 +37,13 @@ class FileManager
         return null;
     }
 
-    public static function deleteDigitalFile($productSlug, $fileName)
+    public static function deleteDigitalFile($product_id, $fileName)
     {
         if ($fileName) {
-            $path = 'private_files/products/' . $productSlug . '/' . $fileName;
+            $path = 'products/' . $product_id . '/' . $fileName;
 
-            if (Storage::disk('local')->exists($path)) {
-                Storage::disk('local')->delete($path);
+            if (Storage::disk('digital_files')->exists($path)) {
+                Storage::disk('digital_files')->delete($path);
             }
         }
     }

@@ -85,7 +85,7 @@ class User extends Authenticatable
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'mobile'=>$request->input('mobile'),
-            'password' => Hash::make($request->input('password')),
+            'password' => $request->input('password'),
             'image'=>$request->image
                 ? ImageManager::saveImage('users', $request->image)
                 : null,
@@ -94,12 +94,16 @@ class User extends Authenticatable
     }
     public static function updateUser($request,$user)
     {
+        if ($request->hasFile('image')) {
+            ImageManager::unlinkImage('users', $user); // حذف عکس قبلی
+            $imageName = ImageManager::saveImage('users', $request->image);
+        }
         $user->update([
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'mobile'=>$request->input('mobile'),
-            'password' => $request->input('password') ? Hash::make($request->input('password')) : $user->password,
-            'image'=>$request->image ? ImageManager::saveImage('users',$request->image) : $user->image
+            'password' => $request->password ? $request->password : $user->password,
+            'image'=>$request->image ? $imageName : $user->image
         ]);
     }
     public function increaseWallet($amount)

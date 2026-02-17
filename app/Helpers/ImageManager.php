@@ -24,13 +24,20 @@ class ImageManager
         }
     }
 
-    public static function unlinkImage($table,$object)
+    public static function unlinkImage($table, $object)
     {
-        $path_small = public_path(). "/images/$table/small/".$object->image;
-        $path_big = public_path(). "/images/$table/big/".$object->image;
+        if ($object->image) {
+            $smallPath = $table . '/small/' . $object->image;
+            $bigPath = $table . '/big/' . $object->image;
 
-        unlink($path_small);
-        unlink($path_big);
+            // چک کردن وجود فایل قبل از حذف برای جلوگیری از خطا
+            if (Storage::disk('public')->exists($smallPath)) {
+                Storage::disk('public')->delete($smallPath);
+            }
+            if (Storage::disk('public')->exists($bigPath)) {
+                Storage::disk('public')->delete($bigPath);
+            }
+        }
     }
     public static function ckeditorImage($table,$image)
     {

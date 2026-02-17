@@ -22,13 +22,6 @@
                 </a>
             </li>
 {{--            @endhasanyrole--}}
-{{--            @hasanyrole('مدیر انبار|مدیر کل')--}}
-            <li data-toggle="tooltip" title="انبار">
-                <a href="#depots" title=" انبار">
-                    <i class="icon ti-truck"></i>
-                </a>
-            </li>
-{{--            @endhasanyrole--}}
 {{--            @hasanyrole('فروشنده|مدیر کل')--}}
             <li data-toggle="tooltip" title="پنل فروشنده">
                 <a href="#seller" title=" پنل فروشنده">
