@@ -1,17 +1,14 @@
 <div class="table overflow-auto" tabindex="8">
     <div class="form-group row">
-        <label class="col-sm-2 col-form-label">عنوان جستجو</label>
-        <div class="col-sm-8">
-            <input type="text" @keyup.enter="$wire.searchData" class="form-control text-left" dir="rtl" wire:model="search">
-        </div>
-        <div class="col-sm-2">
-            <a href="{{route('categories.trashed')}}" class="btn btn-outline-warning">
-                <i class="ti-trash">لیست دسته بندی های حذف شده</i>
-            </a>
+        <label class="col-sm-2 col-form-label">جستجو (عنوان نقش)</label>
+        <div class="col-sm-10 d-flex align-items-center">
+            <input type="text" class="form-control text-left" dir="rtl"
+                   wire:model.live.debounce.500ms="search" placeholder="تایپ کنید...">
+            <div wire:loading class="spinner-border spinner-border-sm text-primary m-r-10"></div>
         </div>
     </div>
     @if($search_categories)
-        @foreach($search_categories as $category)
+        @forelse($search_categories as $category)
             <table class="table table-striped table-hover">
                 <thead class="thead-light">
                 <tr>
@@ -51,9 +48,23 @@
                     <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($category->created_at)->format('%d%B، %Y')}}</td>
                 </tr>
             </table>
-        @endforeach
+        @empty
+            <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
+                <div class="empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
+                    <p class="text-muted">دسته بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
+                    <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                    </button>
+                </div>
+            </div>
+        @endforelse
     @else
-        @foreach($categories as $category)
+        @forelse($categories as $category)
             <div class="accordion" id="accordion">
                 <div class="card">
                     <div class="card-header" id="headingOne">
@@ -250,7 +261,18 @@
                     </div>
                 </div>
             </div>
-        @endforeach
+        @empty
+            <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
+                <div class="empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h5 class="text-dark" style="font-weight: 600;">هیچ دسته‌بندی یافت نشد!</h5>
+                    <p class="text-muted">در حال حاضر هیچ داده‌ای برای نمایش وجود ندارد.</p>
+                </div>
+            </div>
+        @endforelse
     @endif
 </div>
 @section('scripts')

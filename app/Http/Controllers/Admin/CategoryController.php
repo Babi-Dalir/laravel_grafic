@@ -67,7 +67,7 @@ class CategoryController extends Controller
     {
         $category = Category::query()->find($id);
         Category::updateCategory($request,$category);
-        return redirect()->route('categories.index')->with('message', 'دسته بندی جدید با موفقیت ویرایش شد');
+        return redirect()->route('categories.index')->with('message', 'دسته بندی با موفقیت ویرایش شد');
     }
 
 

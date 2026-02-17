@@ -53,11 +53,15 @@ class Category extends Model
 
     public static function updateCategory($request, $category)
     {
+        if ($request->hasFile('image')) {
+            ImageManager::unlinkImage('categories', $category); // حذف عکس قبلی
+            $imageName = ImageManager::saveImage('categories', $request->image);
+        }
         $category->update([
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
             'slug' => str()->slug($request->e_name),
-            'image' => $request->image ? ImageManager::saveImage('categories', $request->image) : $category->image,
+            'image' => $request->image ? $imageName : $category->image,
             'parent_id' => $request->input('parent_id'),
 
         ]);
@@ -71,9 +75,6 @@ class Category extends Model
             $array[$category1->id] = $category1->name;
             foreach ($category1->childCategory as $category2) {
                 $array[$category2->id] = ' - ' . $category2->name;
-                foreach ($category2->childCategory as $category3) {
-                    $array[$category3->id] = ' - - ' . $category3->name;
-                }
             }
         }
         return $array;
