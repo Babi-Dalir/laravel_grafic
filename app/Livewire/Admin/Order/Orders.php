@@ -61,7 +61,6 @@ class Orders extends Component
     {
         $orders = Order::query()
             ->where('order_code','like','%'.$this->search.'%')
-            ->orWhere('post_number','like','%'.$this->search.'%')
             ->orWhereHas('user',function ($q){
                 return $q->where('name','like','%'.$this->search.'%')
                     ->orWhere('mobile','like','%'.$this->search.'%')

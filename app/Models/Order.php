@@ -17,13 +17,14 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'order_code',
-        'status',
         'transaction_id',
         'total_price',
         'discount_price',
         'discount_code',
         'gift_cart_price',
         'gift_cart_code',
+        'status',
+        'paid_at'
     ];
 
     public function user()
@@ -39,12 +40,20 @@ class Order extends Model
     {
         return $this->hasMany(UserTransaction::class);
     }
+    private static function generateOrderCode()
+    {
+        do {
+            $code = mt_rand(10000000, 99999999);
+        } while (Order::query()->where('order_code', $code)->exists());
+
+        return $code;
+    }
 
     public static function createOrder($user, $total_price, $shop_data, $discount_code_price, $gif_cart_code_price)
     {
         return Order::query()->create([
             'user_id' => $user->id,
-            'order_code' => rand(11111, 99999),
+            'order_code' => self::generateOrderCode(),
             'status' => OrderStatus::WaitPayment->value,
             'total_price' => $total_price,
             'discount_price' => $discount_code_price,

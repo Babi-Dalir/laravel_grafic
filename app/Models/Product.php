@@ -162,8 +162,7 @@ class Product extends Model
         return $query
             ->where('status', ProductStatus::Active->value)
             ->where('discount', '>', 0)
-            ->where('count', '>', 0)
-            ->orderByDesc('discount') // تخفیف بیشتر
-            ->orderBy('count');       // موجودی کمتر
+            ->orderByDesc('discount'); // تخفیف بیشتر
+
     }
 }

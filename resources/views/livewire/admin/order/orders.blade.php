@@ -11,7 +11,6 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">نام کاربر</th>
             <th class="text-center align-middle text-primary">کد تحویل</th>
-            <th class="text-center align-middle text-primary">کد پستی</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">جزئیات سفارش</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
@@ -23,7 +22,6 @@
                 <td class="text-center align-middle">{{$orders->firstItem()+$index}}</td>
                 <td class="text-center align-middle">{{$order->user->name}}</td>
                 <td class="text-center align-middle">{{$order->order_code}}</td>
-                <td class="text-center align-middle">{{$order->post_number}}</td>
                 <td class="text-center align-middle" wire:click="changeOrderStatus({{$order->id}})">
                     @if($order->status === \App\Enums\OrderStatus::WaitPayment->value)
                         <span class="cursor-pointer badge badge-warning">در انتظار پرداخت</span>
