@@ -20,9 +20,6 @@ class HomeController extends Controller
         $sliders = Cache::remember('sliders',60*60*24*10,function (){
             return Slider::query()->get();
         });
-        $brands = Cache::remember('brands',60*60*24*10,function (){
-            return Brand::query()->get();
-        });
         $most_sold = Product::query()->with('category')->orderBy('sold','DESC')->get();
         $newest_products = Product::query()->with('category')->orderBy('created_at','DESC')->get();
         $spacial_products = ProductPrice::query()->with('product')
@@ -38,7 +35,7 @@ class HomeController extends Controller
         ->get();
 
         return view('frontend.index',compact('sliders'
-            ,'most_sold','spacial_products','brands','newest_products','instant_offers'));
+            ,'most_sold','spacial_products','newest_products','instant_offers'));
     }
 
     public function userCart()

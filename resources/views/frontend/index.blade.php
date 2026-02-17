@@ -358,26 +358,6 @@
             </section>
 
             <!-- End Feature-Product -->
-            <!-- Start Brand-Slider -->
-            {{-- <section class="slider-section dt-sl mb-5">
-                <div class="row">
-                    <!-- Start Product-Slider -->
-                    <div class="col-12">
-                        <div class="brand-slider carousel-lg owl-carousel owl-theme">
-                            @foreach ($brands as $brand)
-                                <div class="item">
-                                    <img src="{{ url('images/brands/big/' . $brand->image) }}" class="img-fluid"
-                                        alt="">
-                                </div>
-                            @endforeach
-
-                        </div>
-                    </div>
-                    <!-- End Product-Slider -->
-
-                </div>
-            </section> --}}
-            <!-- End Brand-Slider -->
         </div>
     </main>
 @endsection
