@@ -22,6 +22,7 @@ class Product extends Model
         'main_price',
         'price',
         'discount',
+        'sold',
         'image',
         'description',
         'main_file',

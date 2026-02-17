@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('main_price')->default(0); // قیمت اصلی محصول
             $table->integer('price')->default(0);      // قیمت نهایی که نمایش داده میشه
             $table->integer('discount')->default(0);   // درصد یا مبلغ تخفیف
+            $table->integer('sold')->default(0);
 
             // توضیحات و تصویر کاور
             $table->string('image')->nullable(); // تصویر اصلی محصول
