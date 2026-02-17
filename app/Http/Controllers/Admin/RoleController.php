@@ -94,6 +94,6 @@ class RoleController extends Controller
     {
         $role = Role::query()->find($role_id);
         $role->syncPermissions($request->input('permissions'));
-        return redirect()->back()->with('message', 'نقش به مجوز متصل شد');
+        return redirect()->route('roles.index')->with('message', 'نقش به مجوز متصل شد');
     }
 }

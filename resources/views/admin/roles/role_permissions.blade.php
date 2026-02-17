@@ -6,11 +6,15 @@
             <div class="card-body">
                 <div class="row">
                     @if(\Illuminate\Support\Facades\Session::has('message'))
-                        <div class="alert alert-info">
-                            <div>{{session('message')}}</div>
+                        <div class="col-12">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                {{ session('message') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
                         </div>
                     @endif
-
                 </div>
                 <div class="container">
                     <h6 class="card-title">اتصال نقش به مجوز</h6>

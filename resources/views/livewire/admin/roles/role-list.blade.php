@@ -51,7 +51,7 @@
                             </small>
 
                             <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                            <p class="text-muted">کاربری با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
+                            <p class="text-muted">نقشی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
 
                             @if($search)
                                 <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
