@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Banners;
 
+use App\Helpers\ImageManager;
 use App\Models\Banner;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -15,7 +16,9 @@ class BannerList extends Component
     #[On('destroy_banner')]
     public function destroyBanner($id)
     {
-        Banner::destroy($id);
+        $banner = Banner::findOrFail($id);
+        ImageManager::unlinkImage('banners', $banner);
+        $banner->delete();
     }
 
     public function searchData()

@@ -23,10 +23,16 @@ class Banner extends Model
     public static function updateBanner($request,$id)
     {
         Cache::forget('banners');
+
         $banner = Banner::query()->find($id);
+
+        if ($request->hasFile('image')) {
+            ImageManager::unlinkImage('banners', $banner); // حذف عکس قبلی
+            $imageName = ImageManager::saveImage('banners', $request->image);
+        }
         $banner->update([
             'type'=>$request->input('type'),
-            'image'=>$request->image ? ImageManager::saveImage('banners',$request->image) : $banner->image
+            'image'=>$request->image ? $imageName : $banner->image
         ]);
     }
 }
