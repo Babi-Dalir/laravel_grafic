@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     protected $fillable=[
-        'name'
+        'name',
+        'slug'
     ];
     public function products()
     {
@@ -18,6 +19,7 @@ class Tag extends Model
     {
         Tag::query()->create([
             'name'=>$request->input('name'),
+            'slug' => str()->slug($request->name, '-', null),
         ]);
     }
     public static function updateTag($request,$id)
@@ -25,6 +27,7 @@ class Tag extends Model
         $tag = Tag::query()->find($id);
         $tag->update([
             'name'=>$request->input('name'),
+            'slug' => str()->slug($request->name, '-', null),
         ]);
     }
 }

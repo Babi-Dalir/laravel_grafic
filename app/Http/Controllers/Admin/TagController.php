@@ -61,7 +61,7 @@ class TagController extends Controller
     public function update(Request $request, string $id)
     {
         Tag::updateTag($request,$id);
-        return redirect()->route('tags.index')->with('message', 'تگ جدید با موفقیت ویرایش شد');
+        return redirect()->route('tags.index')->with('message', 'تگ با موفقیت ویرایش شد');
     }
 
     /**
