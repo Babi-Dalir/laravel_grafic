@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\FrontEnd;
 
 use App\Enums\CartType;
+use App\Enums\SliderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Brand;
@@ -18,7 +19,8 @@ class HomeController extends Controller
     public function home()
     {
         $sliders = Cache::remember('sliders',60*60*24*10,function (){
-            return Slider::query()->get();
+            return Slider::query()
+                ->where('status',SliderStatus::Active->value)->get();
         });
         $most_sold = Product::query()->with('category')->orderBy('sold','DESC')->get();
         $newest_products = Product::query()->with('category')->orderBy('created_at','DESC')->get();

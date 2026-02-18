@@ -38,16 +38,28 @@
                         نقش های کاربر
                     </a>
                 </td>
-                <td class="text-center align-middle" wire:click="changeStatus({{$user->id}})">
-                    @if($user->status === \App\Enums\UserStatus::Active->value)
-                        <span class="cursor-pointer badge badge-success">فعال</span>
-                    @elseif($user->status === \App\Enums\UserStatus::InActive->value)
-                        <span class="cursor-pointer badge badge-warning">غیر فعال</span>
-                    @elseif($user->status === \App\Enums\UserStatus::Banned->value)
-                        <span class="cursor-pointer badge badge-danger">غیر مجاز</span>
-                    @endif
-
+                <td class="text-center align-middle">
+                    <div wire:click="changeStatus({{$user->id}})" class="status-interactive-wrapper">
+                        @if($user->status === \App\Enums\UserStatus::Active->value)
+                            <div class="modern-status-btn active">
+                                <div class="status-glow"></div>
+                                <i class="ti-check-box mr-1"></i>
+                                <span>فعال</span>
+                            </div>
+                        @elseif($user->status === \App\Enums\UserStatus::InActive->value)
+                            <div class="modern-status-btn inactive">
+                                <i class="ti-power-off mr-1"></i>
+                                <span>غیرفعال</span>
+                            </div>
+                        @elseif($user->status === \App\Enums\UserStatus::Banned->value)
+                            <div class="modern-status-btn banned">
+                                <i class="ti-na ml-1"></i>
+                                <span>غیر مجاز</span>
+                            </div>
+                        @endif
+                    </div>
                 </td>
+
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-info" href="{{route('users.edit',$user->id)}}">
                         ویرایش
@@ -60,13 +72,15 @@
                 <td colspan="9" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
                         {{-- یک SVG ساده و شیک برای حالت جستجو --}}
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" class="mb-3">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </small>
 
                             <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                            <p class="text-muted">کاربری با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
+                            <p class="text-muted">کاربری با عبارت <strong class="text-danger">"{{ $search }}"</strong>
+                                در سیستم ثبت نشده است.</p>
 
                             @if($search)
                                 <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">

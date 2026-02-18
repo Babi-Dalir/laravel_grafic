@@ -10,23 +10,32 @@ class Slider extends Model
 {
     protected $fillable = [
         'image',
-        'link'
+        'link',
+        'status'
     ];
+
     public static function createSlider($request)
     {
         Cache::forget('sliders');
         Slider::query()->create([
-            'link'=>$request->input('link'),
-            'image'=>ImageManager::saveImage('sliders',$request->image)
+            'link' => $request->input('link'),
+            'image' => ImageManager::saveImage('sliders', $request->image)
         ]);
     }
-    public static function updateSlider($request,$id)
+
+    public static function updateSlider($request, $id)
     {
         Cache::forget('sliders');
+
         $slider = Slider::query()->find($id);
+
+        if ($request->hasFile('image')) {
+            ImageManager::unlinkImage('sliders', $slider); // حذف عکس قبلی
+            $imageName = ImageManager::saveImage('sliders', $request->image);
+        }
         $slider->update([
-            'link'=>$request->input('link'),
-            'image'=>$request->image ? ImageManager::saveImage('sliders',$request->image) : $slider->image
+            'link' => $request->input('link'),
+            'image' => $request->image ? $imageName : $slider->image
         ]);
     }
 }

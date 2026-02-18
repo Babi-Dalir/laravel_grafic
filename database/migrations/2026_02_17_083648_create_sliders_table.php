@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('image');
             $table->string('link',255)->nullable();
+            $table->string('status')->default(\App\Enums\SliderStatus::Active->value);
             $table->timestamps();
         });
     }

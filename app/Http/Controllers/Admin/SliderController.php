@@ -61,7 +61,7 @@ class SliderController extends Controller
     public function update(Request $request, string $id)
     {
         Slider::updateSlider($request,$id);
-        return redirect()->route('sliders.index')->with('message', 'اسلایدر جدید با موفقیت ویرایش شد');
+        return redirect()->route('sliders.index')->with('message', 'اسلایدر با موفقیت ویرایش شد');
     }
 
     /**

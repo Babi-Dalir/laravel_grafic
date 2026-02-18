@@ -11660,3 +11660,92 @@ body.dark .ui-datepicker select {
     color: #fff;
     transform: rotate(-10deg); /* یک چرخش ملایم برای جذابیت */
 }
+
+/* --- استایل وضعیت (Modern Status Button) --- */
+.status-interactive-wrapper {
+    display: inline-block;
+    cursor: pointer;
+    perspective: 1000px;
+}
+
+.modern-status-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+/* تم سبز (فعال) */
+.modern-status-btn.active {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+}
+
+.status-glow {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: white;
+    left: -100%;
+    top: 0;
+    opacity: 0.2;
+    transform: skewX(-20deg);
+    transition: 0.5s;
+}
+
+.modern-status-btn.active:hover .status-glow {
+    left: 100%;
+}
+
+/* تم قرمز (غیرفعال) */
+.modern-status-btn.inactive {
+    background: #f1f2f6;
+    color: #a4b0be;
+    border: 1px solid #dcdde1;
+}
+
+.modern-status-btn.inactive:hover {
+    background: #eb4d4b;
+    color: white;
+    box-shadow: 0 4px 15px rgba(235, 77, 75, 0.3);
+    border-color: transparent;
+}
+
+/* افکت کلیک */
+.status-interactive-wrapper:active {
+    transform: scale(0.9);
+}
+
+/* تم غیر مجاز (Banned) */
+.modern-status-btn.banned {
+    background: #2d3436; /* زغالی تیره */
+    color: #fab1a0; /* صورتی/نارنجی ملایم */
+    border: 1px solid #636e72;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modern-status-btn.banned:hover {
+    background: #d63031; /* قرمز جدی */
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 15px rgba(214, 48, 49, 0.4);
+    animation: shake 0.5s ease-in-out infinite; /* انیمیشن هشدار */
+}
+
+/* انیمیشن لرزش برای وضعیت غیرمجاز */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* اصلاح فاصله آیکون در RTL */
+.ml-1 {
+    margin-left: 6px !important;
+}

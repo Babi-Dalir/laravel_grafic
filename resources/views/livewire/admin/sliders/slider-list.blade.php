@@ -2,7 +2,8 @@
     <div class="form-group row">
         <label class="col-sm-2 col-form-label">عنوان جستجو</label>
         <div class="col-sm-10">
-            <input type="text" @keyup.enter="$wire.searchData" class="form-control text-left" dir="rtl" wire:model="search">
+            <input type="text" @keyup.enter="$wire.searchData" class="form-control text-left" dir="rtl"
+                   wire:model="search">
         </div>
     </div>
     <table class="table table-striped table-hover">
@@ -10,6 +11,7 @@
         <tr>
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">عکس</th>
+            <th class="text-center align-middle text-primary"> وضعیت</th>
             <th class="text-center align-middle text-primary">ویرایش</th>
             <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
@@ -21,8 +23,25 @@
                 <td class="text-center align-middle">{{$sliders->firstItem()+$index}}</td>
                 <td class="text-center align-middle">
                     <figure>
-                        <img style="height: 50px;width: 350px;" src="{{url('images/sliders/small/'.$slider->image)}}"  alt="image">
+                        <img style="height: 50px;width: 350px;" src="{{url('images/sliders/small/'.$slider->image)}}"
+                             alt="image">
                     </figure>
+                </td>
+                <td class="text-center align-middle">
+                    <div wire:click="changeStatus({{$slider->id}})" class="status-interactive-wrapper">
+                        @if($slider->status === \App\Enums\SliderStatus::Active->value)
+                            <div class="modern-status-btn active">
+                                <div class="status-glow"></div>
+                                <i class="ti-check-box mr-1"></i>
+                                <span>فعال</span>
+                            </div>
+                        @else
+                            <div class="modern-status-btn inactive">
+                                <i class="ti-power-off mr-1"></i>
+                                <span>غیرفعال</span>
+                            </div>
+                        @endif
+                    </div>
                 </td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-info" href="{{route('sliders.edit',$slider->id)}}">
@@ -56,7 +75,7 @@
                 cancelButtonText: "خیر",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_slider',{id : event.id})
+                    Livewire.dispatch('destroy_slider', {id: event.id})
                     Swal.fire({
                         title: "حذف با موفقیت انجام شد!",
                         icon: "success"
