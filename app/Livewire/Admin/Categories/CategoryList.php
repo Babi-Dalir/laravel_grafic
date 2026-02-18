@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 class CategoryList extends Component
 {
     use WithPagination;
+
     protected $paginationTheme = 'bootstrap';
     public $search;
     public $categories;
@@ -21,26 +22,30 @@ class CategoryList extends Component
     public function mount()
     {
         $this->categories = Category::query()
-            ->where('parent_id',0)
+            ->where('parent_id', 0)
             ->get();
     }
 
     public function updatingSearch($value)
     {
         $this->search_categories = Category::query()
-            ->where('name','like','%'.$value.'%')
+            ->where('name', 'like', '%' . $value . '%')
             ->get();
     }
+
     #[On('destroy_category')]
     public function destroyCategory($id)
     {
-        Category::destroy($id);
+        $category = Category::find($id);
+        $category->delete();
+        $this->mount();
     }
 
     public function searchData()
     {
         $this->resetPage();
     }
+
     public function render()
     {
         return view('livewire.admin.categories.category-list');

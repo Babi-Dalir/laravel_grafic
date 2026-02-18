@@ -11132,7 +11132,7 @@ body.dark .nav a.nav-link:not(.active):active {
 	.header .breadcrumb {
 		display: none;
 	}
-	
+
 	.text-xs-center {
 		text-align: center !important;
 	}
@@ -11511,4 +11511,152 @@ body.dark .ui-datepicker select {
     background-color: #222538;
     color: inherit;
     border-color: #404356;
+}
+
+.btn-trash-modern {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 8px 15px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    position: relative;
+    min-width: 180px;
+}
+
+/* باکس آیکون */
+.btn-trash-modern .icon-box {
+    width: 40px;
+    height: 40px;
+    background: #fff5f5;
+    color: #ff4757;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+/* بخش متنی */
+.btn-trash-modern .text-content {
+    display: flex;
+    flex-direction: column;
+    margin-right: 12px;
+    margin-left: 15px;
+    text-align: right;
+}
+
+.btn-trash-modern .title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2f3542;
+}
+
+.btn-trash-modern .count {
+    font-size: 0.75rem;
+    color: #a4b0be;
+    margin-top: -2px;
+}
+
+/* آیکون فلش انتهای دکمه */
+.btn-trash-modern .arrow-box {
+    margin-right: auto;
+    color: #dfe4ea;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+/* افکت هوور (Hover) */
+.btn-trash-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(255, 71, 87, 0.2);
+    border-color: #ff475733;
+}
+
+.btn-trash-modern:hover .icon-box {
+    background: #ff4757;
+    color: #fff;
+}
+
+.btn-trash-modern:hover .arrow-box {
+    transform: translateX(-5px);
+    color: #ff4757;
+}
+
+/* حالت تپش برای وقتی که سطل زباله پر است */
+@if(\App\Models\Category::onlyTrashed()->count() > 0)
+.btn-trash-modern .icon-box {
+    animation: pulse-red 2s infinite;
+}
+@endif
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+.btn-list-modern {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e3f2fd;
+    padding: 8px 12px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    min-width: 160px;
+}
+
+/* باکس آیکون با تم آبی */
+.btn-list-modern .icon-box-info {
+    width: 38px;
+    height: 38px;
+    background: #e3f2fd;
+    color: #2196f3;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+/* بخش متنی */
+.btn-list-modern .text-content {
+    display: flex;
+    flex-direction: column;
+    margin-right: 12px;
+    text-align: right;
+}
+
+.btn-list-modern .title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.btn-list-modern .subtitle {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: -2px;
+}
+
+/* افکت هوور */
+.btn-list-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(33, 150, 243, 0.15);
+    border-color: #2196f34d;
+    background-color: #f8fbff;
+}
+
+.btn-list-modern:hover .icon-box-info {
+    background: #2196f3;
+    color: #fff;
+    transform: rotate(-10deg); /* یک چرخش ملایم برای جذابیت */
 }

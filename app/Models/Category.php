@@ -79,6 +79,7 @@ class Category extends Model
         }
         return $array;
     }
+
     public static function getLayer3Categories()
     {
         $array = [];
@@ -108,16 +109,23 @@ class Category extends Model
     protected static function boot()
     {
         parent::boot();
+
         self::deleting(function ($category) {
+            // ۱. مدیریت زیرمجموعه‌ها (فرزندان)
             foreach ($category->childCategory()->withTrashed()->get() as $cat) {
                 if ($category->isForceDeleting()) {
-                    $cat->forcedelete();
+                    $cat->forceDelete();
                 } else {
                     $cat->delete();
                 }
             }
+            // ۲. مدیریت حذف فیزیکی عکس (فقط در حذف دائمی)
+            if ($category->isForceDeleting()) {
+                ImageManager::unlinkImage('categories', $category);
+            }
         });
         self::restoring(function ($category) {
+            // بازگردانی زیرمجموعه‌ها
             foreach ($category->childCategory()->withTrashed()->get() as $cat) {
                 $cat->restore();
             }
@@ -135,7 +143,7 @@ class Category extends Model
         }
     }
 
-    public static function getProductListByMainCategory($slug, $column, $orderBy, $page=null,$brands=null)
+    public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null, $brands = null)
     {
         $categoryList = [];
         $category = Category::query()->where('slug', $slug)->first();
@@ -149,19 +157,19 @@ class Category extends Model
             }
         }
 
-        if ($page){
+        if ($page) {
             return Product::query()->whereIn('category_id', $categoryList)
-                ->when($brands,function ($q) use ($brands){
-                    $q->whereIn('brand_id',$brands);
+                ->when($brands, function ($q) use ($brands) {
+                    $q->whereIn('brand_id', $brands);
                 })
                 ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        }else{
+        } else {
             return Product::query()->whereIn('category_id', $categoryList)
                 ->orderBy($column, $orderBy)->get();
         }
     }
 
-    public static function getProductListBySubCategory($slug, $column, $orderBy, $page=null,$brands=null)
+    public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null, $brands = null)
     {
         $categoryList = [];
         $category = Category::query()->where('slug', $slug)->first();
@@ -170,28 +178,28 @@ class Category extends Model
                 array_push($categoryList, $category1->id);
             }
         }
-        if ($page){
+        if ($page) {
             return Product::query()->whereIn('category_id', $categoryList)
-                ->when($brands,function ($q) use ($brands){
-                    $q->whereIn('brand_id',$brands);
+                ->when($brands, function ($q) use ($brands) {
+                    $q->whereIn('brand_id', $brands);
                 })
                 ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        }else{
+        } else {
             return Product::query()->whereIn('category_id', $categoryList)
                 ->orderBy($column, $orderBy)->get();
         }
     }
 
-    public static function getProductListByChildCategory($slug, $column, $orderBy, $page=null,$brands=null)
+    public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null, $brands = null)
     {
         $category = Category::query()->where('slug', $slug)->first();
-        if ($page){
+        if ($page) {
             return Product::query()->where('category_id', $category->id)
-                ->when($brands,function ($q) use ($brands){
-                    $q->whereIn('brand_id',$brands);
+                ->when($brands, function ($q) use ($brands) {
+                    $q->whereIn('brand_id', $brands);
                 })
                 ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        }else{
+        } else {
             return Product::query()->where('category_id', $category->id)
                 ->orderBy($column, $orderBy)->get();
         }

@@ -1,13 +1,21 @@
 <div class="table overflow-auto" tabindex="8">
     <div class="form-group row">
-        <label class="col-sm-2 col-form-label">عنوان جستجو</label>
-        <div class="col-sm-8">
-            <input type="text" @keyup.enter="$wire.searchData" class="form-control text-left" dir="rtl" wire:model="search">
-        </div>
-        <div class="col-sm-2">
-            <a href="{{route('categories.index')}}" class="btn btn-outline-info">
-                <i>لیست دسته بندی ها</i>
-            </a>
+        <div class="col-sm-12 d-flex align-items-center">
+            <label class="col-sm-2 col-form-label">جستجو (عنوان دسته بندی)</label>
+            <input type="text" class="form-control text-left" dir="rtl"
+                   wire:model.live.debounce.500ms="search" placeholder="تایپ کنید...">
+            <div wire:loading class="spinner-border spinner-border-sm text-primary m-r-10"></div>
+            <div class="col-sm-2">
+                <a href="{{ route('categories.index') }}" class="btn-list-modern">
+                    <div class="icon-box-info">
+                        <i class="ti-list"></i>
+                    </div>
+                    <div class="text-content">
+                        <span class="title">لیست دسته بندی ها</span>
+                        <span class="subtitle">مشاهده همه</span>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
     <table class="table table-striped table-hover">
@@ -25,7 +33,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach($categories as $index=>$category)
+        @forelse($categories as $index=>$category)
             <tr>
                 <td class="text-center align-middle">{{$categories->firstItem()+$index}}</td>
                 <td class="text-center align-middle">
@@ -49,7 +57,23 @@
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($category->created_at)->format('%d%B، %Y')}}</td>
             </tr>
-        @endforeach
+        @empty
+            <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
+                <div class="empty-state">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
+                    <p class="text-muted">دسته بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در
+                        سیستم ثبت نشده است.</p>
+                    <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                    </button>
+                </div>
+            </div>
+        @endforelse
     </table>
     <div style="margin: 40px !important;"
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">

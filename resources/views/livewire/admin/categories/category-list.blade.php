@@ -1,10 +1,23 @@
 <div class="table overflow-auto" tabindex="8">
     <div class="form-group row">
-        <label class="col-sm-2 col-form-label">جستجو (عنوان نقش)</label>
-        <div class="col-sm-10 d-flex align-items-center">
+        <div class="col-sm-12 d-flex align-items-center">
+            <label class="col-sm-2 col-form-label">جستجو (عنوان دسته بندی)</label>
             <input type="text" class="form-control text-left" dir="rtl"
                    wire:model.live.debounce.500ms="search" placeholder="تایپ کنید...">
             <div wire:loading class="spinner-border spinner-border-sm text-primary m-r-10"></div>
+            <div class="col-sm-3"><a href="{{ route('categories.trashed') }}" class="btn-trash-modern">
+                    <div class="icon-box">
+                        <i class="ti-trash"></i>
+                    </div>
+                    <div class="text-content">
+                        <span class="title">دسته بندی های حذف شده</span>
+                        <span class="count">{{ \App\Models\Category::onlyTrashed()->count() }} مورد</span>
+                    </div>
+                    <div class="arrow-box">
+                        <i class="ti-angle-left"></i>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
     @if($search_categories)
@@ -51,12 +64,14 @@
         @empty
             <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
                 <div class="empty-state">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" class="mb-3">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                     <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                    <p class="text-muted">دسته بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
+                    <p class="text-muted">دسته بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در
+                        سیستم ثبت نشده است.</p>
                     <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
                         <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
                     </button>
@@ -264,7 +279,8 @@
         @empty
             <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
                 <div class="empty-state">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                         stroke-linecap="round" stroke-linejoin="round" class="mb-3">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
@@ -288,7 +304,7 @@
                 cancelButtonText: "خیر",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_category',{id : event.id})
+                    Livewire.dispatch('destroy_category', {id: event.id})
                     Swal.fire({
                         title: "حذف با موفقیت انجام شد!",
                         icon: "success"
