@@ -6,6 +6,6 @@ enum ProductStatus: string
     case Waiting = 'waiting';
     case Active = 'active';
     case InActive = 'inactive';
-    case StopProduction = 'stop_production';
+    case Draft = 'draft';
     case Rejected = 'rejected';
 }

@@ -11749,3 +11749,39 @@ body.dark .ui-datepicker select {
 .ml-1 {
     margin-left: 6px !important;
 }
+/* تم در حال بررسی */
+.modern-status-btn.waiting {
+    background: linear-gradient(135deg, #feca57, #ff9f43);
+    color: #2f3542;
+    box-shadow: 0 4px 15px rgba(255, 159, 67, 0.35);
+    position: relative;
+}
+
+.modern-status-btn.waiting::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    right: 10px;
+    animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+    0% { transform: scale(1); opacity: 1; }
+    70% { transform: scale(2); opacity: 0; }
+    100% { opacity: 0; }
+}
+/* تم توقف تولید */
+.modern-status-btn.stop {
+    background: #dfe6e9;
+    color: #636e72;
+    border: 1px solid #b2bec3;
+}
+
+.modern-status-btn.stop:hover {
+    background: #636e72;
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 110, 114, 0.3);
+}

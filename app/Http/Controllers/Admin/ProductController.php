@@ -30,8 +30,8 @@ class ProductController extends Controller
     {
         $title = "ایجاد محصول";
         $categories = Category::getCategories();
-//        $tags = Tag::query()->pluck('name','id');
-        return view('admin.products.create',compact('title','categories'));
+        $tags = Tag::query()->pluck('name','id');
+        return view('admin.products.create',compact('title','categories','tags'));
     }
 
 
@@ -59,9 +59,9 @@ class ProductController extends Controller
     {
         $title ="ویرایش محصول";
         $categories = Category::getCategories();
-//        $tags = Tag::query()->pluck('name','id');
+        $tags = Tag::query()->pluck('name','id');
         $product = Product::findOrfail($id);
-        return view('admin.products.edit',compact('title','categories','product'));
+        return view('admin.products.edit',compact('title','categories','tags','product'));
     }
 
     /**
@@ -70,7 +70,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         Product::updateProduct($request,$id);
-        return redirect()->route('products.index')->with('message', 'محصول جدید با موفقیت ویرایش شد');
+        return redirect()->route('products.index')->with('message', 'محصول با موفقیت ویرایش شد');
     }
 
     /**
@@ -83,7 +83,7 @@ class ProductController extends Controller
 
     public function trashed()
     {
-        $title = "لیست محصول های حذف شده";
+        $title = "لیست محصولات حذف شده";
         return view('admin.products.trashed_list',compact('title'));
     }
 

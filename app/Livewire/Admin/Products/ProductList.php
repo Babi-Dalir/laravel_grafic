@@ -19,7 +19,8 @@ class ProductList extends Component
     #[On('destroy_product')]
     public function destroyProduct($id)
     {
-        Product::destroy($id);
+        $product = Product::find($id);
+        $product->delete();
     }
     public function changeStatus($id)
     {
@@ -34,9 +35,9 @@ class ProductList extends Component
             ]);
         }elseif ($product->status == ProductStatus::InActive->value){
             $product->update([
-                'status'=>ProductStatus::StopProduction->value
+                'status'=>ProductStatus::Draft->value
             ]);
-        }elseif ($product->status == ProductStatus::StopProduction->value){
+        }elseif ($product->status == ProductStatus::Draft->value){
             $product->update([
                 'status'=>ProductStatus::Rejected->value
             ]);
@@ -53,16 +54,17 @@ class ProductList extends Component
     }
     public function render()
     {
-        if (auth()->user()->is_admin){
+//        if (auth()->user()->is_admin){
+//            $products = Product::query()
+//                ->where('name','like','%'.$this->search.'%')
+//                ->paginate(10);
+//        }
+//        else{
             $products = Product::query()
+//                ->where('status',ProductStatus::Active->value)
                 ->where('name','like','%'.$this->search.'%')
                 ->paginate(10);
-        }else{
-            $products = Product::query()
-                ->where('status',ProductStatus::Active->value)
-                ->where('name','like','%'.$this->search.'%')
-                ->paginate(10);
-        }
+//        }
 
         return view('livewire.admin.products.product-list',compact('products'));
     }

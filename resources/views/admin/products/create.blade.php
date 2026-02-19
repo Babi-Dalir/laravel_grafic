@@ -42,16 +42,17 @@
                                 <input type="text" class="form-control text-left" dir="rtl" name="discount">
                             </div>
                         </div>
-                        {{--                        <div class="form-group row">--}}
-                        {{--                            <label  class="col-sm-2 col-form-label">تگ ها</label>--}}
-                        {{--                            <div class="col-sm-10">--}}
-                        {{--                                <select name="tags[]" id="tags" class="form-control js-example-basic-single select2-hidden-accessible" multiple>--}}
-                        {{--                                    @foreach($tags as $key => $value)--}}
-                        {{--                                        <option value="{{$key}}">{{$value}}</option>--}}
-                        {{--                                    @endforeach--}}
-                        {{--                                </select>--}}
-                        {{--                            </div>--}}
-                        {{--                        </div>--}}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">تگ ها</label>
+                            <div class="col-sm-10">
+                                <select name="tags[]" id="tags"
+                                        class="form-control js-example-basic-single select2-hidden-accessible" multiple>
+                                    @foreach($tags as $key => $value)
+                                        <option value="{{$key}}">{{$value}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">فایل اصلی محصول</label>
                             <div class="col-sm-10">
@@ -102,6 +103,23 @@
             dropdownAutoWidth: true,
             $dropdownParent: $('#parent')
         })
+        $('.form-select').select2()
+
+        var customOptions = {
+            placeholder: "روز / ماه / سال"
+            , twodigit: false
+            , closeAfterSelect: true
+            , nextButtonIcon: "fa fa-arrow-circle-right"
+            , previousButtonIcon: "fa fa-arrow-circle-left"
+            , buttonsColor: "#5867dd"
+            , markToday: true
+            , markHolidays: true
+            , highlightSelectedDay: true
+            , sync: true
+            , gotoToday: true
+        }
+        kamaDatepicker('spacial_start', customOptions);
+        kamaDatepicker('spacial_expiration', customOptions);
         $('.form-select').select2()
     </script>
 @endsection

@@ -52,20 +52,21 @@
                                        value="{{$product->discount}}">
                             </div>
                         </div>
-                        {{--                        <div class="form-group row">--}}
-                        {{--                            <label  class="col-sm-2 col-form-label">تگ ها</label>--}}
-                        {{--                            <div class="col-sm-10">--}}
-                        {{--                                <select name="tags[]" id="tags" class="form-control js-example-basic-single select2-hidden-accessible" multiple>--}}
-                        {{--                                    @foreach($tags as $key => $value)--}}
-                        {{--                                        @if(in_array($key,$product->tags->pluck('id')->toArray()))--}}
-                        {{--                                            <option selected value="{{$key}}">{{$value}}</option>--}}
-                        {{--                                        @else--}}
-                        {{--                                            <option value="{{$key}}">{{$value}}</option>--}}
-                        {{--                                        @endif--}}
-                        {{--                                    @endforeach--}}
-                        {{--                                </select>--}}
-                        {{--                            </div>--}}
-                        {{--                        </div>--}}
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label">تگ ها</label>
+                            <div class="col-sm-10">
+                                <select name="tags[]" id="tags"
+                                        class="form-control js-example-basic-single select2-hidden-accessible" multiple>
+                                    @foreach($tags as $key => $value)
+                                        @if(in_array($key,$product->tags->pluck('id')->toArray()))
+                                            <option selected value="{{$key}}">{{$value}}</option>
+                                        @else
+                                            <option value="{{$key}}">{{$value}}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">فایل اصلی محصول</label>
                             <div class="col-sm-10">
@@ -84,7 +85,12 @@
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="file"> آپلود عکس </label>
-                            <input class="col-sm-10 form-control-file" type="file" name="image" id="image">
+                            <div class="col-sm-10">
+                                <input class="form-control-file" type="file" name="image" id="image">
+                                @if($product->image)
+                                    <small>فایل فعلی: {{ basename($product->image) }}</small>
+                                @endif
+                            </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ شروع شگفت انگیز</label>
