@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->string('code')->unique();
             $table->integer('discount');
             $table->string('status')->default(\App\Enums\DiscountStatus::Active->value);
             $table->timestamp('expiration_date');

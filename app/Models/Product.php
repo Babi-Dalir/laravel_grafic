@@ -34,7 +34,7 @@ class Product extends Model
         'status',
         'user_id',
         'category_id',
-
+        'file_extension'
     ];
 
     public function category()
