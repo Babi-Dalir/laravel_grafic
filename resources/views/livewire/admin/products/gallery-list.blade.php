@@ -1,4 +1,4 @@
-<div class="table overflow-auto" tabindex="8">
+<div class="table overflow-auto" tabindex="8" wire:poll.2s>
     <table class="table table-striped table-hover">
         <thead class="thead-light">
         <tr>

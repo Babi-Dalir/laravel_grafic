@@ -103,7 +103,7 @@ class Product extends Model
                 'main_price' => $mainPrice,
                 'discount' => $discount,
                 'price' => $price,
-                'image' => $request->image ? ImageManager::saveImage('products', $request->image) : null,
+                'image' => $request->image ? ImageManager::saveProductImage('products', $request->image) : null,
                 // مدیریت فایل دیجیتال
                 'main_file' => FileManager::saveDigitalFile($mainFile, $slug),
                 'file_size' => $mainFile ? $mainFile->getSize() : 0, // ذخیره حجم فایل به بایت
@@ -133,7 +133,7 @@ class Product extends Model
             // ۱. مدیریت تصویر (اگر تصویر جدید آپلود شد، قبلی حذف شود)
             if ($request->hasFile('image')) {
                 ImageManager::unlinkImage('products', $product); // حذف عکس قبلی
-                $imageName = ImageManager::saveImage('products', $request->image);
+                $imageName = ImageManager::saveProductImage('products', $request->image);
             }
 
             // ۲. مدیریت فایل دیجیتال

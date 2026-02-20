@@ -20,9 +20,10 @@ class GalleryList extends Component
     #[On('destroy_gallery')]
     public function destroyGallery($id)
     {
-        $gallery = Gallery::query()->find($id);
-        ImageManager::unlinkImage('products',$gallery);
-        Gallery::destroy($id);
+        $gallery = Gallery::findOrFail($id);
+        // حذف فیزیکی فایل‌ها
+        ImageManager::unlinkImage('products', $gallery);
+        $gallery->delete();
     }
 
     public function searchData()

@@ -97,7 +97,7 @@ class ProductController extends Controller
     {
         Gallery::query()->create([
             'product_id'=>$id,
-            'image'=>ImageManager::saveImage('products',$request->file),
+            'image'=>ImageManager::saveProductImage('products',$request->file),
             'position'=>Gallery::query()->where('product_id',$id)->count()
         ]);
         return redirect()->back();
