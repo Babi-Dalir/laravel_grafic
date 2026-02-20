@@ -26,6 +26,7 @@ class PropertyGroupList extends Component
     public function render()
     {
         $property_groups = PropertyGroup::query()
+            ->with('category') // لود کردن پیش‌فرض دسته‌بندی‌ها
             ->where('name','like','%'.$this->search.'%')
             ->paginate(20);
         return view('livewire.admin.property-groups.property-group-list',compact('property_groups'));

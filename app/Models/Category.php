@@ -75,6 +75,9 @@ class Category extends Model
             $array[$category1->id] = $category1->name;
             foreach ($category1->childCategory as $category2) {
                 $array[$category2->id] = ' - ' . $category2->name;
+                foreach ($category2->childCategory as $category3) {
+                    $array[$category3->id] = ' - - ' . $category3->name;
+                }
             }
         }
         return $array;

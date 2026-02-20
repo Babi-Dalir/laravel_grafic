@@ -2,18 +2,32 @@
     <h6 class="card-title"> ایجاد ویژگی های محصول {{$product->name}}</h6>
     <form wire:submit.prevent="submit">
         <div class="form-group row">
-                <select wire:model="property_group_id" class="col-sm-3">
-                    <option>انتخاب کنید</option>
+            <div class="col-sm-3">
+                <select wire:model="property_group_id" class="form-control @error('property_group_id') is-invalid @enderror">
+                    <option value="">انتخاب گروه ویژگی</option>
                     @foreach($property_groups as $property_group)
                         <option value="{{$property_group->id}}">{{$property_group->name}}</option>
                     @endforeach
                 </select>
-            <div class="col-sm-6">
-                <input type="text" class="form-control text-left" dir="rtl" wire:model="name">
+                @error('property_group_id')
+                <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
+
+            <div class="col-sm-6">
+                <input type="text"
+                       class="form-control text-right @error('name') is-invalid @enderror"
+                       placeholder="مقدار ویژگی (مثلاً: 8 گیگابایت)"
+                       wire:model="name">
+                @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="col-sm-3">
-                <button type="submit" class="btn btn-success btn-uppercase">
-                    <i class="ti-check-box m-r-5"></i> ذخیره
+                <button type="submit" class="btn btn-success btn-block" wire:loading.attr="disabled">
+                    <span wire:loading.remove><i class="ti-check-box m-r-5"></i> ذخیره</span>
+                    <span wire:loading><i class="fa fa-spinner fa-spin"></i> در حال ثبت...</span>
                 </button>
             </div>
         </div>

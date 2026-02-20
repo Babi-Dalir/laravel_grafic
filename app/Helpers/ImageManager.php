@@ -98,7 +98,7 @@ class ImageManager
                 Storage::disk('public')->put($table.'/big/'.$name, (string)$img->toJpeg(75));
 
                 // استفاده از آدرس کامل با asset
-                return asset("storage/$table/big/".$name);
+                return url("images/$table/big/".$name);
 
             } catch (\Exception $e) {
                 // اگر در پردازش تصویر مشکلی بود، فایل اصلی را بدون دستکاری ذخیره کن

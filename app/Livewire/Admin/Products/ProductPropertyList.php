@@ -16,6 +16,15 @@ class ProductPropertyList extends Component
 
     public function submit()
     {
+        $this->validate([
+            'name' => 'required|min:2',
+            'property_group_id' => 'required|exists:property_groups,id',
+        ]
+            , [
+            'name.required' => 'نام ویژگی الزامی است',
+            'property_group_id.required' => 'انتخاب گروه ویژگی الزامی است',
+        ]);
+
         $exist = $this->product->whereHas('propertyGroups', function ($q) {
             $q->where('property_group_id', $this->property_group_id)->where('product_id', $this->product->id);
         })->exists();
@@ -27,6 +36,8 @@ class ProductPropertyList extends Component
             'property_group_id' => $this->property_group_id,
             'product_id' => $this->product->id
         ]);
+        $this->reset(['name', 'property_group_id']);
+        session()->flash('message', 'ویژگی با موفقیت اضافه شد.');
     }
 
     #[On('destroy_product_property_group')]
@@ -56,10 +67,29 @@ class ProductPropertyList extends Component
 
     public function render()
     {
+        $category = $this->product->category;
+
+        // پیدا کردن ID دسته‌بندی‌های مجاز (لایه ۲ و ۳)
+        $validCategoryIds = [];
+
+        if ($category->parent_id != 0) {
+            // اگر محصول در لایه ۲ یا ۳ باشد، خودش حتماً مجاز است
+            $validCategoryIds[] = $category->id;
+
+            // حالا چک می‌کنیم پدرش هم لایه ۲ هست یا نه
+            // اگر پدرِ پدرش صفر نباشد، یعنی پدرش لایه ۲ است
+            $parent = $category->parentCategory;
+            if ($parent && $parent->parent_id != 0) {
+                $validCategoryIds[] = $parent->id;
+            }
+        }
+
         $property_groups = PropertyGroup::query()
-            ->where('category_id', $this->product->category->parentCategory->id)
+            ->whereIn('category_id', $validCategoryIds)
             ->get();
-        $product_property_groups = collect($this->product->propertyGroups);
+
+        $product_property_groups = $this->product->propertyGroups;
+
         return view('livewire.admin.products.product-property-list', compact('property_groups', 'product_property_groups'));
     }
 }
