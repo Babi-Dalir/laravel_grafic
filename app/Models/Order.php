@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CartType;
 use App\Enums\DiscountStatus;
+use App\Enums\GiftCartStatus;
 use App\Enums\OrderDetailStatus;
 use App\Enums\OrderStatus;
 use Carbon\Carbon;
@@ -103,14 +104,28 @@ class Order extends Model
         if ($gift_cart_code){
             $gift_cart = GiftCart::query()
                 ->where('code', $gift_cart_code)
-                ->where('user_id', auth()->user()->id)
-                ->where('gift_price', '>', 0)
+                ->where('user_id', $order->user_id)
+                ->where('balance', '>', 0)
                 ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
                 ->first();
             if ($gift_cart) {
-                $gift_cart->update([
-                    'gift_price'=>0
-                ]);
+
+                $amountToDeduct = $order->gift_cart_price;
+
+                if ($amountToDeduct > 0) {
+                    if ($gift_cart->balance >= $amountToDeduct) {
+                        $gift_cart->decrement('balance', $amountToDeduct);
+                    } else {
+                        $gift_cart->update(['balance' => 0]);
+                    }
+                }
+
+                // چک کردن وضعیت نهایی
+                if ($gift_cart->fresh()->balance <= 0) {
+                    $gift_cart->update([
+                        'status' => GiftCartStatus::InActive->value
+                    ]);
+                }
             }
         }
     }

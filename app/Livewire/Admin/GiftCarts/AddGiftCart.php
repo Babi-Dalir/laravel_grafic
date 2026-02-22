@@ -36,19 +36,24 @@ class AddGiftCart extends Component
     public function addGiftCart()
     {
         $this->validate([
-            'selected_user'=>'required',
-            'gift_title'=>'required',
-            'gift_price'=>'required',
-            'expiration_date'=>'required',
+            'selected_user' => 'required',
+            'gift_title' => 'required|string|max:255',
+            'gift_price' => 'required|numeric|min:1000', // قیمت عددی و حداقل هزار تومان
+            'expiration_date' => 'required',
+        ], [
+            'selected_user.required' => 'لطفاً ابتدا یک کاربر را جستجو و انتخاب کنید.',
+            'gift_price.numeric' => 'مبلغ باید به صورت عدد باشد.',
         ]);
+
         GiftCart::query()->create([
             'user_id' => $this->selected_user['id'],
             'code' => CreateUniqueCode::generateRandomString(6, GiftCart::class),
             'gift_title' => $this->gift_title,
             'gift_price' => $this->gift_price,
+            'balance' => $this->gift_price, // <--- حل مشکل SQLSTATE 1364
             'expiration_date' => DateManager::shamsi_to_miladi($this->expiration_date)
-
         ]);
+
         $this->reset([
             'gift_title',
             'gift_price',
@@ -57,8 +62,9 @@ class AddGiftCart extends Component
             'search',
             'selected_user'
         ]);
+
         $this->users = collect();
-        session()->flash('message', 'کارت هدیه باموفقیت ثبت شد');
+        session()->flash('message', 'کارت هدیه با موفقیت برای کاربر صادر شد.');
     }
 
     public function selectUser($user)
