@@ -39,6 +39,11 @@ class Category extends Model
 //        return $this->hasOne(Commission::class);
 //    }
 
+    public function campaignTargets()
+    {
+        return $this->hasMany(DiscountCampaignTarget::class, 'target_id');
+    }
+
     public static function createCategory($request)
     {
         Category::query()->create([

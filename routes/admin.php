@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\DepotController;
+use App\Http\Controllers\Admin\DiscountCampaignController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\GiftCartController;
@@ -107,3 +108,6 @@ Route::get('order_detail_list/{order}', [OrderController::class, 'orderDetails']
 
 //commissions Route
 Route::resource('commissions', CommissionController::class);
+
+//DiscountCampaign Route
+Route::resource('discount_campaigns', DiscountCampaignController::class);

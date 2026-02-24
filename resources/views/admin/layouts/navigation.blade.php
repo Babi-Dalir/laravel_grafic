@@ -80,6 +80,13 @@
                 </ul>
             </li>
             <li>
+                <a href="#">کمپین ها</a>
+                <ul>
+                    <li><a href="{{route('discount_campaigns.create')}}">ایجاد کمپین</a></li>
+                    <li><a href="{{route('discount_campaigns.index')}}">لیست کمپین ها</a></li>
+                </ul>
+            </li>
+            <li>
                 <a href="#">دسته بندی ها</a>
                 <ul>
                     <li><a href="{{route('categories.create')}}">ایجاد دسته بندی</a></li>

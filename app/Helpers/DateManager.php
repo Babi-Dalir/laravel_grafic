@@ -27,4 +27,12 @@ class DateManager
         $date2 = date('Y-m-d', $date1);
         return DateTime::createFromFormat('Y-m-d', $date2);
     }
+
+    public static function shamsi_to_miladi_campain($date)
+    {
+        if (!$date) return null;
+
+        // تبدیل مستقیم ورتا به فرمت میلادی قابل فهم برای دیتابیس
+        return Verta::parse($date)->toCarbon()->toDateTimeString();
+    }
 }

@@ -37,7 +37,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">درصد تخفیف محصول</label>
+                            <label class="col-sm-2 col-form-label">درصد تخفیف محصول(اختیاری)</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control text-left" dir="rtl" name="discount">
                             </div>
@@ -70,6 +70,7 @@
                             <label class="col-sm-2 col-form-label" for="file"> آپلود عکس </label>
                             <input class="col-sm-10 form-control-file" type="file" name="image" id="image">
                         </div>
+                        <h6 class="mb-4 text-primary">تنظیمات تخفیف شگفت‌انگیز (اختیاری)</h6>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ شروع شگفت انگیز</label>
                             <div class="col-sm-10">

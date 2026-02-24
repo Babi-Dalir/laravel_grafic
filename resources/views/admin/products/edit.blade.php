@@ -45,13 +45,21 @@
                                        value="{{$product->main_price}}">
                             </div>
                         </div>
+                        @php
+                            // پیدا کردن کمپین اختصاصی این محصول برای نمایش در فرم
+                            $productCampaign = \App\Models\DiscountCampaignTarget::where('target_id', $product->id)
+                                ->whereHas('campaign', fn($q) => $q->where('type', 'product'))
+                                ->first()?->campaign;
+                        @endphp
+
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">درصد تخفیف محصول</label>
+                            <label class="col-sm-2 col-form-label">درصد تخفیف فعلی</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control text-left" dir="rtl" name="discount"
-                                       value="{{$product->discount}}">
+                                       value="{{ $productCampaign ? $productCampaign->percent : '' }}">
                             </div>
                         </div>
+                        {{-- فیلدهای تاریخ هم دقیقاً به همین شکل با مقدار $productCampaign->starts_at پر میشن --}}
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">تگ ها</label>
                             <div class="col-sm-10">
