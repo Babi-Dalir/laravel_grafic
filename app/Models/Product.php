@@ -215,7 +215,12 @@ class Product extends Model
     {
         parent::boot();
 
-        // استفاده از deleting به جای forceDeleted برای کنترل دقیق‌تر
+        // ۱. اضافه کردن فیلتر خودکار برای محصولات تایید شده (Global Scope)
+//        static::addGlobalScope('active', function ($builder) {
+//            $builder->where('status', \App\Enums\ProductStatus::Active->value);
+//        });
+
+        // ۲. مدیریت حذف فایل‌ها و تصاویر (کد قبلی خودت)
         static::deleting(function ($product) {
             if ($product->isForceDeleting()) {
                 ImageManager::unlinkImage('products', $product);
@@ -227,10 +232,11 @@ class Product extends Model
         });
     }
 
-    protected $appends = ['final_price'];
+    // ۱. اضافه کردن نام اکسسور جدید به لیست اپندها
+    protected $appends = ['final_price', 'discount_percent'];
 
     /**
-     * اکسسور قیمت نهایی - تمام منطق اینجا مدیریت می‌شود
+     * اکسسور قیمت نهایی
      */
     public function getFinalPriceAttribute()
     {
@@ -263,22 +269,62 @@ class Product extends Model
     }
 
     /**
-     * متد کمکی برای چک کردن وجود تخفیف
-     * حالا خیلی ساده از ویژگی بالا استفاده می‌کند
+     * ۲. اکسسور جدید برای محاسبه درصد تخفیف
+     */
+    public function getDiscountPercentAttribute()
+    {
+        if ($this->main_price > 0 && $this->final_price < $this->main_price) {
+            $diff = $this->main_price - $this->final_price;
+            return round(($diff / $this->main_price) * 100);
+        }
+
+        return 0;
+    }
+
+    /**
+     * متد کمکی (کد قبلی شما)
      */
     public function hasDiscount()
     {
-        // استفاده از ویژگی final_price که توسط اکسسور بالا ساخته شده
         return $this->final_price < $this->main_price;
     }
 
     // الگوریتم پیشنهاد لحظه‌ای
     public function scopeSmartOffer($query)
     {
-        return $query
-            ->where('status', ProductStatus::Active->value)
-            ->where('discount', '>', 0)
-            ->orderByDesc('discount'); // تخفیف بیشتر
+        $now = now();
 
+        return $query->where('status', ProductStatus::Active->value)
+            ->where(function ($q) use ($now) {
+                // ۱. محصولاتی که مستقیماً در یک کمپین هستند
+                $q->whereHas('campaignTargets.campaign', function ($sub) use ($now) {
+                    $sub->where('status',DiscountCampaignStatus::Active->value)
+                        ->where('starts_at', '<=', $now)
+                        ->where(function ($e) use ($now) {
+                            $e->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+                        });
+                })
+                    // ۲. یا محصولاتی که دسته‌بندی آن‌ها کمپین فعال دارد
+                    ->orWhereHas('category.campaignTargets.campaign', function ($sub) use ($now) {
+                        $sub->where('status',DiscountCampaignStatus::Active->value)
+                            ->where('starts_at', '<=', $now)
+                            ->where(function ($e) use ($now) {
+                                $e->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+                            });
+                    })
+                    // ۳. یا کمپین‌های سراسری (Global) فعال وجود داشته باشد
+                    ->orWhereExists(function ($sub) use ($now) {
+                        $sub->select(\DB::raw(1))
+                            ->from('discount_campaigns')
+                            ->where('type',DiscountCampaignType::Global->value)
+                            ->where('status',DiscountCampaignStatus::Active->value)
+                            ->where('starts_at', '<=', $now)
+                            ->where(function ($e) use ($now) {
+                                $e->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+                            });
+                    });
+            })
+            ->latest() // جدیدترین تخفیف‌دارها
+            ->limit(9);
     }
 }

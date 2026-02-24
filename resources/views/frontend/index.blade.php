@@ -10,7 +10,8 @@
                     <div class="sidebar-inner dt-sl">
                         <div class="sidebar-banner">
                             <a href="#" target="_top">
-                                <img src="{{ url('images/banners/big/' . $banners->where('type', 'side_banner')->first()->image) }}"
+                                <img
+                                    src="{{ url('images/banners/big/' . $banners->where('type', 'side_banner')->first()->image) }}"
                                     width="100%" height="329" alt="">
                             </a>
                         </div>
@@ -20,7 +21,7 @@
                 <div class="col-xl-10 col-lg-9 col-12 order-1 order-lg-2">
                     <!-- Start main-slider -->
                     <section id="main-slider" class="main-slider carousel slide carousel-fade card hidden-sm"
-                        data-ride="carousel">
+                             data-ride="carousel">
                         <ol class="carousel-indicators">
                             @foreach ($sliders as $slider)
                                 <li data-target="#main-slider" data-slide-to="{{ $slider->id }}"
@@ -31,7 +32,7 @@
                             @foreach ($sliders as $slider)
                                 <div class="carousel-item @if ($loop->first) active @endif">
                                     <a class="main-slider-slide" href="#"
-                                        style="background-image: url({{ url('images/sliders/big/' . $slider->image) }})">
+                                       style="background-image: url({{ url('images/sliders/big/' . $slider->image) }})">
                                     </a>
                                 </div>
                             @endforeach
@@ -44,7 +45,7 @@
                         </a>
                     </section>
                     <section id="main-slider-res" class="main-slider carousel slide carousel-fade card d-none show-sm"
-                        data-ride="carousel">
+                             data-ride="carousel">
                         <ol class="carousel-indicators">
                             @foreach ($sliders as $slider)
                                 <li data-target="#main-slider-res" data-slide-to="{{ $slider->id }}"
@@ -56,7 +57,7 @@
                                 <div class="carousel-item @if ($loop->first) active @endif ">
                                     <a class="main-slider-slide" href="#">
                                         <img src="{{ url('images/sliders/big/' . $slider->image) }}" alt=""
-                                            class="img-fluid">
+                                             class="img-fluid">
                                     </a>
                                 </div>
                             @endforeach
@@ -85,7 +86,7 @@
                                     <div class="item">
                                         <a href="#" class="promotion-category">
                                             <img src="{{ url('images/categories/big/' . $category->image) }}"
-                                                alt="">
+                                                 alt="">
                                             <h4 class="promotion-category-name">{{ $category->name }}</h4>
                                             <h6 class="promotion-category-quantity">
                                                 {{ $category->getProductCategoryCount($category->id) }}</h6>
@@ -123,16 +124,16 @@
                                                         <i class="mdi mdi-star active"></i>
                                                         <i class="mdi mdi-star active"></i>
                                                     </div>
-                                                    <div class="discount">
-                                                        @if ($product->discount != 0)
-                                                            <span>{{ $product->discount }}%</span>
-                                                        @endif
-                                                    </div>
+                                                    @if($product->discount_percent > 0)
+                                                        <div class="discount">
+                                                            <span>{{ $product->discount_percent }}%</span>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 <a class="product-thumb"
-                                                    href="{{ route('single.product', $product->slug) }}">
+                                                   href="{{ route('single.product', $product->slug) }}">
                                                     <img src="{{ url('images/products/big/' . $product->image) }}"
-                                                        alt="Product Thumbnail">
+                                                         alt="Product Thumbnail">
                                                 </a>
                                                 <div class="product-card-body">
                                                     <h5 class="product-title">
@@ -140,9 +141,14 @@
                                                             href="{{ route('single.product', $product->slug) }}">{{ $product->name }}</a>
                                                     </h5>
                                                     <a class="product-meta"
-                                                        href="#">{{ $product->category->name }}</a>
-                                                    <span class="product-price">{{ number_format($product->price) }}
-                                                        تومان</span>
+                                                       href="#">{{ $product->category->name }}</a>
+                                                    @if($product->hasDiscount())
+                                                        <del
+                                                            class="text-danger small">{{ number_format($product->main_price) }}</del>
+                                                        <span class="product-price">{{ number_format($product->final_price) }} تومان</span>
+                                                    @else
+                                                        <span class="product-price">{{ number_format($product->main_price) }} تومان</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -184,21 +190,12 @@
             <!-- Start Product-Slider -->
             <section class="slider-section dt-sl mb-5">
                 <div class="row mb-3">
-
-               {{-- فقط محصولاتی که تخفیف ویژه دارن و هنوز معتبر هستن --}}
-                @php
-                    $specialCount = \App\Models\Product::query()
-                        ->where('spacial_expiration', '>', now())
-                        ->where('discount', '>', 0)
-                        ->count();
-                @endphp
-
-                    @if ( $specialCount > 0)
-                    <div class="col-12">
-                        <div class="section-title text-sm-title title-wide no-after-title-wide">
-                            <h2>فروش شگفت انگیز</h2>
+                    @if ($spacial_products->count() > 0)
+                        <div class="col-12">
+                            <div class="section-title text-sm-title title-wide no-after-title-wide">
+                                <h2>فروش شگفت انگیز</h2>
+                            </div>
                         </div>
-                    </div>
                     @endif
                     <!-- Start Product-Slider -->
                     <div class="col-12">
@@ -206,6 +203,7 @@
                             @foreach ($spacial_products as $spacial_product)
                                 <div class="item">
                                     <div class="product-card">
+                                        {{-- بخش بالایی کارت شامل ستاره‌ها و تخفیف --}}
                                         <div class="product-head">
                                             <div class="rating-stars">
                                                 <i class="mdi mdi-star active"></i>
@@ -214,26 +212,29 @@
                                                 <i class="mdi mdi-star active"></i>
                                                 <i class="mdi mdi-star active"></i>
                                             </div>
-                                            <div class="discount">
-                                                @if ($spacial_product->discount != 0)
-                                                    <span>{{ $spacial_product->discount }}%</span>
-                                                @endif
-                                            </div>
+                                            {{-- استفاده از اکسسوری که در مدل محصول ساختیم --}}
+                                            @if($spacial_product->discount_percent > 0)
+                                                <div class="discount">
+                                                    <span>{{ $spacial_product->discount_percent }}%</span>
+                                                </div>
+                                            @endif
                                         </div>
-                                        <a class="product-thumb"
-                                            href="{{ route('single.product', $spacial_product->product->slug) }}">
-                                            <img src="{{ url('images/products/big/' . $spacial_product->product->image) }}"
-                                                alt="Product Thumbnail">
+
+                                        <a class="product-thumb" href="{{ route('single.product', $spacial_product->slug) }}">
+                                            <img src="{{ url('images/products/big/' . $spacial_product->image) }}" alt="{{ $spacial_product->name }}">
                                         </a>
+
                                         <div class="product-card-body">
                                             <h5 class="product-title">
-                                                <a
-                                                    href="{{ route('single.product', $spacial_product->product->slug) }}">{{ $spacial_product->product->name }}</a>
+                                                <a href="{{ route('single.product', $spacial_product->slug) }}">{{ $spacial_product->name }}</a>
                                             </h5>
                                             <a class="product-meta"
-                                                href="#">{{ $spacial_product->product->category->name }}</a>
-                                            <span class="product-price">{{ number_format($spacial_product->price) }}
-                                                تومان</span>
+                                               href="#">{{ $spacial_product->category->name }}</a>
+                                            {{-- قیمت خط خورده و قیمت نهایی --}}
+                                            <div class="product-price-info">
+                                                <del class="text-danger small">{{ number_format($spacial_product->main_price) }}</del>
+                                                <span class="product-price d-block">{{ number_format($spacial_product->final_price) }} تومان</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -250,7 +251,8 @@
                 <div class="col-12">
                     <div class="widget-banner">
                         <a href="#">
-                            <img src="{{ url('images/banners/big/' . $banners->where('type', 'large_banner')->first()->image) }}"
+                            <img
+                                src="{{ url('images/banners/big/' . $banners->where('type', 'large_banner')->first()->image) }}"
                                 alt="">
                         </a>
                     </div>
@@ -280,16 +282,16 @@
                                                 <i class="mdi mdi-star active"></i>
                                                 <i class="mdi mdi-star active"></i>
                                             </div>
-                                            <div class="discount">
-                                                @if ($newest_product->discount != 0)
-                                                    <span>{{ $newest_product->discount }}%</span>
-                                                @endif
-                                            </div>
+                                            @if($newest_product->discount_percent > 0)
+                                                <div class="discount">
+                                                    <span>{{ $newest_product->discount_percent }}%</span>
+                                                </div>
+                                            @endif
                                         </div>
                                         <a class="product-thumb"
-                                            href="{{ route('single.product', $newest_product->slug) }}">
+                                           href="{{ route('single.product', $newest_product->slug) }}">
                                             <img src="{{ url('images/products/big/' . $newest_product->image) }}"
-                                                alt="Product Thumbnail">
+                                                 alt="Product Thumbnail">
                                         </a>
                                         <div class="product-card-body">
                                             <h5 class="product-title">
@@ -297,9 +299,16 @@
                                                     href="{{ route('single.product', $newest_product->slug) }}">{{ $newest_product->name }}</a>
                                             </h5>
                                             <a class="product-meta"
-                                                href="#">{{ $newest_product->category->name }}</a>
-                                            <span class="product-price">{{ number_format($newest_product->price) }}
-                                                تومان</span>
+                                               href="#">{{ $newest_product->category->name }}</a>
+                                            <div class="product-price">
+                                                @if($newest_product->hasDiscount())
+                                                    <del
+                                                        class="text-danger small">{{ number_format($newest_product->main_price) }}</del>
+                                                    <span class="d-block">{{ number_format($newest_product->final_price) }} تومان</span>
+                                                @else
+                                                    <span>{{ number_format($newest_product->main_price) }} تومان</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -322,17 +331,24 @@
                 </div>
 
                 <div class="row mb-3">
-                    {{-- هر ردیف شامل 3 محصول --}}
                     @foreach ($instant_offers->chunk(3) as $products)
                         @foreach ($products as $product)
                             <div class="col-lg-4 col-md-6 col-sm-12 pt-4">
                                 <div class="card-horizontal-product border-bottom rounded-0">
-                                    <div class="card-horizontal-product-thumb">
+                                    <div class="card-horizontal-product-thumb position-relative"> {{-- اضافه شدن پوزیشن نسبی --}}
                                         <a href="{{ route('single.product', $product->slug) }}">
                                             <img src="{{ url('images/products/big/' . $product->image) }}"
-                                                alt="{{ $product->name }}">
+                                                 alt="{{ $product->name }}">
                                         </a>
+
+                                        {{-- نشان تخفیف قرمز و استایلی --}}
+                                        @if($product->discount_percent > 0)
+                                            <div class="discount-badge-red">
+                                                <span>{{ $product->discount_percent }}%</span>
+                                            </div>
+                                        @endif
                                     </div>
+
                                     <div class="card-horizontal-product-content">
                                         <div class="card-horizontal-product-title">
                                             <a href="{{ route('single.product', $product->slug) }}">
@@ -340,14 +356,20 @@
                                             </a>
                                         </div>
 
-                                        {{-- قیمت --}}
                                         <div class="card-horizontal-product-price">
-                                            <span>{{ number_format($product->price) }} تومان</span>
+                                            @if($product->hasDiscount())
+                                                <del class="text-secondary small d-block">{{ number_format($product->main_price) }}</del>
+                                                <span class="text-danger font-weight-bold" style="font-size: 1.1rem;">
+                                    {{ number_format($product->final_price) }} <small>تومان</small>
+                                </span>
+                                            @else
+                                                <span class="font-weight-bold">{{ number_format($product->main_price) }} تومان</span>
+                                            @endif
                                         </div>
 
-                                        <div class="card-horizontal-product-buttons">
+                                        <div class="card-horizontal-product-buttons mt-2">
                                             <a href="{{ route('single.product', $product->slug) }}"
-                                                class="btn btn-outline-info">جزئیات محصول</a>
+                                               class="btn btn-sm btn-outline-info">مشاهده محصول</a>
                                         </div>
                                     </div>
                                 </div>

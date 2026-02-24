@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\FrontEnd;
 
 use App\Enums\CartType;
+use App\Enums\DiscountCampaignStatus;
+use App\Enums\DiscountCampaignType;
 use App\Enums\SliderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
@@ -18,18 +20,31 @@ class HomeController extends Controller
 {
     public function home()
     {
+        $now = now();
+
         $sliders = Cache::remember('sliders',60*60*24*10,function (){
             return Slider::query()
                 ->where('status',SliderStatus::Active->value)->get();
         });
-        $most_sold = Product::query()->with('category')->orderBy('sold','DESC')->get();
-        $newest_products = Product::query()->with('category')->orderBy('created_at','DESC')->get();
-        $spacial_products = ProductPrice::query()->with('product')
-            ->where('spacial_start','<=',now())
-            ->where('spacial_expiration','>=',now())
-            ->where('count','>',0)
+        $most_sold = Product::query()
+            ->with(['category','campaignTargets.campaign'])
+            ->orderBy('sold','DESC')
             ->get();
-
+        $newest_products = Product::query()
+            ->with(['category', 'campaignTargets.campaign'])
+            ->orderBy('created_at','DESC')
+            ->get();
+        $spacial_products = Product::query()
+            ->with(['category', 'campaignTargets.campaign'])
+            ->whereHas('campaignTargets.campaign', function ($query) use ($now) {
+                $query->where('status',DiscountCampaignStatus::Active->value)
+                    ->where('starts_at', '<=', $now)
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+                    });
+            })
+            ->take(10)
+            ->get();
         // پیشنهاد لحظه ای
 
          $instant_offers = Product::smartOffer()
