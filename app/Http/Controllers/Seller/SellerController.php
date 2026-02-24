@@ -25,11 +25,8 @@ class SellerController extends Controller
     {
         $title = "ایجاد محصول توسط فروشنده";
         $categories = Category::getCategories();
-        $brands = Brand::query()->pluck('name','id');
         $tags = Tag::query()->pluck('name','id');
-        $guaranties = Guaranty::query()->pluck('name','id');
-        $colors = Color::query()->pluck('name','id');
-        return view('admin.sellers.create',compact('title','categories','brands','tags','guaranties','colors'));
+        return view('admin.sellers.create',compact('title','categories','tags'));
     }
     public function storeSellerProduct(Request $request)
     {
