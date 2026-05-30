@@ -57,7 +57,8 @@ class DiscountCampaign extends Model
                 if ($request->filled('target_ids')) {
                     foreach ($request->input('target_ids') as $id) {
                         $campaign->targets()->create([
-                            'target_id' => $id
+                            'target_id' => $id,
+                            'target_type' => $request->input('type'),
                         ]);
                     }
                 }
@@ -88,7 +89,8 @@ class DiscountCampaign extends Model
                 if ($request->filled('target_ids')) {
                     foreach ($request->input('target_ids') as $id) {
                         $campaign->targets()->create([
-                            'target_id' => $id
+                            'target_id' => $id,
+                            'target_type' => $request->input('type'),
                         ]);
                     }
                 }

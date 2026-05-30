@@ -8,7 +8,8 @@ class DiscountCampaignTarget extends Model
 {
     protected $fillable = [
         'discount_campaign_id',
-        'target_id'
+        'target_id',
+        'target_type'
     ];
 
     public function campaign()

@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('discount_campaign_targets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('discount_campaign_id')->constrained()->cascadeOnDelete();
-            $table->unsignedBigInteger('target_id')->index();
+            $table->unsignedBigInteger('target_id');
+            $table->string('target_type'); // product یا category
+            $table->index(['target_id','target_type']);
             $table->timestamps();
         });
     }

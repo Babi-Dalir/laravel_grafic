@@ -77,7 +77,13 @@ class Product extends Model
 
     public function campaignTargets()
     {
-        return $this->hasMany(DiscountCampaignTarget::class, 'target_id');
+        return $this->hasMany(
+            DiscountCampaignTarget::class,
+            'target_id'
+        )->where(
+            'target_type',
+            DiscountCampaignType::Product->value
+        );
     }
 
     /**
@@ -91,7 +97,7 @@ class Product extends Model
             'target_id',   // کلید خارجی در جدول واسط
             'id',          // کلید اصلی در جدول کمپین
             'id',          // کلید اصلی در جدول محصول
-            'campaign_id'  // کلید خارجی در جدول واسط که به کمپین وصل است
+            'discount_campaign_id'  // کلید خارجی در جدول واسط که به کمپین وصل است
         );
     }
 
@@ -133,7 +139,10 @@ class Product extends Model
                 ]);
 
                 // اتصال کمپین به محصول در جدول واسط هوشمند
-                $campaign->targets()->create(['target_id' => $product->id]);
+                $campaign->targets()->create([
+                    'target_id' => $product->id,
+                    'target_type' => DiscountCampaignType::Product->value
+                ]);
             }
 
             if ($request->filled('tags')) {
@@ -181,9 +190,11 @@ class Product extends Model
             if ($request->filled('discount')) {
                 // پیدا کردن کمپین قبلی محصول (اگر وجود داشته باشد)
                 $existingCampaignTarget = DiscountCampaignTarget::where('target_id', $product->id)
+                    ->where('target_type', DiscountCampaignType::Product->value)
                     ->whereHas('campaign', function ($query) {
                         $query->where('type', DiscountCampaignType::Product->value);
-                    })->first();
+                    })
+                    ->first();
 
                 $campaignData = [
                     'percent' => $request->discount,
@@ -199,7 +210,10 @@ class Product extends Model
                         'type' => DiscountCampaignType::Product->value,
                         'priority' => 3
                     ]));
-                    $newCampaign->targets()->create(['target_id' => $product->id]);
+                    $newCampaign->targets()->create([
+                        'target_id' => $product->id,
+                        'target_type' => DiscountCampaignType::Product->value
+                    ]);
                 }
             }
 
@@ -249,10 +263,12 @@ class Product extends Model
             })
             ->where(function ($query) {
                 $query->whereHas('targets', function ($q) {
-                    $q->where('target_id', $this->id);
+                    $q->where('target_id', $this->id)
+                    ->where('target_type', DiscountCampaignType::Product->value);
                 })
                     ->orWhereHas('targets', function ($q) {
-                        $q->where('target_id', $this->category_id);
+                        $q->where('target_id', $this->category_id)
+                        ->where('target_type', DiscountCampaignType::Category->value);
                     })
                     ->orWhere('type', DiscountCampaignType::Global->value);
             })
@@ -264,6 +280,7 @@ class Product extends Model
             $discountAmount = ($this->main_price * $bestCampaign->percent) / 100;
             return $this->main_price - $discountAmount;
         }
+
 
         return $this->main_price;
     }
