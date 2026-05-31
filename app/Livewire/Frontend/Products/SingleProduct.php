@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Frontend\Products;
 
+use App\Enums\CartType;
 use App\Models\Favorite;
 use App\Models\ProductPrice;
 use App\Models\UserCart;
@@ -10,7 +11,6 @@ use Livewire\Component;
 class SingleProduct extends Component
 {
     public $product;
-    public $product_price;
 
     public function AddFavorite($product_id)
     {
@@ -34,28 +34,24 @@ class SingleProduct extends Component
 
     public function addToCart()
     {
-        if (auth()->user()){
-            $user_cart = UserCart::query()
-                ->where('user_id',auth()->user()->id)
-                ->where('product_id',$this->product->id)
-
-                ->first();
-            if ($user_cart){
-                $user_cart->update([
-                    'count'=>$user_cart->count +1
-                ]);
-            }else{
-                UserCart::query()->create([
-                    'user_id'=>auth()->user()->id,
-                    'product_id'=>$this->product->id,
-                    'count'=>1,
-                ]);
-            }
-
-            return redirect()->route('user.cart');
-        }else{
+        if (!auth()->check()) {
             return redirect()->route('login');
         }
+
+        $userCart = UserCart::query()
+            ->where('user_id', auth()->id())
+            ->where('product_id', $this->product->id)
+            ->first();
+
+        if (!$userCart) {
+            UserCart::create([
+                'user_id' => auth()->id(),
+                'product_id' => $this->product->id,
+                'type' => CartType::Main->value,
+            ]);
+        }
+
+        return redirect()->route('user.cart');
     }
     public function render()
     {

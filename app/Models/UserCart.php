@@ -10,7 +10,6 @@ class UserCart extends Model
     protected $fillable = [
         'user_id',
         'product_id',
-        'count',
         'type',
 
     ];
@@ -24,20 +23,11 @@ class UserCart extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function productPrice($product_id,$color_id,$guaranty_id)
-    {
-        $product_price = ProductPrice::query()
-            ->where('product_id',$product_id)
-            ->first();
-        if ($product_price){
-            return $product_price->price;
-        }
-    }
-
     public static function getUserCart($user)
     {
         return UserCart::query()
             ->where('user_id', $user->id)
-            ->where('type', CartType::Main->value)->get();
+            ->where('type', CartType::Main->value)
+            ->get();
     }
 }
