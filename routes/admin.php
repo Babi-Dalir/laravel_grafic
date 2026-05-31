@@ -59,17 +59,6 @@ Route::resource('tags', TagController::class);
 Route::resource('products', ProductController::class);
 Route::get('products_trashed', [ProductController::class, "trashed"])->name('products.trashed');
 
-//ProductPrice Route
-Route::get('product_prices/{id}', [ProductPriceController::class, 'index'])->name('product.prices');
-
-Route::get('create_product_prices/{product_id}', [ProductPriceController::class, 'create'])->name('create.product.prices');
-
-Route::post('store_product_prices/{product_id}', [ProductPriceController::class, 'store'])->name('store.product.prices');
-
-Route::get('edit_product_prices/{id}/{product_id}', [ProductPriceController::class, 'edit'])->name('edit.product.prices');
-
-Route::put('update_product_prices/{id}/{product_id}', [ProductPriceController::class, 'update'])->name('update.product.prices');
-
 // Gallery Route
 Route::get('add_product_galleries/{id}', [ProductController::class, 'addGallery'])->name('add.product.gallery');
 

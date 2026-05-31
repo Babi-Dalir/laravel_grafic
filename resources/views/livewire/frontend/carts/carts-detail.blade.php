@@ -189,7 +189,7 @@
                                                             </ul>
                                                             <div class="item-quantity--item-price">
                                                                 <div class="item-quantity">
-                                                                    <button class="item-remove-btn mr-3">
+                                                                    <button class="item-remove-btn mr-3" wire:click="deleteCart({{$cart->id}})">
                                                                         <i class="far fa-trash-alt btn-danger"></i>
                                                                         حذف
                                                                     </button>

@@ -26,6 +26,7 @@ class UserCart extends Model
     public static function getUserCart($user)
     {
         return UserCart::query()
+            ->with('product')
             ->where('user_id', $user->id)
             ->where('type', CartType::Main->value)
             ->get();
