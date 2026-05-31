@@ -32,7 +32,7 @@ class SingleProduct extends Component
         }
     }
 
-    public function addToCart($color_id,$guaranty_id)
+    public function addToCart()
     {
         if (auth()->user()){
             $user_cart = UserCart::query()

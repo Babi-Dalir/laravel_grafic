@@ -131,7 +131,7 @@
                                         تومان تخفیف شما از خرید این محصول کسر گردیده است.
                                     </div>
                                 </div>
-                                <div class="product-seller-row product-seller-row--add-to-cart">
+                                <div class="product-seller-row product-seller-row--add-to-cart" wire:click='addToCart' wire:ignore.self>
                                     <a href="#" class="btn-add-to-cart btn-add-to-cart--full-width" wire:ignore>
                                         <span class="btn-add-to-cart-txt">افزودن به سبد خرید</span>
                                     </a>
