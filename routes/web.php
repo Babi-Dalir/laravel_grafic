@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FrontEnd\DownloadController;
 use App\Http\Controllers\FrontEnd\HomeController;
 use App\Http\Controllers\FrontEnd\PaymentController;
 use App\Http\Controllers\FrontEnd\ProductController;
@@ -26,6 +27,9 @@ Route::get('/compare_products/{product_id_1}/{product_id_2}', [ProductController
 Route::get('/ajax-search', [SearchController::class, 'ajaxSearch'])->name('ajax.search');
 
 Route::middleware('auth')->group(function () {
+
+    //Downloads Route
+    Route::get('/download/{token}', [DownloadController::class,'download'])->name('download.file');
 
     Route::get('/user_cart', [HomeController::class, 'userCart'])->name('user.cart');
 

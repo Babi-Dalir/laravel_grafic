@@ -10,6 +10,7 @@ use App\Enums\OrderStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Order extends Model
 {
@@ -74,13 +75,17 @@ class Order extends Model
                 'status' => OrderDetailStatus::Processing->value
             ]);
 
-            $product_price = ProductPrice::query()
-                ->where('product_id', $order_detail->product_id)
-                ->first();
-            $product_price->decrement('count', $order_detail->count);
-
             $product = Product::query()->find($order_detail->product_id);
             $product->increment('sold', $order_detail->count);
+
+            Downloads::create([
+                'user_id' => $order->user_id,
+                'product_id' => $order_detail->product_id,
+                'order_detail_id' => $order_detail->id,
+                'token' => Str::random(80),
+                'expire_at' => now()->addDays(30), // یا null
+                'max_download' => 5,
+            ]);
         }
         $carts = UserCart::query()
             ->where('user_id', $order->user_id)
