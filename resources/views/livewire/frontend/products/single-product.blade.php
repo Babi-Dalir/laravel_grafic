@@ -75,29 +75,6 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-6">
-                        <div class="product-variant dt-sl">
-                            <div
-                                class="section-title text-sm-title title-wide no-after-title-wide mb-0">
-                                <h2>انتخاب رنگ:</h2>
-                            </div>
-                            <ul class="product-variants float-right ml-3">
-                                @foreach($product->colors as $color)
-                                    @if($product->productPrices()->where('color_id',$color->id)->where('count','>',0)->first())
-                                        <li class="ui-variant" wire:click="changeColorProduct({{$color->id}})">
-                                            <label class="ui-variant ui-variant--color">
-                                                        <span class="ui-variant-shape"
-                                                              style="background-color: {{$color->code}}"></span>
-                                                <input type="radio" value="1" name="color"
-                                                       class="variant-selector"
-                                                       @if($product->productPrices()->where('price',$product->price)->first()->color_id == $color->id) checked @endif>
-                                                <span class="ui-variant--check">{{$color->name}}</span>
-                                            </label>
-                                        </li>
-                                    @endif
-                                @endforeach
-
-                            </ul>
-                        </div>
                         <div class="product-params dt-sl">
                             <ul data-title="ویژگی‌های محصول">
                                 @foreach($product->propertyGroups as $propertyGroup)
@@ -117,23 +94,12 @@
                                                 </span>
                             </div>
                         </div>
-                        <div
-                            class="section-title text-sm-title title-wide no-after-title-wide mb-0 dt-sl">
-                            <h2>کد محصول:225566</h2>
-                        </div>
                     </div>
                     <div class="col-lg-6" wire:ignore.self>
 
                         <div class="product-summary" wire:ignore.self>
                             <nav id="stack-menu" wire:ignore.self>
                                 <ul wire:ignore.self>
-
-                                    <li wire:ignore.self>
-                                        <a>
-                                            <i class="far fa-shield-check"></i>
-                                            {{$product_price->guaranty->name}}
-                                        </a>
-                                    </li>
                                     <li wire:ignore>
                                         <a href="#">
                                             <i class="far fa-box-check product-delivery-warehouse"></i>
@@ -145,28 +111,27 @@
                                 <div class="product-seller-row product-seller-row--price" wire:ignore.self>
                                     <div class="product-seller-price-info" wire:ignore.self>
                                         <div class="product-seller-price-prev" wire:ignore.self>
-                                            {{number_format(($product_price->main_price))}}
+                                            {{number_format(($product->main_price))}}
                                         </div>
-                                        @if($product_price->discount >0)
+                                        @if($product->discount_percent >0)
                                             <div class="product-seller-price-off" wire:ignore.self>
-                                                {{$product_price->discount}}٪
+                                                {{$product->discount_percent}}٪
                                             </div>
                                         @endif
                                     </div>
                                     <div class="product-seller-price-real" wire:ignore.self>
                                         <div
-                                            class="product-seller-price-raw">{{number_format($product_price->price)}}</div>
+                                            class="product-seller-price-raw">{{number_format($product->final_price)}}</div>
                                         تومان
                                     </div>
                                     <div
                                         class="product-additional-item product-additional-item--no-icon"
                                         wire:ignore.self>
-                                        <span>{{number_format($product_price->main_price - $product_price->price)}}</span>&nbsp;
+                                        <span>{{number_format($product->main_price - $product->final_price)}}</span>&nbsp;
                                         تومان تخفیف شما از خرید این محصول کسر گردیده است.
                                     </div>
                                 </div>
-                                <div class="product-seller-row product-seller-row--add-to-cart"
-                                     wire:click="addToCart({{$product_price->color_id}},{{$product_price->guaranty_id}})">
+                                <div class="product-seller-row product-seller-row--add-to-cart">
                                     <a href="#" class="btn-add-to-cart btn-add-to-cart--full-width" wire:ignore>
                                         <span class="btn-add-to-cart-txt">افزودن به سبد خرید</span>
                                     </a>

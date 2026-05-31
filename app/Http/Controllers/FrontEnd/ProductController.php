@@ -12,9 +12,9 @@ class ProductController extends Controller
     public function singleProduct($slug)
     {
         $product = Product::query()
-            ->with(['category','tags','properties','propertyGroups','productPrices'])
+            ->with(['category','tags','properties','propertyGroups'])
             ->where('slug',$slug)->first();
-        $product->increment('viewed');
+
         return view('frontend.single_product',compact('product'));
     }
 

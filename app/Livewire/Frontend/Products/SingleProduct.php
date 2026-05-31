@@ -12,11 +12,6 @@ class SingleProduct extends Component
     public $product;
     public $product_price;
 
-    public function mount()
-    {
-        $this->product_price = ProductPrice::query()->where('product_id',$this->product->id)->orderBy('price','ASC')->first();
-    }
-
     public function AddFavorite($product_id)
     {
         if (auth()->user()){
@@ -43,8 +38,7 @@ class SingleProduct extends Component
             $user_cart = UserCart::query()
                 ->where('user_id',auth()->user()->id)
                 ->where('product_id',$this->product->id)
-                ->where('color_id',$color_id)
-                ->where('guaranty_id',$guaranty_id)
+
                 ->first();
             if ($user_cart){
                 $user_cart->update([
@@ -54,8 +48,6 @@ class SingleProduct extends Component
                 UserCart::query()->create([
                     'user_id'=>auth()->user()->id,
                     'product_id'=>$this->product->id,
-                    'color_id'=>$color_id,
-                    'guaranty_id'=>$guaranty_id,
                     'count'=>1,
                 ]);
             }
@@ -64,14 +56,6 @@ class SingleProduct extends Component
         }else{
             return redirect()->route('login');
         }
-    }
-    public function changeColorProduct($color_id)
-    {
-        $this->product_price = ProductPrice::query()
-            ->where('product_id',$this->product->id)
-            ->where('color_id',$color_id)
-            ->orderBy('price','ASC')
-            ->first();
     }
     public function render()
     {
