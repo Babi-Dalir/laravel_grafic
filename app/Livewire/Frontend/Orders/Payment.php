@@ -14,8 +14,6 @@ use Livewire\Component;
 
 class Payment extends Component
 {
-    public $payment_type;
-    public $payment_types;
     public $carts;
     public $total_price;
     public $discount_price;
@@ -24,7 +22,6 @@ class Payment extends Component
     {
         $this->payment_type = 'zarinpal';
 
-        $this->payment_types = PaymentType::query()->get();
         $this->carts = UserCart::query()
             ->where('user_id',auth()->user()->id)
             ->where('type',CartType::Main->value)
@@ -44,7 +41,6 @@ class Payment extends Component
     public function render()
     {
         $shop_data = Session::get('shop_data');
-        $shop_data['payment_type'] = $this->payment_type;
         $shop_data['discount_code'] = $this->discount_code;
         $shop_data['gift_cart_code'] = $this->gift_cart_code;
         Session::put('shop_data',$shop_data);

@@ -43,7 +43,11 @@ class PaymentController extends Controller
                 ->with('error', 'سبد خرید شما خالی است');
         }
 
-        $total_price = $carts->product->final_price;
+        $total_price = 0;
+
+        foreach ($carts as $cart) {
+            $total_price += $cart->product->final_price;
+        }
 
         $discount_code_price = 0;
         $gift_cart_code_price = 0;
@@ -99,7 +103,7 @@ class PaymentController extends Controller
             foreach ($carts as $cart) {
 
                 $product = Product::query()
-                    ->where('product_id', $cart->product_id)
+                    ->where('id', $cart->product_id)
                     ->first();
 
                 if (!$product) {

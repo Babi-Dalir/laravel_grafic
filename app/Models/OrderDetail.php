@@ -33,19 +33,26 @@ class OrderDetail extends Model
     public static function createOrderDetail($order, $cart, $product)
     {
         $commission_percent = 20;
-        $siteShare = ($product->price * $commission_percent) / 100;
-        $sellerShare = $product->price - $siteShare;
+
+        $price = $product->final_price;
+        $discount = $product->main_price - $product->final_price;
+
+        $siteShare = ($price * $commission_percent) / 100;
+        $sellerShare = $price - $siteShare;
 
         return OrderDetail::query()->create([
             'seller_id' => $product->user_id,
             'order_id' => $order->id,
             'product_id' => $cart->product_id,
+
             'main_price' => $product->main_price,
-            'price' => $product->price,
-            'discount' => $product->discount,
+            'price' => $price,
+            'discount' => $discount,
+
             'status' => OrderDetailStatus::Waiting->value,
-            'seller_share' => $sellerShare,         // سهم خالص فروشنده
-            'site_share' => $siteShare,           // سهم پلتفرم (پورسانت)
+
+            'seller_share' => $sellerShare,
+            'site_share' => $siteShare,
         ]);
     }
 

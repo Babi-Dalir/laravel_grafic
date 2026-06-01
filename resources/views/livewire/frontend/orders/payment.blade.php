@@ -99,7 +99,7 @@
                 </div>
             </div>
             <div class="mt-5">
-                <a href="{{route('user.shopping')}}" class="float-right border-bottom-dt"><i
+                <a href="{{route('payment')}}" class="float-right border-bottom-dt"><i
                         class="mdi mdi-chevron-double-right"></i>بازگشت به شیوه ارسال</a>
                 <a href="{{route('payment')}}" class="float-left border-bottom-dt">ثبت نهایی سفارش<i
                         class="mdi mdi-chevron-double-left"></i></a>

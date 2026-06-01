@@ -24,10 +24,10 @@ class CartsDetail extends Component
     public $gift_cart_price = 0;
     public function submitPayment()
     {
-        $this->validate();
         Session::put('shop_data',[
             'discount_code'  => $this->discount_code,
             'gift_cart_code' => $this->gift_cart_code,
+            'payment_type'   => 'zarinpal', // یا offline
         ]);
 
         return redirect()->route('payment');
