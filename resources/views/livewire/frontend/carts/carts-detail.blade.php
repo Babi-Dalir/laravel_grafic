@@ -52,14 +52,6 @@
                                                         <div class="item-detail">
                                                             <ul>
                                                                 <li>
-                                                                    <span class="color"></span>
-                                                                    <span></span>
-                                                                </li>
-                                                                <li>
-                                                                    <i class="far fa-shield-check text-muted"></i>
-                                                                    <span></span>
-                                                                </li>
-                                                                <li>
                                                                     <i class="far fa-store-alt text-muted"></i>
                                                                     <span>نام فروشنده</span>
                                                                 </li>
@@ -96,7 +88,7 @@
                                 <div class="dt-sn dt-sn--box border mb-2">
                                     <ul class="checkout-summary-summary">
                                         <li>
-                                            <span>مبلغ کل ({{count($carts)}} کالا)</span><span>{{number_format($total_price)}} تومان</span>
+                                            <span>مبلغ کل ({{count($carts)}} کالا)</span><span>{{number_format($final_price)}} تومان</span>
                                         </li>
                                         <li class="checkout-summary-discount">
                                             <span>سود شما از خرید</span><span>{{number_format($discount_price)}}
@@ -109,13 +101,13 @@
                                     <div class="checkout-summary-content">
                                         <div class="checkout-summary-price-title">مبلغ قابل پرداخت:</div>
                                         <div class="checkout-summary-price-value">
-                                            <span class="checkout-summary-price-value-amount">{{number_format($total_price)}}</span>
+                                            <span class="checkout-summary-price-value-amount">{{number_format($final_price)}}</span>
                                             تومان
                                         </div>
-                                        <a href="#" class="mb-2 d-block">
+                                        <a href="{{route('payment')}}" class="mb-2 d-block">
                                             <button class="btn-primary-cm btn-with-icon w-100 text-center pr-0">
                                                 <i class="mdi mdi-arrow-left"></i>
-                                                ادامه ثبت سفارش
+                                                پرداخت و دانلود
                                             </button>
                                         </a>
                                         <div>
@@ -145,6 +137,106 @@
                                             تحویل اکسپرس
                                         </li>
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- کارت هدیه و کد تخفیف --}}
+                    <div class="row mt-4 mx-0">
+                        <div class="col-md-6 col-12 mb-3">
+                            <div class="dt-sn dt-sn--box pt-3 pb-3 px-3 h-100">
+                                <div class="section-title text-sm-title title-wide no-after-title-wide mb-0">
+                                    <h2>
+                                        استفاده از کارت هدیه
+                                        <span class="help-sn">
+                        <span class="mdi mdi-information-outline"></span>
+                    </span>
+                                    </h2>
+                                </div>
+
+                                <p class="mb-3">
+                                    با ثبت کد کارت هدیه، مبلغ کارت هدیه از مبلغ قابل پرداخت کسر می‌شود.
+                                </p>
+
+                                <div class="form-ui">
+                                    <form wire:submit.prevent="giftCartCode">
+                                        <div class="row align-items-start">
+                                            <div class="col-lg-8 col-md-7 col-12 mb-2">
+                                                <input
+                                                    type="text"
+                                                    class="input-ui pr-2"
+                                                    wire:model="gift_cart_code"
+                                                    placeholder="مثلا 837A2CS">
+                                            </div>
+
+                                            <div class="col-lg-4 col-md-5 col-12 mb-2">
+                                                <button class="btn btn-primary w-100">
+                                                    ثبت کد هدیه
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        @if(session()->has('success_gift_cart'))
+                                            <div class="alert alert-success mt-2">
+                                                {{ session('success_gift_cart') }}
+                                            </div>
+                                        @endif
+
+                                        @if(session()->has('warning_gift_cart'))
+                                            <div class="alert alert-danger mt-2">
+                                                {{ session('warning_gift_cart') }}
+                                            </div>
+                                        @endif
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-12 mb-3">
+                            <div class="dt-sn dt-sn--box pt-3 pb-3 px-3 h-100">
+                                <div class="section-title text-sm-title title-wide no-after-title-wide mb-0">
+                                    <h2>
+                                        استفاده از کد تخفیف
+                                        <span class="help-sn">
+                        <span class="mdi mdi-information-outline"></span>
+                    </span>
+                                    </h2>
+                                </div>
+
+                                <p class="mb-3">
+                                    با ثبت کد تخفیف، مبلغ تخفیف از مبلغ قابل پرداخت کسر می‌شود.
+                                </p>
+
+                                <div class="form-ui">
+                                    <form wire:submit.prevent="discountCode">
+                                        <div class="row align-items-start">
+                                            <div class="col-lg-8 col-md-7 col-12 mb-2">
+                                                <input
+                                                    type="text"
+                                                    class="input-ui pr-2"
+                                                    wire:model="discount_code"
+                                                    placeholder="مثلا 837A2CS">
+                                            </div>
+
+                                            <div class="col-lg-4 col-md-5 col-12 mb-2">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    ثبت کد تخفیف
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        @if(session()->has('success_discount'))
+                                            <div class="alert alert-success mt-2">
+                                                {{ session('success_discount') }}
+                                            </div>
+                                        @endif
+
+                                        @if(session()->has('warning_discount'))
+                                            <div class="alert alert-danger mt-2">
+                                                {{ session('warning_discount') }}
+                                            </div>
+                                        @endif
+                                    </form>
                                 </div>
                             </div>
                         </div>

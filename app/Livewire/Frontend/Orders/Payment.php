@@ -19,8 +19,6 @@ class Payment extends Component
     public $carts;
     public $total_price;
     public $discount_price;
-    public $discount_code;
-    public $gift_cart_code;
 
     public function mount()
     {
@@ -41,41 +39,6 @@ class Payment extends Component
                 ->first();
             $this->total_price += ($product_price->price) * $cart->count;
             $this->discount_price += ($product_price->main_price - $product_price->price) * $cart->count;
-        }
-    }
-
-    public function discountCode()
-    {
-        $discount = Discount::query()
-            ->where('code',$this->discount_code)
-            ->where('discount','>',0)
-            ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
-            ->first();
-        if ($discount){
-            $this->total_price -= $discount->discount;
-            $this->discount_price += $discount->discount;
-            session()->flash('success_discount',"کد تخفیف ثبت شد");
-        }else{
-            session()->flash('warning_discount',"کد تخفیف اشتباه است");
-
-        }
-    }
-
-    public function giftCartCode()
-    {
-        $gift_cart = GiftCart::query()
-            ->where('code',$this->gift_cart_code)
-            ->where('user_id',auth()->user()->id)
-            ->where('gift_price','>',0)
-            ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
-            ->first();
-        if ($gift_cart){
-            $this->total_price -= $gift_cart->gift_price;
-            $this->discount_price += $gift_cart->gift_price;
-            session()->flash('success_gift_cart',"کد کارت هدیه ثبت شد");
-        }else{
-            session()->flash('warning_gift_cart',"کد کارت هدیه اشتباه است");
-
         }
     }
     public function render()

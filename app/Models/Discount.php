@@ -35,8 +35,13 @@ class Discount extends Model
             ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
             ->first();
         if ($discount) {
-            $total_price -= $discount->discount;
-            $discount_code_price = $discount->discount;
+
+            $discount_code_price = min(
+                $discount->discount,
+                $total_price
+            );
+
+            $total_price -= $discount_code_price;
         }
         return [
             'total_price' => $total_price,

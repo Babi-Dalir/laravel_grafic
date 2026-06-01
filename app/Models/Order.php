@@ -65,74 +65,58 @@ class Order extends Model
         ]);
     }
 
-    public static function successPayment($order, $order_details,$discount_code,$gift_cart_code)
+    public static function successPayment($order, $order_details, $discount_code, $gift_cart_code)
     {
+        // جلوگیری از اجرای مجدد
+        if ($order->status == OrderStatus::Payed->value) {
+            return;
+        }
+
         $order->update([
-            'status' => OrderStatus::Payed->value
+            'status' => OrderStatus::Payed->value,
+            'paid_at' => now(),
         ]);
+
         foreach ($order_details as $order_detail) {
+
             $order_detail->update([
                 'status' => OrderDetailStatus::Processing->value
             ]);
 
-            $product = Product::query()->find($order_detail->product_id);
-            $product->increment('sold', $order_detail->count);
+            $product = Product::find($order_detail->product_id);
 
-            Downloads::create([
-                'user_id' => $order->user_id,
-                'product_id' => $order_detail->product_id,
-                'order_detail_id' => $order_detail->id,
-                'token' => Str::random(80),
-                'expire_at' => now()->addDays(30), // یا null
-                'max_download' => 5,
-            ]);
-        }
-        $carts = UserCart::query()
-            ->where('user_id', $order->user_id)
-            ->where('type', CartType::Main->value)->get();
-        foreach ($carts as $cart) {
-            $cart->delete();
-        }
-        if ($discount_code){
-            $discount = Discount::query()
-                ->where('code', $discount_code)
-                ->where('discount', '>', 0)
-                ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
-                ->first();
-            if ($discount) {
-                $discount->update([
-                    'discount'=>0,
-                    'status'=>DiscountStatus::InActive->value
+            if ($product) {
+                $product->increment('sold');
+            }
+
+            $downloadExists = Downloads::query()
+                ->where('order_detail_id', $order_detail->id)
+                ->exists();
+
+            if (!$downloadExists) {
+
+                Downloads::create([
+                    'user_id' => $order->user_id,
+                    'product_id' => $order_detail->product_id,
+                    'order_detail_id' => $order_detail->id,
+                    'token' => Str::random(80),
+                    'expire_at' => now()->addDays(30),
+                    'max_download' => 5,
                 ]);
             }
         }
-        if ($gift_cart_code){
-            $gift_cart = GiftCart::query()
-                ->where('code', $gift_cart_code)
-                ->where('user_id', $order->user_id)
-                ->where('balance', '>', 0)
-                ->where('expiration_date', '>=',Carbon::now()->toDateTimeString())
-                ->first();
-            if ($gift_cart) {
 
-                $amountToDeduct = $order->gift_cart_price;
+        UserCart::query()
+            ->where('user_id', $order->user_id)
+            ->where('type', CartType::Main->value)
+            ->delete();
 
-                if ($amountToDeduct > 0) {
-                    if ($gift_cart->balance >= $amountToDeduct) {
-                        $gift_cart->decrement('balance', $amountToDeduct);
-                    } else {
-                        $gift_cart->update(['balance' => 0]);
-                    }
-                }
+        self::handleDiscount($discount_code);
 
-                // چک کردن وضعیت نهایی
-                if ($gift_cart->fresh()->balance <= 0) {
-                    $gift_cart->update([
-                        'status' => GiftCartStatus::InActive->value
-                    ]);
-                }
-            }
-        }
+        self::handleGiftCart(
+            $gift_cart_code,
+            $order
+        );
     }
 
     public static function isBuyer($product_id,$user_id)
@@ -143,5 +127,69 @@ class Order extends Model
             ->where('user_id',$user_id)
             ->where('status',OrderStatus::Payed->value)
             ->exists();
+    }
+
+    private static function handleDiscount($discount_code)
+    {
+        if (!$discount_code) {
+            return;
+        }
+
+        $discount = Discount::query()
+            ->where('code', $discount_code)
+            ->where('status', DiscountStatus::Active->value)
+            ->first();
+
+        if (!$discount) {
+            return;
+        }
+
+        $discount->update([
+            'discount' => 0,
+            'status' => DiscountStatus::InActive->value
+        ]);
+    }
+    private static function handleGiftCart($gift_cart_code, $order)
+    {
+        if (!$gift_cart_code) {
+            return;
+        }
+
+        $gift_cart = GiftCart::query()
+            ->where('code', $gift_cart_code)
+            ->where('user_id', $order->user_id)
+            ->first();
+
+        if (!$gift_cart) {
+            return;
+        }
+
+        $amountToDeduct = $order->gift_cart_price;
+
+        if ($amountToDeduct > 0) {
+
+            if ($gift_cart->balance >= $amountToDeduct) {
+
+                $gift_cart->decrement(
+                    'balance',
+                    $amountToDeduct
+                );
+
+            } else {
+
+                $gift_cart->update([
+                    'balance' => 0
+                ]);
+            }
+        }
+
+        $gift_cart = $gift_cart->fresh();
+
+        if ($gift_cart->balance <= 0) {
+
+            $gift_cart->update([
+                'status' => GiftCartStatus::InActive->value
+            ]);
+        }
     }
 }
