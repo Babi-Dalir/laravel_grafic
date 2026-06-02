@@ -21,8 +21,8 @@
             <tr>
                 <td class="text-center align-middle">{{$order_details->firstItem()+$index}}</td>
                 <td class="text-center align-middle">{{$order_detail->product->name}}</td>
-                <td class="text-center align-middle">{{number_format($order_detail->price)}}تومان </td>
-                <td class="text-center align-middle">{{$order_detail->discount}}%</td>
+                <td class="text-center align-middle">{{number_format($order_detail->price)}} تومان </td>
+                <td class="text-center align-middle">{{number_format($order_detail->discount)}} تومان</td>
                 <td class="text-center align-middle" wire:click="changeOrderDetailStatus({{$order_detail->id}})">
                     @if($order_detail->status === \App\Enums\OrderDetailStatus::Processing->value)
                         <span class="cursor-pointer badge badge-info">در حال پردازش</span>

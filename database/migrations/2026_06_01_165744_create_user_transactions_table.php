@@ -16,7 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('amount')->default(0);
+            $table->foreignId('order_id')
+                ->constrained('orders')
+                ->cascadeOnDelete()->cascadeOnUpdate();
+            $table->double('money')->default(0);
             $table->string('type')->default(\App\Enums\UserTransactionType::Deposit->value);
             $table->text('description')->nullable();
             $table->timestamps();

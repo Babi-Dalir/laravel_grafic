@@ -1,12 +1,9 @@
 <?php
 namespace App\Enums;
 
-enum BannerType: string
+enum UserTransactionType: string
 {
-    case TopBanner = 'top_banner';
-    case SideBanner = 'side_banner';
-    case MediumBanner = 'medium_banner';
-    case SmallBanner = 'small_banner';
-    case LargeBanner = 'large_banner';
+    case Deposit = 'deposit';  //واریز
 
+    case Withdraw = 'withdraw';  //برداشت
 }

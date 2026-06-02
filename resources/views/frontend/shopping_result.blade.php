@@ -45,11 +45,6 @@
                                         با موفقیت در سیستم ثبت شد.
                                     </h4>
                                 </div>
-                                <div class="checkout-alert-content">
-                                    <p class="checkout-alert-content-success">
-                                        سفارش نهایتا تا {{\Hekmatinasser\Verta\Verta::instance($order->receive_day)->formatDifference()}} روز آماده ارسال خواهد شد.
-                                    </p>
-                                </div>
                             </div>
                             <section class="checkout-details dt-sl dt-sn dt-sn--box mt-4 pt-4 pb-3 pr-3 pl-3 mb-5 px-res-1">
                                 <div class="checkout-details-title">
@@ -104,14 +99,6 @@
                                                 <div class="row">
                                                     <div class="col-md-6 col-sm-12">
                                                         <p>
-                                                            تعداد مرسوله :
-                                                            <span>
-                                                            ۱
-                                                        </span>
-                                                        </p>
-                                                    </div>
-                                                    <div class="col-md-6 col-sm-12">
-                                                        <p>
                                                             مبلغ کل:
                                                             <span>
                                                             {{number_format($order->total_price)}} تومان
@@ -139,20 +126,13 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <p>آدرس : {{$order->address->address}} </p>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </section>
                         </div>
-
                     </div>
-
                 </div>
             </main>
         @else
@@ -334,11 +314,6 @@
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <p>آدرس : {{$order->address->address}}</p>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -395,7 +370,7 @@
                                                         <p>{{$order->order_code}}</p>
                                                     </td>
                                                     <td class=" date">
-                                                        <p>{{$order->receive_day}}</p>
+                                                        <p></p>
                                                     </td>
                                                     <td class="price">
                                                         <p> {{number_format($order->total_price)}} تومان</p>
