@@ -21,7 +21,7 @@
                         <i class="mdi mdi-star"></i>
                     </div>
                     <div class="card-horizontal-product-price">
-                        <span>{{number_format($favorite->product->price)}} تومان</span>
+                        <span>{{number_format($favorite->product->main_price)}} تومان</span>
                     </div>
                     <div class="card-horizontal-product-buttons">
                         <a href="{{route('single.product',$favorite->product->slug)}}" class="btn">مشاهده محصول</a>

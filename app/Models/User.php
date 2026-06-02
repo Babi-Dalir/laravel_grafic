@@ -35,6 +35,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserProfile::class);
     }
+    //ساخت پروفایل برای کاربر بعد از ثبت نام
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            $user->profile()->create();
+        });
+    }
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
@@ -47,10 +54,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Product::class);
     }
-//    public function productPrices()
-//    {
-//        return $this->hasMany(ProductPrice::class);
-//    }
     public function userTransactions()
     {
         return $this->hasMany(UserTransaction::class);

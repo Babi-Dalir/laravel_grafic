@@ -22,11 +22,8 @@
                                         <tr>
                                             <th>ردیف</th>
                                             <th>نام محصول</th>
-                                            <th>رنگ محصول</th>
-                                            <th>گارانتی محصول</th>
                                             <th>مبلغ پرداخت شده</th>
                                             <th>تخفیف</th>
-                                            <th>تعداد</th>
                                             <th>وضعیت</th>
                                         </tr>
                                         </thead>
@@ -35,11 +32,8 @@
                                             <tr>
                                                 <td>{{$order_details->firstItem()+$index}}</td>
                                                 <td>{{$order_detail->product->name}}</td>
-                                                <td>{{$order_detail->color->name}}</td>
-                                                <td>{{$order_detail->guaranty->name}}</td>
                                                 <td>{{number_format($order_detail->price)}} تومان</td>
-                                                <td>{{$order_detail->discount}}%</td>
-                                                <td>{{$order_detail->count}}</td>
+                                                <td>{{number_format($order_detail->discount)}} تومان</td>
                                                 <td>
                                                     @if($order_detail->status === \App\Enums\OrderDetailStatus::Processing->value)
                                                         <span class="cursor-pointer badge badge-info">در حال پردازش</span>

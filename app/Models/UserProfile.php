@@ -8,16 +8,13 @@ class UserProfile extends Model
 {
     protected $fillable = [
         'user_id',
-        'bank_account_number',
-        'bank_card_number',
-        'bank_shaba_number',
-        'national_code',
+        'image',
         'phone',
         'telegram',
+        'eta',
         'instagram',
-        'whatsapp',
-        'newsletter',
-
+        'website',
+        'bio',
     ];
 
     public function user()

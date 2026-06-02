@@ -35,7 +35,7 @@
         </div>
         <div class="dt-sl dt-sn mb-3 text-center">
             <a href="#">
-                <img src="./assets/img/banner/sidebar-banner-3.jpg" class="img-fluid" alt="">
+                <img src="{{url('images/users/small/'.auth()->user()->image)}}" class="img-fluid" alt="">
             </a>
         </div>
         <div class="dt-sl dt-sn border mb-3">

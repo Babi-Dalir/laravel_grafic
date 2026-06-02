@@ -48,26 +48,25 @@
                                     <i class="mdi mdi-account-circle-outline"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-sm dropdown-menu-left">
-{{--                                    @if (auth()->user()->is_admin)--}}
+                                    @if(auth()->user()->hasAnyRole(['مدیر']))
                                         <a class="dropdown-item" href="{{ route('panel') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل مدیرت
                                         </a>
                                         <a class="dropdown-item" href="{{ route('profile') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل کاربری
                                         </a>
-{{--                                    @elseif(auth()->user()->seller?->status == \App\Enums\CompanyStatus::Active->value)--}}
+                                    @elseif(auth()->user()->hasAnyRole(['فروشنده']))
                                         <a class="dropdown-item" href="{{ route('panel') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل فروشنده
                                         </a>
                                         <a class="dropdown-item" href="{{ route('profile') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل کاربری
                                         </a>
-{{--                                    @else--}}
+                                    @else
                                         <a class="dropdown-item" href="{{ route('profile') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل کاربری
                                         </a>
-{{--                                    @endif--}}
-
+                                    @endif
                                     <div class="dropdown-divider" role="presentation"></div>
                                     <a class="dropdown-item" href="{{ route('logout') }}">
                                         <i class="mdi mdi-logout-variant"></i>خروج

@@ -49,31 +49,74 @@
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-row-title">
-                                                    <h3>کد ملی</h3>
+                                                    <h3>تلفن تماس</h3>
                                                 </div>
                                                 <div class="form-row">
-                                                    <input type="text" class="input-ui pl-2 text-left dir-ltr" name="national_code"
-                                                           value="{{$user->userProfile ? $user->userProfile->national_code : ""}}">
+                                                    <input type="text"
+                                                           class="input-ui pl-2 text-left dir-ltr"
+                                                           name="phone"
+                                                           placeholder="09123456789"
+                                                           value="{{ $user->userProfile?->phone }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <div class="form-row-title">
+                                                    <h3>تلگرام</h3>
+                                                </div>
+                                                <div class="form-row">
+                                                    <input type="text"
+                                                           class="input-ui pl-2 text-left dir-ltr"
+                                                           name="telegram"
+                                                           value="{{ $user->userProfile?->telegram }}">
                                                 </div>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-row-title">
-                                                    <h3>شماره موبایل</h3>
+                                                    <h3>ایتا</h3>
                                                 </div>
                                                 <div class="form-row">
-                                                    <input type="text" class="input-ui pl-2 text-left dir-ltr" name="mobile"
-                                                           placeholder="شماره موبایل خود را وارد نمایید"
-                                                           value="{{$user->mobile}}">
+                                                    <input type="text"
+                                                           class="input-ui pl-2 text-left dir-ltr"
+                                                           name="eta"
+                                                           value="{{ $user->userProfile?->eta }}">
                                                 </div>
                                             </div>
+
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-row-title">
-                                                    <h3>آدرس ایمیل</h3>
+                                                    <h3>اینستاگرام</h3>
                                                 </div>
                                                 <div class="form-row">
-                                                    <input type="email" class="input-ui pl-2 text-left dir-ltr" name="email"
-                                                           placeholder="آدرس ایمیل خود را وارد نمایید"
-                                                           value="{{$user->email}}">
+                                                    <input type="text"
+                                                           class="input-ui pl-2 text-left dir-ltr"
+                                                           name="instagram"
+                                                           value="{{ $user->userProfile?->instagram }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mb-3">
+                                                <div class="form-row-title">
+                                                    <h3>وب سایت</h3>
+                                                </div>
+                                                <div class="form-row">
+                                                    <input type="text"
+                                                           class="input-ui pl-2 text-left dir-ltr"
+                                                           name="website"
+                                                           placeholder="https://www.example.com"
+                                                           value="{{ $user->userProfile?->website }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <div class="form-row-title">
+                                                    <h3>درباره من</h3>
+                                                </div>
+                                                <div class="form-row">
+                                            <textarea
+                                                class="input-ui pt-2"
+                                                name="bio"
+                                                rows="5"
+                                                placeholder="خودتان، تخصص‌ها و سبک طراحی‌تان را معرفی کنید...">{{ $user->userProfile?->bio }}</textarea>
                                                 </div>
                                             </div>
                                             <div class="col-md-6 mb-3">
@@ -90,29 +133,6 @@
                                                                    for="inputGroupFile04">انتخاب
                                                                 عکس</label>
                                                         </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-3">
-                                                <div class="pt-2 pb-2 mb-3 dt-sl">
-                                                    <div class="form-row-title mb-2">
-                                                        <h3>شماره کارت</h3>
-                                                    </div>
-                                                    <div class="form-row">
-                                                        <input type="text" class="input-ui pl-2 text-left dir-ltr" name="bank_card_number"
-                                                               value="{{$user->userProfile ? $user->userProfile->bank_card_number : ""}}">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12 mb-3">
-                                                <div class="form-row mt-2">
-                                                    <div class="custom-control custom-checkbox float-right mt-2">
-                                                        <input type="checkbox" class="custom-control-input" name="newsletter" @if($user->userProfile && $user->userProfile->newsletter) checked @endif
-                                                               id="customCheck4">
-                                                        <label class="custom-control-label text-justify"
-                                                               for="customCheck4">
-                                                            اشتراک در خبرنامه
-                                                        </label>
                                                     </div>
                                                 </div>
                                             </div>
