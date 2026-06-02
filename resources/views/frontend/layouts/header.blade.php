@@ -149,7 +149,7 @@
                     </li>
                 </ul>
                 <div class="nav mr-auto">
-{{--                    <livewire:frontend.carts.header-carts />--}}
+                    <livewire:frontend.carts.header-carts />
                 </div>
                 <button class="btn-menu">
                     <div class="align align__justify">
