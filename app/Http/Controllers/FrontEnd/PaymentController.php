@@ -5,6 +5,7 @@ namespace App\Http\Controllers\FrontEnd;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Discount;
+use App\Models\Downloads;
 use App\Models\GiftCart;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -162,7 +163,14 @@ class PaymentController extends Controller
                 $result = 'failed';
             }
 
-            return view('frontend.shopping_result', compact('order', 'result'));
+            $downloads = Downloads::query()
+                ->where('user_id', $order->user_id)
+                ->whereHas('orderDetail', function ($q) use ($order) {
+                    $q->where('order_id', $order->id);
+                })
+                ->with('product')
+                ->get();
+            return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
         }
 
         /*
@@ -252,7 +260,13 @@ class PaymentController extends Controller
 
             $result = 'failed';
         }
-
-        return view('frontend.shopping_result', compact('order', 'result'));
+        $downloads = Downloads::query()
+            ->where('user_id', $order->user_id)
+            ->whereHas('orderDetail', function ($q) use ($order) {
+                $q->where('order_id', $order->id);
+            })
+            ->with('product')
+            ->get();
+        return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
     }
 }

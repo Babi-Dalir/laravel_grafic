@@ -130,6 +130,34 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="dt-sn dt-sn--box mt-4 p-4">
+                                    <div class="section-title text-sm-title title-wide no-after-title-wide mb-3">
+                                        <h2>فایل‌های قابل دانلود</h2>
+                                    </div>
+                                    @forelse($downloads as $download)
+                                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                            <div>
+                                                <strong>{{ $download->product->name }}</strong>
+
+                                                <div class="text-muted small mt-1">
+                                                    تعداد دانلود:
+                                                    {{ $download->download_count }}
+                                                    از
+                                                    {{ $download->max_download }}
+                                                </div>
+                                            </div>
+
+                                            <a href="{{ route('download.file', $download->token) }}"
+                                               class="btn btn-success">
+                                                دانلود فایل
+                                            </a>
+                                        </div>
+                                    @empty
+                                        <div class="alert alert-warning">
+                                            فایل دانلودی برای این سفارش پیدا نشد.
+                                        </div>
+                                    @endforelse
+                                </div>
                             </section>
                         </div>
                     </div>
@@ -146,7 +174,7 @@
                                 </div>
                                 <div class="checkout-alert-title">
                                     <h4> سفارش <span
-                                            class="checkout-alert-highlighted checkout-alert-highlighted-success">{{$order->order_code}}</span>
+                                            class="checkout-alert-highlighted checkout-alert-highlighted-success">{{$order?->order_code}}</span>
                                         ثبت شد اما پرداخت ناموفق بود.
                                     </h4>
                                 </div>
@@ -230,7 +258,7 @@
                                     <h4 class="checkout-details-title px-res-1">
                                         کد سفارش:
                                         <span>
-                                       {{$order->order_code}}
+                                       {{$order?->order_code}}
                                     </span>
                                     </h4>
                                     <div class="row">
@@ -263,7 +291,7 @@
                                                         <p>
                                                             نام تحویل گیرنده:
                                                             <span>
-                                                            {{$order->user->name}}
+                                                            {{$order?->user->name}}
                                                         </span>
                                                         </p>
                                                     </div>
@@ -271,7 +299,7 @@
                                                         <p>
                                                             شماره تماس :
                                                             <span>
-                                                            {{$order->user->mobile}}
+                                                            {{$order?->user->mobile}}
                                                         </span>
                                                         </p>
                                                     </div>
@@ -289,7 +317,7 @@
                                                         <p>
                                                             مبلغ کل:
                                                             <span>
-                                                            {{number_format($order->total_price)}} تومان
+                                                            {{number_format($order?->total_price)}} تومان
                                                         </span>
                                                         </p>
                                                     </div>
@@ -367,13 +395,13 @@
                                                         <p>دیجی‌پی</p>
                                                     </td>
                                                     <td class="id">
-                                                        <p>{{$order->order_code}}</p>
+                                                        <p>{{$order?->order_code}}</p>
                                                     </td>
                                                     <td class=" date">
                                                         <p></p>
                                                     </td>
                                                     <td class="price">
-                                                        <p> {{number_format($order->total_price)}} تومان</p>
+                                                        <p> {{number_format($order?->total_price)}} تومان</p>
                                                     </td>
                                                     <td class="status">
                                                         <p>پرداخت ناموفق</p>

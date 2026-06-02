@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Enums\DownloadStatus;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager as IM;

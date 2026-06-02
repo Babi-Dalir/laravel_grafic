@@ -32,10 +32,11 @@ class DownloadController extends Controller
 
         $product = $download->product;
 
-        return Storage::disk('private')
-            ->download(
-                $product->main_file,
-                $product->slug . '.' . $product->file_extension
-            );
+        $path = 'products/' . $product->slug . '/' . $product->main_file;
+
+        return Storage::disk('digital_files')->download(
+            $path,
+            $product->slug . '.' . $product->file_extension
+        );
     }
 }

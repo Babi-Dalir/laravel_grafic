@@ -95,14 +95,7 @@ class Order extends Model
 
             if (!$downloadExists) {
 
-                Downloads::create([
-                    'user_id' => $order->user_id,
-                    'product_id' => $order_detail->product_id,
-                    'order_detail_id' => $order_detail->id,
-                    'token' => Str::random(80),
-                    'expire_at' => now()->addDays(30),
-                    'max_download' => 5,
-                ]);
+                Downloads::createDownload($order_detail);
             }
         }
 

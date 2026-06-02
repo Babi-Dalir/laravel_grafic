@@ -60,12 +60,12 @@ class Downloads extends Model
         return true;
     }
 
-    public static function createDownload(OrderDetail $orderDetail): self
+    public static function createDownload(OrderDetail $order_detail): self
     {
         return self::create([
-            'user_id' => $orderDetail->order->user_id,
-            'product_id' => $orderDetail->product_id,
-            'order_detail_id' => $orderDetail->id,
+            'user_id' => $order_detail->order->user_id,
+            'product_id' => $order_detail->product_id,
+            'order_detail_id' => $order_detail->id,
 
             'token' => str()->random(100),
 
