@@ -45,9 +45,16 @@ class PaymentController extends Controller
         }
 
         $total_price = 0;
+        $product_discount_price = 0;
 
         foreach ($carts as $cart) {
-            $total_price += $cart->product->final_price;
+
+            $product = $cart->product;
+
+            $total_price += $product->final_price;
+
+            $product_discount_price +=
+                ($product->main_price - $product->final_price);
         }
 
         $discount_code_price = 0;
@@ -69,6 +76,7 @@ class PaymentController extends Controller
             $total_price = $result['total_price'];
             $discount_code_price = $result['discount_code_price'];
         }
+        $total_discount_price = $product_discount_price + $discount_code_price;
 
         /*
         |--------------------------------------------------------------------------
@@ -95,7 +103,7 @@ class PaymentController extends Controller
                 $user,
                 $total_price,
                 $shop_data,
-                $discount_code_price,
+                $total_discount_price,
                 $gift_cart_code_price
             );
 
