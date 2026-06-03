@@ -34,10 +34,10 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-//    public function commission()
-//    {
-//        return $this->hasOne(Commission::class);
-//    }
+    public function commission()
+    {
+        return $this->hasOne(Commission::class);
+    }
 
     public function campaignTargets()
     {
@@ -100,6 +100,13 @@ class Category extends Model
             }
         }
         return $array;
+    }
+    public static function getLeafCategories()
+    {
+        return self::query()
+            ->doesntHave('childCategory')
+            ->pluck('name','id')
+            ->toArray();
     }
 
     public static function getProductCategoryCount($id)

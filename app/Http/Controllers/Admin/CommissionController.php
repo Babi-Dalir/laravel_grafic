@@ -26,7 +26,7 @@ class CommissionController extends Controller
     public function create()
     {
         $title = "ایجاد کمیسیون";
-        $categories = Category::getLayer3Categories();
+        $categories = Category::getLeafCategories();
         return view('admin.commissions.create',compact('title','categories'));
     }
 
@@ -54,7 +54,7 @@ class CommissionController extends Controller
     public function edit(string $id)
     {
         $title ="ویرایش کمیسیون";
-        $categories = Category::getLayer3Categories();
+        $categories = Category::getLeafCategories();
         $commission = Commission::query()->findOrfail($id);
         return view('admin.commissions.edit',compact('title','categories','commission'));
     }

@@ -39,6 +39,7 @@ class OrderDetail extends Model
         $price = $product->final_price;
         $discount = $product->main_price - $product->final_price;
 
+        // محصول متعلق به مدیر سایت
         if ($product->user->hasRole('مدیر')) {
 
             $siteShare = $price;
@@ -46,13 +47,13 @@ class OrderDetail extends Model
 
         } else {
 
-            $commission_percent = 20;
+            $commissionPercent = $product->category?->commission?->commission_percent ?? 20;
 
-            $siteShare = ($price * $commission_percent) / 100;
+            $siteShare = ($price * $commissionPercent) / 100;
             $sellerShare = $price - $siteShare;
         }
 
-        return OrderDetail::query()->create([
+        return self::create([
             'seller_id' => $product->user_id,
             'order_id' => $order->id,
             'product_id' => $cart->product_id,
