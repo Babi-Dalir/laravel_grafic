@@ -18,7 +18,7 @@ class Orders extends Component
     public function changeOrderStatus($id)
     {
         $order = Order::query()->find($id);
-        if ($order->status == OrderStatus::Processing->value){
+        if ($order->status == OrderStatus::WaitPayment->value){
             $order->update([
                 'status'=>OrderStatus::Payed->value
             ]);
@@ -29,27 +29,12 @@ class Orders extends Component
         }
         elseif ($order->status == OrderStatus::Failed->value){
             $order->update([
-                'status'=>OrderStatus::SendOrder->value
+                'status'=>OrderStatus::Cancelled->value
             ]);
         }
-        elseif ($order->status == OrderStatus::SendOrder->value){
-            $order->update([
-                'status'=>OrderStatus::ReceivedOrder->value
-            ]);
-        }
-        elseif ($order->status == OrderStatus::ReceivedOrder->value){
-            $order->update([
-                'status'=>OrderStatus::NotReceivedOrder->value
-            ]);
-        }
-        elseif ($order->status == OrderStatus::NotReceivedOrder->value){
+        elseif ($order->status == OrderStatus::Cancelled->value){
             $order->update([
                 'status'=>OrderStatus::WaitPayment->value
-            ]);
-        }
-        elseif ($order->status == OrderStatus::WaitPayment->value){
-            $order->update([
-                'status'=>OrderStatus::Processing->value
             ]);
         }
     }

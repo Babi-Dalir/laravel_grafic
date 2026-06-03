@@ -18,23 +18,23 @@ class OrderDetails extends Component
     public function changeOrderDetailStatus($id)
     {
         $order_detail = OrderDetail::query()->find($id);
-        if ($order_detail->status == OrderDetailStatus::Processing->value){
+        if ($order_detail->status == OrderDetailStatus::Waiting->value){
+            $order_detail->update([
+                'status'=>OrderDetailStatus::Paid->value
+            ]);
+        }elseif ($order_detail->status == OrderDetailStatus::Paid->value){
+            $order_detail->update([
+                'status'=>OrderDetailStatus::Downloaded->value
+            ]);
+        }
+        elseif ($order_detail->status == OrderDetailStatus::Downloaded->value){
+            $order_detail->update([
+                'status'=>OrderDetailStatus::Refunded->value
+            ]);
+        }
+        elseif ($order_detail->status == OrderDetailStatus::Refunded->value){
             $order_detail->update([
                 'status'=>OrderDetailStatus::Waiting->value
-            ]);
-        }elseif ($order_detail->status == OrderDetailStatus::Waiting->value){
-            $order_detail->update([
-                'status'=>OrderDetailStatus::Received->value
-            ]);
-        }
-        elseif ($order_detail->status == OrderDetailStatus::Received->value){
-            $order_detail->update([
-                'status'=>OrderDetailStatus::Rejected->value
-            ]);
-        }
-        elseif ($order_detail->status == OrderDetailStatus::Rejected->value){
-            $order_detail->update([
-                'status'=>OrderDetailStatus::Processing->value
             ]);
         }
     }

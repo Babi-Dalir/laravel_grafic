@@ -1,10 +1,10 @@
 <?php
 namespace App\Enums;
 
-enum OrderDetailStatus: string
+enum OrderDetailStatus:string
 {
-    case Waiting = 'waiting';
-    case Processing = 'processing';
-    case Received = 'received';
-    case Rejected = 'rejected';
+    case Waiting = 'waiting';         // در انتظار پرداخت
+    case Paid = 'paid';               // پرداخت شده
+    case Downloaded = 'downloaded';   // دانلود شده
+    case Refunded = 'refunded';       // مرجوع شده
 }

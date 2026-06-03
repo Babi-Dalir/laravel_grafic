@@ -29,16 +29,28 @@ class OrderDetail extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function download()
+    {
+        return $this->hasOne(Downloads::class);
+    }
 
     public static function createOrderDetail($order, $cart, $product)
     {
-        $commission_percent = 20;
-
         $price = $product->final_price;
         $discount = $product->main_price - $product->final_price;
 
-        $siteShare = ($price * $commission_percent) / 100;
-        $sellerShare = $price - $siteShare;
+        if ($product->user->hasRole('مدیر')) {
+
+            $siteShare = $price;
+            $sellerShare = 0;
+
+        } else {
+
+            $commission_percent = 20;
+
+            $siteShare = ($price * $commission_percent) / 100;
+            $sellerShare = $price - $siteShare;
+        }
 
         return OrderDetail::query()->create([
             'seller_id' => $product->user_id,

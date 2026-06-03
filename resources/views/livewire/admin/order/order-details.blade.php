@@ -13,6 +13,7 @@
             <th class="text-center align-middle text-primary">قیمت</th>
             <th class="text-center align-middle text-primary">تخفیف</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
+            <th class="text-center align-middle text-primary">تعداد دانلود</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
         </tr>
         </thead>
@@ -24,16 +25,20 @@
                 <td class="text-center align-middle">{{number_format($order_detail->price)}} تومان </td>
                 <td class="text-center align-middle">{{number_format($order_detail->discount)}} تومان</td>
                 <td class="text-center align-middle" wire:click="changeOrderDetailStatus({{$order_detail->id}})">
-                    @if($order_detail->status === \App\Enums\OrderDetailStatus::Processing->value)
-                        <span class="cursor-pointer badge badge-info">در حال پردازش</span>
-                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Received->value)
-                        <span class="cursor-pointer badge badge-success">دریافت شده</span>
-                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Rejected->value)
-                        <span class="cursor-pointer badge badge-danger">پس داده شده</span>
+                    @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid->value)
+                        <span class="cursor-pointer badge badge-success">پرداخت شده</span>
+                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded->value)
+                        <span class="cursor-pointer badge badge-info">کاملا دانلود شده</span>
+                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded->value)
+                        <span class="cursor-pointer badge badge-danger">مرجوع شده</span>
                     @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Waiting->value)
                         <span class="cursor-pointer badge badge-warning">در حال انتظار</span>
                     @endif
-
+                </td>
+                <td class="text-center align-middle">
+                    {{ $order_detail->download?->download_count ?? 0 }}
+                    /
+                    {{ $order_detail->download?->max_download ?? 0 }}
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($order_detail->created_at)->format('%d%B، %Y')}}</td>
             </tr>

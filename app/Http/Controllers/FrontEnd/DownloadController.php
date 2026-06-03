@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\FrontEnd;
 
+use App\Enums\DownloadStatus;
+use App\Enums\OrderDetailStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Downloads;
 use Illuminate\Http\Request;
@@ -23,12 +25,7 @@ class DownloadController extends Controller
             abort(403);
         }
 
-        $download->increment('download_count');
-
-        $download->update([
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        $download->registerDownload(request());
 
         $product = $download->product;
 

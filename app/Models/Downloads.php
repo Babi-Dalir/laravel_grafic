@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DownloadStatus;
+use App\Enums\OrderDetailStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Downloads extends Model
@@ -58,6 +59,26 @@ class Downloads extends Model
         }
 
         return true;
+    }
+    public function registerDownload($request): void
+    {
+        $this->increment('download_count');
+
+        $this->update([
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        if ($this->download_count >= $this->max_download) {
+
+            $this->update([
+                'status' => DownloadStatus::Expired->value,
+            ]);
+
+            $this->orderDetail()->update([
+                'status' => OrderDetailStatus::Downloaded->value,
+            ]);
+        }
     }
 
     public static function createDownload(OrderDetail $order_detail): self

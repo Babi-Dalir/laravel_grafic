@@ -37,20 +37,15 @@
                                                 <td>{{\Hekmatinasser\Verta\Verta::instance($order->created_at)->format('%d%B، %Y')}}</td>
                                                 <td>{{number_format($order->total_price)}} تومان</td>
                                                 <td>{{number_format($order->discount_price)}} تومان</td>
-                                                <td> @if($order->status === \App\Enums\OrderStatus::WaitPayment->value)
+                                                <td>
+                                                    @if($order->status === \App\Enums\OrderStatus::WaitPayment->value)
                                                         <span class="cursor-pointer badge badge-warning">در انتظار پرداخت</span>
                                                     @elseif($order->status === \App\Enums\OrderStatus::Payed->value)
                                                         <span class="cursor-pointer badge badge-success">پرداخت شده</span>
                                                     @elseif($order->status === \App\Enums\OrderStatus::Failed->value)
-                                                        <span class="cursor-pointer badge badge-danger">انصراف ار پرداخت</span>
-                                                    @elseif($order->status === \App\Enums\OrderStatus::ReceivedOrder->value)
-                                                        <span class="cursor-pointer badge badge-success">سفارش دریافت شد</span>
-                                                    @elseif($order->status === \App\Enums\OrderStatus::Processing->value)
-                                                        <span class="cursor-pointer badge badge-info">در حال پردازش</span>
-                                                    @elseif($order->status === \App\Enums\OrderStatus::SendOrder->value)
-                                                        <span class="cursor-pointer badge badge-success">ارسال شده</span>
-                                                    @elseif($order->status === \App\Enums\OrderStatus::NotReceivedOrder->value)
-                                                        <span class="cursor-pointer badge badge-danger">سفارش دریافت نشد</span>
+                                                        <span class="cursor-pointer badge badge-danger">پرداخت ناموفق</span>
+                                                    @elseif($order->status === \App\Enums\OrderStatus::Cancelled->value)
+                                                        <span class="cursor-pointer badge badge-secondary">انصراف از پرداخت</span>
                                                     @endif
                                                 </td>
                                                 <td class="details-link">

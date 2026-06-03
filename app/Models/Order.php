@@ -80,7 +80,7 @@ class Order extends Model
         foreach ($order_details as $order_detail) {
 
             $order_detail->update([
-                'status' => OrderDetailStatus::Processing->value
+                'status' => OrderDetailStatus::Paid->value
             ]);
 
             $product = Product::find($order_detail->product_id);
