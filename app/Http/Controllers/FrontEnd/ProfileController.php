@@ -6,6 +6,7 @@ use App\Helpers\FileManager;
 use App\Helpers\ImageManager;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\Downloads;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\Request;
@@ -49,16 +50,12 @@ class ProfileController extends Controller
 
     public function profileOrders()
     {
-        $user = auth()->user();
-        $orders = Order::query()->where('user_id', $user->id)->paginate(10);
-        return view('frontend.profile.profile_orders', compact('orders'));
+        return view('frontend.profile.profile_orders');
     }
 
     public function profileOrdersDetails($order_id)
     {
-        $order = Order::query()->find($order_id);
-        $order_details = OrderDetail::query()->where('order_id', $order_id)->paginate(10);
-        return view('frontend.profile.profile_order_details', compact('order', 'order_details'));
+        return view('frontend.profile.profile_order_details',compact('order_id'));
     }
 
     public function profileFavorites()
@@ -66,11 +63,15 @@ class ProfileController extends Controller
         return view('frontend.profile.profile_favorites');
     }
 
-    public function profileComments()
+//    public function profileComments()
+//    {
+//        $user = auth()->user();
+//        $comments = Comment::query()->where('user_id', $user->id)->get();
+//        return view('frontend.profile.profile_comments', compact('comments'));
+//    }
+    public function profileDownloads()
     {
-        $user = auth()->user();
-        $comments = Comment::query()->where('user_id', $user->id)->get();
-        return view('frontend.profile.profile_comments', compact('comments'));
+        return view('frontend.profile.profile_downloads');
     }
 
     public function profileSeller()

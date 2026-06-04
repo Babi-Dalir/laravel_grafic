@@ -15,49 +15,7 @@
                                 class="section-title text-sm-title title-wide mb-1 no-after-title-wide dt-sl mb-2 px-res-1">
                                 <h2>آخرین سفارش‌ها</h2>
                             </div>
-                            <div class="dt-sl">
-                                <div class="table-responsive">
-                                    <table class="table table-order">
-                                        <thead>
-                                        <tr>
-                                            <th>ردیف</th>
-                                            <th>نام محصول</th>
-                                            <th>مبلغ پرداخت شده</th>
-                                            <th>تخفیف</th>
-                                            <th>وضعیت</th>
-                                            <th>تعداد دانلود</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach($order_details as $index=>$order_detail)
-                                            <tr>
-                                                <td>{{$order_details->firstItem()+$index}}</td>
-                                                <td>{{$order_detail->product->name}}</td>
-                                                <td>{{number_format($order_detail->price)}} تومان</td>
-                                                <td>{{number_format($order_detail->discount)}} تومان</td>
-                                                <td>
-                                                    @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid->value)
-                                                        <span class="cursor-pointer badge badge-success">پرداخت شده</span>
-                                                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded->value)
-                                                        <span class="cursor-pointer badge badge-info">کاملا دانلود شده</span>
-                                                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded->value)
-                                                        <span class="cursor-pointer badge badge-danger">مرجوع شده</span>
-                                                    @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Waiting->value)
-                                                        <span class="cursor-pointer badge badge-warning">در حال انتظار</span>
-                                                    @endif
-
-                                                </td>
-                                                <td class="text-center align-middle">
-                                                    {{ $order_detail->download?->download_count ?? 0 }}
-                                                    /
-                                                    {{ $order_detail->download?->max_download ?? 0 }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            <livewire:frontend.profiles.order-detail-list :order_id="$order_id"/>
                         </div>
                     </div>
                 </div>

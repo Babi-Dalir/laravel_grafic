@@ -64,9 +64,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{route('profile.comments')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.comments') class="active" @endif>
+                            <a href="{{route('profile.downloads')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.downloads') class="active" @endif>
                                 <i class="mdi mdi-glasses"></i>
-                                نقد و نظرات
+                                فایل های دانلود شده
                             </a>
                         </li>
                         <li>
