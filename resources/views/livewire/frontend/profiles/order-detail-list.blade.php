@@ -9,6 +9,7 @@
                 <th>تخفیف</th>
                 <th>وضعیت</th>
                 <th>تعداد دانلود</th>
+                <th>دانلود</th>
             </tr>
             </thead>
             <tbody>
@@ -34,6 +35,24 @@
                         {{ $order_detail->download?->download_count ?? 0 }}
                         /
                         {{ $order_detail->download?->max_download ?? 0 }}
+                    </td>
+                    <td>
+
+                        @if($order_detail->download->download_count < $order_detail->download->max_download)
+
+                            <a href="{{ route('download.file', $order_detail->download->token) }}"
+                               class="btn btn-success">
+                                دانلود فایل
+                            </a>
+
+                        @else
+
+                            <button class="btn btn-secondary btn-sm" disabled>
+                                سقف دانلود تکمیل شده
+                            </button>
+
+                        @endif
+
                     </td>
                 </tr>
                 @empty

@@ -17,7 +17,9 @@
                 @endif
             @endforeach
 
+            @if($paginator->hasMorePages())
                 <a href="#" class="next" wire:click="nextPage"><i class="mdi mdi-chevron-double-left"></i></a>
+            @endif
         </div>
     </nav>
 @endif
