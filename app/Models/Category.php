@@ -146,6 +146,18 @@ class Category extends Model
             }
         });
     }
+    public static function getCategoryBySlug($main_slug, $sub_slug, $child_slug)
+    {
+        if ($main_slug) {
+            return self::where('slug', $main_slug)->first();
+        }
+
+        if ($child_slug) {
+            return self::where('slug', $child_slug)->first();
+        }
+
+        return self::where('slug', $sub_slug)->first();
+    }
 
     public static function getProductByCategory($main_slug, $sub_slug, $child_slug, $column, $orderBy, $page)
     {
@@ -158,61 +170,54 @@ class Category extends Model
         }
     }
 
-    public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null, $brands = null)
+    public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null)
     {
-        $categoryList = [];
-        $category = Category::query()->where('slug', $slug)->first();
-        if (sizeof($category->childCategory) > 0) {
-            foreach ($category->childCategory as $category1) {
-                if (sizeof($category1->childCategory) > 0) {
-                    foreach ($category1->childCategory()->get() as $category2) {
-                        array_push($categoryList, $category2->id);
-                    }
-                }
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        $categoryIds = [$category->id];
+
+        foreach ($category->childCategory as $child) {
+
+            $categoryIds[] = $child->id;
+
+            foreach ($child->childCategory as $grandChild) {
+                $categoryIds[] = $grandChild->id;
             }
         }
 
-        if ($page) {
-            return Product::query()->whereIn('category_id', $categoryList)
-                ->when($brands, function ($q) use ($brands) {
-                    $q->whereIn('brand_id', $brands);
-                })
-                ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        } else {
-            return Product::query()->whereIn('category_id', $categoryList)
-                ->orderBy($column, $orderBy)->get();
-        }
+        $query = Product::query()
+            ->whereIn('category_id', $categoryIds)
+            ->orderBy($column, $orderBy);
+
+        return $page
+            ? $query->paginate(20, ['*'], 'page', $page)
+            : $query->get();
     }
 
-    public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null, $brands = null)
+    public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null)
     {
-        $categoryList = [];
-        $category = Category::query()->where('slug', $slug)->first();
-        if (sizeof($category->childCategory) > 0) {
-            foreach ($category->childCategory as $category1) {
-                array_push($categoryList, $category1->id);
-            }
+        $category = Category::where('slug', $slug)->firstOrFail();
+
+        $categoryIds = [$category->id];
+
+        foreach ($category->childCategory as $child) {
+            $categoryIds[] = $child->id;
         }
-        if ($page) {
-            return Product::query()->whereIn('category_id', $categoryList)
-                ->when($brands, function ($q) use ($brands) {
-                    $q->whereIn('brand_id', $brands);
-                })
-                ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        } else {
-            return Product::query()->whereIn('category_id', $categoryList)
-                ->orderBy($column, $orderBy)->get();
-        }
+
+        $query = Product::query()
+            ->whereIn('category_id', $categoryIds)
+            ->orderBy($column, $orderBy);
+
+        return $page
+            ? $query->paginate(20, ['*'], 'page', $page)
+            : $query->get();
     }
 
-    public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null, $brands = null)
+    public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null)
     {
         $category = Category::query()->where('slug', $slug)->first();
         if ($page) {
             return Product::query()->where('category_id', $category->id)
-                ->when($brands, function ($q) use ($brands) {
-                    $q->whereIn('brand_id', $brands);
-                })
                 ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
         } else {
             return Product::query()->where('category_id', $category->id)
