@@ -158,7 +158,7 @@
 
                                                         <h6 class="mb-2">
                                                             <i class="ti-alert mr-1"></i>
-                                                            درخواست شما به دلیل {{ $sellerRequest->admin_note }} رد شده است
+                                                            درخواست شما در تاریخ {{\Hekmatinasser\Verta\Verta::instance($sellerRequest->reviewed_at)->format('%d %B، %Y')}} روئیت شد و به دلیل {{ $sellerRequest->admin_note }} رد شده است
                                                         </h6>
 
                                                     </div>

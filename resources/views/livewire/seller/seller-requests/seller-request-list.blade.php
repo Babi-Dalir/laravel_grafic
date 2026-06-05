@@ -20,10 +20,11 @@
             <th class="text-center align-middle text-primary">برند</th>
             <th class="text-center align-middle text-primary">موبایل</th>
             <th class="text-center align-middle text-primary">نمونه کار</th>
-            <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">رزومه</th>
-            <th class="text-center align-middle text-primary">جزئیات</th>
-            <th class="text-center align-middle text-primary">توضیحات رد درخواست</th>
+            <th class="text-center align-middle text-primary">تلگرام</th>
+            <th class="text-center align-middle text-primary">اینستاگرام</th>
+            <th class="text-center align-middle text-primary">وضعیت</th>
+            <th class="text-center align-middle text-primary">عملیات</th>
             <th class="text-center align-middle text-primary">تاریخ ثبت</th>
         </tr>
         </thead>
@@ -69,7 +70,27 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    <div wire:click="changeStatus({{$request->id}})" class="status-interactive-wrapper">
+                    <a class="btn btn-outline-info" href="{{route('download.resume',$request->id)}}">
+                        دانلود رزومه
+                    </a>
+                </td>
+                <td class="text-center align-middle">
+                    @if($request->user->userProfile->telegram)
+                        {{$request->user->userProfile->telegram}}
+                    @else
+                        ---
+                    @endif
+                </td>
+                <td class="text-center align-middle">
+                    @if($request->user->userProfile->instagram)
+                        {{$request->user->userProfile->instagram}}
+                    @else
+                        ---
+                    @endif
+                </td>
+
+                <td class="text-center align-middle">
+                    <div class="status-interactive-wrapper">
                         @if($request->status === \App\Enums\SellerRequestStatus::Pending->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>
@@ -92,29 +113,30 @@
                     @endif
 
                 </td>
-                <td class="text-center align-middle">
-                    <a class="btn btn-outline-info" href="{{route('download.resume',$request->id)}}">
-                        دانلود رزومه
-                    </a>
-                </td>
-                <td class="text-center align-middle">
 
-                    <a href="{{route('seller.requests.detail',$request->id)}}"
-                       class="btn btn-outline-primary btn-sm">
-                        جزئیات
-                    </a>
+                <td class="text-center">
 
-                </td>
-                <td class="text-center align-middle">
-                    <button class="btn btn-danger" wire:click="$set('sellerRequestId', {{ $request->id }})"
+                    @if($request->status === \App\Enums\SellerRequestStatus::Pending->value)
+
+                        <button
+                            wire:click="approveRequest({{ $request->id }})"
+                            class="btn btn-success btn-sm">
+
+                            تایید
+                        </button>
+
+                        <button
+                            class="btn btn-danger btn-sm"
+                            wire:click="$set('sellerRequestId', {{ $request->id }})"
                             data-toggle="modal"
                             data-target="#rejectModal">
 
-                        رد درخواست
+                            رد
+                        </button>
 
-                    </button>
+                    @endif
+
                 </td>
-
                 <td class="text-center align-middle">
                     {{\Hekmatinasser\Verta\Verta::instance($request->created_at)->format('%d %B، %Y')}}
                 </td>
@@ -170,7 +192,7 @@
 
         </tbody>
     </table>
-{{-- Modal --}}
+    {{-- Modal --}}
     <div
         wire:ignore.self
         class="modal fade"

@@ -3,13 +3,9 @@ use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
 //Seller Request Route
-Route::get('seller_requests', [SellerController::class, 'sellerRequestsList'])->name('seller.requests.list');
+Route::get('seller_requests', [SellerController::class, 'sellerRequestsList'])
+    ->name('seller.requests.list');
 
-Route::get('seller_requests/{sellerRequest}', [SellerController::class, 'detailSellerRequest'])->name('seller.requests.detail');
-
-Route::post('seller_requests/{sellerRequest}/approve', [SellerController::class, 'approveSellerRequest'])->name('seller.requests.approve');
-
-Route::post('seller_requests/{sellerRequest}/reject', [SellerController::class, 'rejectSellerRequest'])->name('seller.requests.reject');
 
 //Download Resume Route
 Route::get('download_resume/{request}', [SellerController::class, 'downloadResume'])

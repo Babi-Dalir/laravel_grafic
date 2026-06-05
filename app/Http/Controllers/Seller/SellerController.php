@@ -26,39 +26,6 @@ class SellerController extends Controller
 
         return view('seller.seller_requests.list',compact('title','requests'));
     }
-    public function detailSellerRequest(SellerRequest $sellerRequest)
-    {
-        return view('admin.seller-requests.show',compact('sellerRequest')
-        );
-    }
-
-    public function approveSellerRequest(SellerRequest $sellerRequest)
-    {
-        $sellerRequest->update([
-            'status' => SellerRequestStatus::Approved->value,
-            'reviewed_at' => now(),
-        ]);
-
-        $sellerRequest->user->assignRole('فروشنده');
-
-        return back()->with(
-            'message',
-            'فروشنده با موفقیت تایید شد'
-        );
-    }
-    public function rejectSellerRequest(Request $request,SellerRequest $sellerRequest)
-    {
-        $sellerRequest->update([
-            'status' => SellerRequestStatus::Rejected->value,
-            'admin_note' => $request->admin_note,
-            'reviewed_at' => now(),
-        ]);
-
-        return back()->with(
-            'message',
-            'درخواست رد شد'
-        );
-    }
 
     public function downloadResume(SellerRequest $request)
     {

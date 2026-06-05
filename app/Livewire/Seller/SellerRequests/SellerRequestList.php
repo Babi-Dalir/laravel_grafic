@@ -16,6 +16,24 @@ class SellerRequestList extends Component
     public $sellerRequestId;
     public $admin_note;
 
+    public function approveRequest($id)
+    {
+        $sellerRequest = SellerRequest::with('user')->findOrFail($id);
+
+        $sellerRequest->update([
+            'status' => SellerRequestStatus::Approved->value,
+            'reviewed_at' => now(),
+            'admin_note' => null,
+        ]);
+
+        $sellerRequest->user->assignRole('فروشنده');
+
+        session()->flash(
+            'message',
+            'درخواست فروشندگی با موفقیت تایید شد.'
+        );
+    }
+
     public function rejectRequest()
     {
         $request = SellerRequest::findOrFail($this->sellerRequestId);
@@ -23,6 +41,7 @@ class SellerRequestList extends Component
         $request->update([
             'status' => SellerRequestStatus::Rejected->value,
             'admin_note' => $this->admin_note,
+            'reviewed_at' => now(),
         ]);
 
         $this->reset([
@@ -37,23 +56,23 @@ class SellerRequestList extends Component
             'درخواست با موفقیت رد شد.'
         );
     }
-    public function changeStatus($id)
-    {
-        $seller_request = SellerRequest::query()->find($id);
-        if ($seller_request->status == SellerRequestStatus::Pending->value){
-            $seller_request->update([
-                'status'=>SellerRequestStatus::Approved->value
-            ]);
-        }elseif ($seller_request->status == SellerRequestStatus::Approved->value){
-            $seller_request->update([
-                'status'=>SellerRequestStatus::Rejected->value
-            ]);
-        }elseif ($seller_request->status == SellerRequestStatus::Rejected->value){
-            $seller_request->update([
-                'status'=>SellerRequestStatus::Pending->value
-            ]);
-        }
-    }
+//    public function changeStatus($id)
+//    {
+//        $seller_request = SellerRequest::query()->find($id);
+//        if ($seller_request->status == SellerRequestStatus::Pending->value){
+//            $seller_request->update([
+//                'status'=>SellerRequestStatus::Approved->value
+//            ]);
+//        }elseif ($seller_request->status == SellerRequestStatus::Approved->value){
+//            $seller_request->update([
+//                'status'=>SellerRequestStatus::Rejected->value
+//            ]);
+//        }elseif ($seller_request->status == SellerRequestStatus::Rejected->value){
+//            $seller_request->update([
+//                'status'=>SellerRequestStatus::Pending->value
+//            ]);
+//        }
+//    }
 
     public function searchData()
     {
