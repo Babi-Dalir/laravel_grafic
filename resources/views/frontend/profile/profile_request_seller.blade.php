@@ -44,7 +44,7 @@
                                                     <input type="text"
                                                            class="input-ui pr-2"
                                                            name="brand_name"
-                                                           value="{{ old('brand_name') }}"
+                                                           value="{{ $sellerRequest->brand_name }}"
                                                            placeholder="مثال: Graphic Master">
                                                 </div>
                                             </div>
@@ -58,7 +58,7 @@
                                                     <input type="url"
                                                            class="input-ui pr-2"
                                                            name="portfolio"
-                                                           value="{{ old('portfolio') }}"
+                                                           value="{{ $sellerRequest->portfolio }}"
                                                            placeholder="https://behance.net/...">
                                                 </div>
                                             </div>
@@ -109,7 +109,7 @@
                                 name="reason"
                                 rows="6"
                                 class="input-ui pr-2"
-                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ old('reason') }}</textarea>
+                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ $sellerRequest->reason }}</textarea>
                                                 </div>
 
                                             </div>
@@ -146,24 +146,51 @@
                                                 </div>
 
                                             </div>
-
-                                            {{-- توضیح مدیر در صورت رد درخواست --}}
-                                            @if($sellerRequest && $sellerRequest->admin_note)
+                                            @if(
+                                                $sellerRequest &&
+                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value &&
+                                                $sellerRequest->admin_note
+                                            )
 
                                                 <div class="col-md-12">
 
-                                                    <div class="alert alert-warning">
+                                                    <div class="alert alert-danger shadow-sm">
 
-                                                        <strong>پیام مدیریت:</strong>
-
-                                                        <br>
-
-                                                        {{ $sellerRequest->admin_note }}
+                                                        <h6 class="mb-2">
+                                                            <i class="ti-alert mr-1"></i>
+                                                            درخواست شما به دلیل {{ $sellerRequest->admin_note }} رد شده است
+                                                        </h6>
 
                                                     </div>
 
                                                 </div>
+                                            @elseif( $sellerRequest &&
+                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
+                                                <div class="col-md-12">
 
+                                                    <div class="alert alert-success shadow-sm">
+
+                                                        <h6 class="mb-2">
+                                                            <i class="ti-alert mr-1"></i>
+                                                            درخواست شما تایید شده است
+                                                        </h6>
+                                                    </div>
+
+                                                </div>
+                                            @elseif($sellerRequest &&
+                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value)
+                                                <div class="col-md-12">
+
+                                                    <div class="alert alert-warning shadow-sm">
+
+                                                        <h6 class="mb-2">
+                                                            <i class="ti-alert mr-1"></i>
+                                                            درخواست شما درحال بررسی است
+                                                        </h6>
+
+                                                    </div>
+
+                                                </div>
                                             @endif
 
                                         </div>

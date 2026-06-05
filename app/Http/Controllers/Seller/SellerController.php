@@ -19,11 +19,12 @@ class SellerController extends Controller
 
     public function sellerRequestsList()
     {
+        $title = "لیست درخواست ها";
         $requests = SellerRequest::with('user')
             ->latest()
             ->paginate(20);
 
-        return view('seller.seller_requests.list',compact('requests'));
+        return view('seller.seller_requests.list',compact('title','requests'));
     }
     public function detailSellerRequest(SellerRequest $sellerRequest)
     {

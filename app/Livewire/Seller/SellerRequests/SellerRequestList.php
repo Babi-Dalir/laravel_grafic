@@ -13,6 +13,30 @@ class SellerRequestList extends Component
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
     public $search;
+    public $sellerRequestId;
+    public $admin_note;
+
+    public function rejectRequest()
+    {
+        $request = SellerRequest::findOrFail($this->sellerRequestId);
+
+        $request->update([
+            'status' => SellerRequestStatus::Rejected->value,
+            'admin_note' => $this->admin_note,
+        ]);
+
+        $this->reset([
+            'sellerRequestId',
+            'admin_note'
+        ]);
+
+        $this->dispatch('closeRejectModal');
+
+        session()->flash(
+            'message',
+            'درخواست با موفقیت رد شد.'
+        );
+    }
     public function changeStatus($id)
     {
         $seller_request = SellerRequest::query()->find($id);

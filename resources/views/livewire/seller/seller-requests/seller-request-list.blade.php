@@ -23,6 +23,7 @@
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">رزومه</th>
             <th class="text-center align-middle text-primary">جزئیات</th>
+            <th class="text-center align-middle text-primary">توضیحات رد درخواست</th>
             <th class="text-center align-middle text-primary">تاریخ ثبت</th>
         </tr>
         </thead>
@@ -69,21 +70,21 @@
 
                 <td class="text-center align-middle">
                     <div wire:click="changeStatus({{$request->id}})" class="status-interactive-wrapper">
-                    @if($request->status === \App\Enums\SellerRequestStatus::Pending->value)
+                        @if($request->status === \App\Enums\SellerRequestStatus::Pending->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>
                                 <i class="ti-time mr-1"></i>
                                 <span>در حال بررسی</span>
                             </div>
 
-                    @elseif($request->status === \App\Enums\SellerRequestStatus::Approved->value)
+                        @elseif($request->status === \App\Enums\SellerRequestStatus::Approved->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
                                 <span>تایید شده</span>
                             </div>
 
-                    @elseif($request->status === \App\Enums\SellerRequestStatus::Rejected->value)
+                        @elseif($request->status === \App\Enums\SellerRequestStatus::Rejected->value)
                             <div class="modern-status-btn inactive">
                                 <i class="ti-close mr-1"></i>
                                 <span>رد شده</span>
@@ -104,6 +105,15 @@
                     </a>
 
                 </td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-danger" wire:click="$set('sellerRequestId', {{ $request->id }})"
+                            data-toggle="modal"
+                            data-target="#rejectModal">
+
+                        رد درخواست
+
+                    </button>
+                </td>
 
                 <td class="text-center align-middle">
                     {{\Hekmatinasser\Verta\Verta::instance($request->created_at)->format('%d %B، %Y')}}
@@ -114,7 +124,7 @@
         @empty
 
             <tr>
-                <td colspan="8"
+                <td colspan="10"
                     class="text-center py-5"
                     style="background-color: #f9f9f966;">
 
@@ -160,6 +170,62 @@
 
         </tbody>
     </table>
+{{-- Modal --}}
+    <div
+        wire:ignore.self
+        class="modal fade"
+        id="rejectModal"
+        tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        دلیل رد درخواست
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="close"
+                        data-dismiss="modal">
+
+                        <span>&times;</span>
+
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                <textarea
+                    wire:model="admin_note"
+                    rows="5"
+                    class="form-control"
+                    placeholder="دلیل رد درخواست را وارد کنید...">
+                </textarea>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        wire:click="rejectRequest"
+                        class="btn btn-danger">
+
+                        ثبت و رد درخواست
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <div style="margin: 40px !important;"
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
@@ -168,3 +234,16 @@
 
     </div>
 </div>
+<script>
+    document.addEventListener('livewire:init', () => {
+
+        Livewire.on('closeRejectModal', () => {
+
+            console.log('EVENT FIRED');
+
+            $('#rejectModal').modal('hide');
+
+        });
+
+    });
+</script>
