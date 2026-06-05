@@ -44,6 +44,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile_order_details/{order_id}', [ProfileController::class, 'profileOrdersDetails'])->name('profile.order.details');
     Route::get('/profile_favorites', [ProfileController::class, 'profileFavorites'])->name('profile.favorites');
     Route::get('/profile_downloads', [ProfileController::class, 'profileDownloads'])->name('profile.downloads');
-    Route::get('/profile_seller', [ProfileController::class, 'profileSeller'])->name('profile.seller');
-    Route::post('/profile_store_seller', [ProfileController::class, 'profileStoreSeller'])->name('profile.store.seller');
+    Route::get('/profile_seller_request', [ProfileController::class, 'profileRequestSeller'])->name('profile.request.seller');
+    Route::post('/profile_store_seller_request', [ProfileController::class, 'profileStoreRequestSeller'])->name('profile.store.request.seller');
 });

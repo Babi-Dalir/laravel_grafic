@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Seller;
 
+use App\Enums\SellerRequestStatus;
 use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
@@ -9,12 +10,55 @@ use App\Models\Category;
 use App\Models\Color;
 use App\Models\Guaranty;
 use App\Models\Seller;
+use App\Models\SellerRequest;
 use App\Models\Tag;
 use App\Models\UserTransaction;
 use Illuminate\Http\Request;
 
 class SellerController extends Controller
 {
+
+    public function sellerRequestsList()
+    {
+        $requests = SellerRequest::with('user')
+            ->latest()
+            ->paginate(20);
+
+        return view('admin.seller-requests.index',compact('requests'));
+    }
+    public function detailSellerRequest(SellerRequest $sellerRequest)
+    {
+        return view('admin.seller-requests.show',compact('sellerRequest')
+        );
+    }
+
+    public function approveSellerRequest(SellerRequest $sellerRequest)
+    {
+        $sellerRequest->update([
+            'status' => SellerRequestStatus::Approved->value,
+            'reviewed_at' => now(),
+        ]);
+
+        $sellerRequest->user->assignRole('فروشنده');
+
+        return back()->with(
+            'message',
+            'فروشنده با موفقیت تایید شد'
+        );
+    }
+    public function rejectSellerRequest(Request $request,SellerRequest $sellerRequest)
+    {
+        $sellerRequest->update([
+            'status' => SellerRequestStatus::Rejected->value,
+            'admin_note' => $request->admin_note,
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with(
+            'message',
+            'درخواست رد شد'
+        );
+    }
     public function sellerProductList()
     {
         $title = "لیست محصولات فروشنده";

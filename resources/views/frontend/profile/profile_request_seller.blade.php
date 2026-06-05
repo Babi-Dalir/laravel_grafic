@@ -20,78 +20,175 @@
                         </div>
                         <div class="col-12">
                             <div class="px-3 px-res-0">
-                                <div
-                                    class="section-title text-sm-title title-wide mb-1 no-after-title-wide dt-sl mb-2 px-res-1">
-                                    <h2>ایجاد اطلاعات تجاری</h2>
+
+                                <div class="section-title text-sm-title title-wide mb-1 no-after-title-wide dt-sl mb-2 px-res-1">
+                                    <h2>درخواست همکاری به عنوان طراح</h2>
                                 </div>
+
                                 <div class="form-ui additional-info dt-sl dt-sn pt-4">
-                                    <form action="{{route('profile.store.seller')}}" method="POST" enctype="multipart/form-data">
+
+                                    <form action="{{ route('profile.store.request.seller') }}"
+                                          method="POST"
+                                          enctype="multipart/form-data">
+
                                         @csrf
+
                                         <div class="row">
+
+                                            {{-- نام برند --}}
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-row-title">
-                                                    <h3>نام شرکت</h3>
+                                                    <h3>نام برند یا نام هنری</h3>
                                                 </div>
                                                 <div class="form-row">
-                                                    <input type="text" class="input-ui pr-2" name="company_name"
-                                                           placeholder="نام شرکت خود را وارد نمایید" value="{{$user->seller->company_name ?? ""}}">
+                                                    <input type="text"
+                                                           class="input-ui pr-2"
+                                                           name="brand_name"
+                                                           value="{{ old('brand_name') }}"
+                                                           placeholder="مثال: Graphic Master">
                                                 </div>
                                             </div>
+
+                                            {{-- لینک نمونه کار --}}
                                             <div class="col-md-6 mb-3">
                                                 <div class="form-row-title">
-                                                    <h3> شماره اقتصادی شرکت</h3>
+                                                    <h3>لینک نمونه کار</h3>
                                                 </div>
                                                 <div class="form-row">
-                                                    <input type="text" class="input-ui pr-2" name="company_economy_code"
-                                                           placeholder=" شماره اقتصادی شرکت خود را وارد نمایید"
-                                                           value="{{$user->seller->company_economy_code ?? ""}}">
+                                                    <input type="url"
+                                                           class="input-ui pr-2"
+                                                           name="portfolio"
+                                                           value="{{ old('portfolio') }}"
+                                                           placeholder="https://behance.net/...">
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-3">
-                                                <div class="form-row-title">
-                                                    <h3>
-                                                        وضعیت :
-                                                        @if($user->seller)
-                                                            @if($user->seller->status == \App\Enums\CompanyStatus::Request->value)
-                                                                <label class="badge badge-info">درخواست اولیه</label>
-                                                            @elseif($user->seller->status == \App\Enums\CompanyStatus::Active->value)
-                                                                <label class="badge badge-success">پذیرفته شده</label>
-                                                            @else
-                                                                <label class="badge badge-danger">رد شده</label>
+
+                                            {{-- وضعیت درخواست --}}
+                                            @if($sellerRequest)
+                                                <div class="col-md-12 mb-3">
+
+                                                    <div class="form-row-title">
+                                                        <h3>
+                                                            وضعیت درخواست :
+
+                                                            @if($sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value)
+
+                                                                <span class="badge badge-warning">
+                                            در انتظار بررسی
+                                        </span>
+
+                                                            @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
+
+                                                                <span class="badge badge-success">
+                                            تایید شده
+                                        </span>
+
+                                                            @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value)
+
+                                                                <span class="badge badge-danger">
+                                            رد شده
+                                        </span>
+
                                                             @endif
-                                                        @endif
-                                                    </h3>
+
+                                                        </h3>
+                                                    </div>
+
+                                                </div>
+                                            @endif
+
+                                            {{-- توضیحات --}}
+                                            <div class="col-md-12 mb-3">
+
+                                                <div class="form-row-title">
+                                                    <h3>معرفی خود و سوابق طراحی</h3>
+                                                </div>
+
+                                                <div class="form-row">
+                            <textarea
+                                name="reason"
+                                rows="6"
+                                class="input-ui pr-2"
+                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ old('reason') }}</textarea>
                                                 </div>
 
                                             </div>
-                                            <div class="col-md-6 mb-3">
+
+                                            {{-- فایل رزومه --}}
+                                            <div class="col-md-12 mb-3">
+
                                                 <div class="form-row-title">
-                                                    <h3>آپلود قرارداد</h3>
+                                                    <h3>رزومه (اختیاری)</h3>
                                                 </div>
+
                                                 <div class="form-row mt-2">
+
                                                     <div class="input-group">
+
                                                         <div class="custom-file">
-                                                            <input type="file" class="custom-file-input" name="contract"
-                                                                   id="inputGroupFile04"
-                                                                   aria-describedby="inputGroupFileAddon04">
+
+                                                            <input type="file"
+                                                                   class="custom-file-input"
+                                                                   name="resume"
+                                                                   id="resumeFile">
+
                                                             <label class="custom-file-label"
-                                                                   for="inputGroupFile04">بارگزاری فایل
-                                                                </label>
+                                                                   for="resumeFile">
+
+                                                                انتخاب فایل
+
+                                                            </label>
+
                                                         </div>
+
                                                     </div>
+
                                                 </div>
+
                                             </div>
+
+                                            {{-- توضیح مدیر در صورت رد درخواست --}}
+                                            @if($sellerRequest && $sellerRequest->admin_note)
+
+                                                <div class="col-md-12">
+
+                                                    <div class="alert alert-warning">
+
+                                                        <strong>پیام مدیریت:</strong>
+
+                                                        <br>
+
+                                                        {{ $sellerRequest->admin_note }}
+
+                                                    </div>
+
+                                                </div>
+
+                                            @endif
+
                                         </div>
+
                                         <div class="dt-sl">
+
                                             <div class="form-row mt-3 justify-content-end">
-                                                <button type="submit" class="btn-primary-cm btn-with-icon ml-2">
-                                                    <i class="mdi mdi-account-circle-outline"></i>
-                                                    ثبت اطلاعات تجاری
+
+                                                <button type="submit"
+                                                        class="btn-primary-cm btn-with-icon ml-2">
+
+                                                    <i class="mdi mdi-account-check-outline"></i>
+
+                                                    ارسال درخواست همکاری
+
                                                 </button>
+
                                             </div>
+
                                         </div>
+
                                     </form>
+
                                 </div>
+
                             </div>
                         </div>
                     </div>

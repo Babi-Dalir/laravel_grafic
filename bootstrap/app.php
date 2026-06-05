@@ -11,7 +11,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
         then: function (){
             \Illuminate\Support\Facades\Route::prefix('admin')->middleware(['web'])->group(base_path('routes/admin.php'));
-            \Illuminate\Support\Facades\Route::prefix('seller')->middleware(['web','auth','admin'])->group(base_path('routes/seller.php'));
+            \Illuminate\Support\Facades\Route::prefix('seller')->middleware(['web','auth'])->group(base_path('routes/seller.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {

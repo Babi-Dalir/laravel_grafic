@@ -70,7 +70,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{route('profile.seller')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.seller') class="active" @endif>
+                            <a href="{{route('profile.request.seller')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.request.seller') class="active" @endif>
                                 <i class="mdi mdi-sign-direction"></i>
                                  درخواست فروشندگی
                             </a>

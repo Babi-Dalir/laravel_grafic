@@ -8,15 +8,16 @@ use Intervention\Image\ImageManager as IM;
 
 class FileManager
 {
-    public static function saveContract($file, $company)
+    public static function saveResume($file,$user_id)
     {
-        if ($file) {
-            $name = $file->hashName();
-            Storage::disk('files')->put('/contract/' . $company, $file);
-            return $name;
-        } else {
-            return "";
+        if (!$file) {
+            return null;
         }
+
+        return $file->store(
+            "resume//{$user_id}",
+            'files'
+        );
     }
 
     public static function saveDigitalFile($file, $product_id)

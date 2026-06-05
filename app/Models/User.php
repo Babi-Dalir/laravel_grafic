@@ -46,6 +46,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Favorite::class);
     }
+    public function sellerRequest()
+    {
+        return $this->hasOne(SellerRequest::class);
+    }
 //    public function seller()
 //    {
 //        return $this->hasOne(Seller::class);

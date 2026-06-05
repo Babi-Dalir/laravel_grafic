@@ -10,6 +10,7 @@ use App\Models\Downloads;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\SellerRequest;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
@@ -80,30 +81,32 @@ class ProfileController extends Controller
         return view('frontend.profile.profile_downloads');
     }
 
-    public function profileSeller()
+    public function profileRequestSeller()
     {
         $user = auth()->user();
-        return view('frontend.profile.profile_seller', compact('user'));
+        $sellerRequest = SellerRequest::query()
+            ->where('user_id', $user->id)
+            ->first();
+
+        return view('frontend.profile.profile_request_seller', compact('user','sellerRequest'));
     }
 
-    public function profileStoreSeller(Request $request)
+    public function profileStoreRequestSeller(Request $request)
     {
         $user = auth()->user();
-        $contract = FileManager::saveContract($request->contract, $request->input('company_name'));
-        if ($user->seller) {
-            $user->seller()->update([
-                'company_name' => $request->input('company_name'),
-                'company_economy_code' => $request->input('company_economy_code'),
-                'contract' => $contract
-            ]);
-            return redirect()->back()->with('message', "اطلاعات شرکت شما با موفقیت ویرایش شد");
-        } else {
-            $user->seller()->create([
-                'company_name' => $request->input('company_name'),
-                'company_economy_code' => $request->input('company_economy_code'),
-                'contract' => $contract
-            ]);
-            return redirect()->back()->with('message', "اطلاعات شرکت شما با موفقیت ثبت شد");
+
+        if ($user->sellerRequest) {
+            return back()->with(
+                'error',
+                'شما قبلا درخواست ثبت کرده اید'
+            );
         }
+
+        SellerRequest::createSellerRequest($request);
+
+        return back()->with(
+            'message',
+            'درخواست شما با موفقیت ثبت شد'
+        );
     }
 }
