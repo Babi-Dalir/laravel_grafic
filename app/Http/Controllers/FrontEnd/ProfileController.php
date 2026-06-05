@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\Downloads;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
@@ -16,7 +17,12 @@ class ProfileController extends Controller
     public function profile()
     {
         $user = auth()->user();
-        return view('frontend.profile.profile', compact('user'));
+        // پیشنهاد لحظه ای
+
+        $instant_offers = Product::smartOffer()
+            ->limit(9)
+            ->get();
+        return view('frontend.profile.profile', compact('user','instant_offers'));
     }
 
     public function profileUpdate(Request $request)
