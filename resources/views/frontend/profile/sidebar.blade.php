@@ -72,7 +72,7 @@
                         <li>
                             <a href="{{route('profile.request.seller')}}" @if(\Illuminate\Support\Facades\Route::current()->getName() == 'profile.request.seller') class="active" @endif>
                                 <i class="mdi mdi-sign-direction"></i>
-                                 درخواست فروشندگی
+                                 درخواست همکاری
                             </a>
                         </li>
                     </ul>

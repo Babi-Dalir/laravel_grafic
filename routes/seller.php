@@ -11,6 +11,9 @@ Route::post('seller_requests/{sellerRequest}/approve', [SellerController::class,
 
 Route::post('seller_requests/{sellerRequest}/reject', [SellerController::class, 'rejectSellerRequest'])->name('seller.requests.reject');
 
+//Download Resume Route
+Route::get('download_resume/{request}', [SellerController::class, 'downloadResume'])
+    ->name('download.resume');
 //Seller Product Route
 Route::get('seller_product_list',[SellerController::class,'sellerProductList'])->name('seller.product.list');
 

@@ -63,6 +63,12 @@
                 </ul>
             </li>
             <li>
+                <a href="#">درخواست همکاری</a>
+                <ul>
+                    <li><a href="{{route('seller.requests.list')}}">لیست درخواست ها</a></li>
+                </ul>
+            </li>
+            <li>
                 <a href="#">فروشندگان</a>
                 <ul>
                     <li><a href="{{route('seller.list')}}">لیست فروشندگان</a></li>

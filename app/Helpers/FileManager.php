@@ -15,7 +15,7 @@ class FileManager
         }
 
         return $file->store(
-            "resume//{$user_id}",
+            "resume/{$user_id}",
             'files'
         );
     }

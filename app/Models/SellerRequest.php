@@ -41,7 +41,6 @@ class SellerRequest extends Model
             'portfolio' => $request->portfolio,
             'resume' => $resume,
             'reason' => $request->reason,
-            'status' => SellerRequestStatus::Pending->value,
         ]);
     }
 }

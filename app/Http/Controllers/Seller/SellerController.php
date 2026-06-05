@@ -7,13 +7,12 @@ use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Color;
-use App\Models\Guaranty;
 use App\Models\Seller;
 use App\Models\SellerRequest;
 use App\Models\Tag;
 use App\Models\UserTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SellerController extends Controller
 {
@@ -24,7 +23,7 @@ class SellerController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('admin.seller-requests.index',compact('requests'));
+        return view('seller.seller_requests.list',compact('requests'));
     }
     public function detailSellerRequest(SellerRequest $sellerRequest)
     {
@@ -58,6 +57,12 @@ class SellerController extends Controller
             'message',
             'درخواست رد شد'
         );
+    }
+
+    public function downloadResume(SellerRequest $request)
+    {
+        $path = Storage::disk('files')->path($request->resume);
+        return response()->download($path);
     }
     public function sellerProductList()
     {
