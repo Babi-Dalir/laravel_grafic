@@ -90,7 +90,7 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    <div class="status-interactive-wrapper">
+                    <div class="status-interactive-wrapper" wire:click="changeStatus({{$request->id}})">
                         @if($request->status === \App\Enums\SellerRequestStatus::Pending->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>

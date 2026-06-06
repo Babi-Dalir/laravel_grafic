@@ -56,23 +56,23 @@ class SellerRequestList extends Component
             'درخواست با موفقیت رد شد.'
         );
     }
-//    public function changeStatus($id)
-//    {
-//        $seller_request = SellerRequest::query()->find($id);
-//        if ($seller_request->status == SellerRequestStatus::Pending->value){
-//            $seller_request->update([
-//                'status'=>SellerRequestStatus::Approved->value
-//            ]);
-//        }elseif ($seller_request->status == SellerRequestStatus::Approved->value){
-//            $seller_request->update([
-//                'status'=>SellerRequestStatus::Rejected->value
-//            ]);
-//        }elseif ($seller_request->status == SellerRequestStatus::Rejected->value){
-//            $seller_request->update([
-//                'status'=>SellerRequestStatus::Pending->value
-//            ]);
-//        }
-//    }
+    public function changeStatus($id)
+    {
+        $seller_request = SellerRequest::query()->find($id);
+        if ($seller_request->status == SellerRequestStatus::Pending->value){
+            $seller_request->update([
+                'status'=>SellerRequestStatus::Approved->value
+            ]);
+        }elseif ($seller_request->status == SellerRequestStatus::Approved->value){
+            $seller_request->update([
+                'status'=>SellerRequestStatus::Rejected->value
+            ]);
+        }elseif ($seller_request->status == SellerRequestStatus::Rejected->value){
+            $seller_request->update([
+                'status'=>SellerRequestStatus::Pending->value
+            ]);
+        }
+    }
 
     public function searchData()
     {
