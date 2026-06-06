@@ -105,6 +105,10 @@ class Product extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function downloads()
+    {
+        return $this->hasMany(Downloads::class);
+    }
 
     public static function createProduct($request)
     {

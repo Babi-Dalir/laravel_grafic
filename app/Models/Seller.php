@@ -25,18 +25,7 @@ class Seller extends Model
     {
         DB::beginTransaction();
         try {
-            $product = Product::query()->create([
-                'user_id' => auth()->user()->id,
-                'name' => $request->input('name'),
-                'e_name' => $request->input('e_name'),
-                'slug' => str()->slug($request->e_name),
-                'description' => $request->input('description'),
-                'category_id' => $request->input('category_id'),
-                'brand_id' => $request->input('brand_id'),
-                'image' => ImageManager::saveImage('products', $request->image),
-            ]);
-            $product->tags()->attach($request->tags);
-            ProductPrice::createProductPrice($request,$product->id);
+            $product = Product::createProduct();
 
             DB::commit();
 

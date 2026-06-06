@@ -168,19 +168,62 @@
 {{--        @endhasanyrole--}}
 {{--        @hasanyrole('فروشنده|مدیر کل')--}}
         <ul id="seller">
+
             <li>
-                <a href="#">محصولات</a>
+                <a href="#">محصولات من</a>
                 <ul>
-                    <li><a href="{{route('products.index')}}">لیست همه محصولات</a></li>
-                    <li><a href="{{route('seller.product.list')}}">لیست محصولات من</a></li>
+                    <li>
+                        <a href="{{route('seller.product.list')}}">
+                            لیست طرح‌ها
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{route('create.seller.product')}}">
+                            افزودن طرح جدید
+                        </a>
+                    </li>
                 </ul>
             </li>
+
             <li>
-                <a href="#">تراکنش ها</a>
+                <a href="#">فروش و درآمد</a>
                 <ul>
-                    <li><a href="{{route('seller.transaction.list')}}">لیست تراکنش ها</a></li>
+
+{{--                    <li>--}}
+{{--                        <a href="{{route('seller.orders')}}">--}}
+{{--                            فایل‌های فروخته شده--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+
+                    <li>
+                        <a href="{{route('seller.transaction.list')}}">
+                            تراکنش‌ها
+                        </a>
+                    </li>
+
+{{--                    <li>--}}
+{{--                        <a href="{{route('seller.wallet')}}">--}}
+{{--                            کیف پول--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
+
                 </ul>
             </li>
+
+            <li>
+                <a href="#">حساب کاربری</a>
+                <ul>
+
+                    <li>
+                        <a href="{{route('profile')}}">
+                            پروفایل
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+
         </ul>
 {{--        @endhasanyrole--}}
     </div>

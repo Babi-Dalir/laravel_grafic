@@ -6,7 +6,6 @@
                    wire:model.live.debounce.500ms="search" placeholder="تایپ کنید...">
             <div wire:loading class="spinner-border spinner-border-sm text-primary m-r-10"></div>
         </div>
-        {{--        @hasallroles('مدیرکل')--}}
         <div class="col-sm-2">
             <a href="{{route('products.trashed')}}" class="btn btn-outline-warning">
                 <i class="ti-trash">لیست محصولات حذف شده</i>
@@ -17,14 +16,6 @@
                 <i class="ti-plus">ایجاد محصول</i>
             </a>
         </div>
-        {{--        @endhasanyrole--}}
-        @hasallroles('فروشنده')
-        <div class="col-sm-2">
-            <a href="{{route('create.seller.product')}}" class="btn btn-outline-secondary">
-                <i class="ti-plus">ایجاد محصول توسط فروشنده</i>
-            </a>
-        </div>
-        @endhasanyrole
     </div>
     <table class="table table-striped table-hover">
         <thead class="thead-light">
@@ -32,13 +23,10 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">عکس</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
-            {{--            <th class="text-center align-middle text-primary">نام شرکت</th>--}}
             <th class="text-center align-middle text-primary">دسته بندی</th>
             <th class="text-center align-middle text-primary">ویژگی های محصول</th>
             <th class="text-center align-middle text-primary">گالری</th>
-            {{--            @if(auth()->user()->is_admin)--}}
             <th class="text-center align-middle text-primary">وضعیت</th>
-            {{--            @endif--}}
             <th class="text-center align-middle text-primary">ویرایش</th>
             <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
@@ -49,12 +37,14 @@
             <tr>
                 <td class="text-center align-middle">{{$products->firstItem()+$index}}</td>
                 <td class="text-center align-middle">
-                    <figure class="avatar avatar">
-                        <img src="{{url('images/products/small/'.$product->image)}}" class="rounded-circle" alt="image">
-                    </figure>
+
+                    <img
+                        src="{{ url('images/products/small/'.$product->image) }}"
+                        width="60"
+                        class="rounded">
+
                 </td>
                 <td class="text-center align-middle">{{$product->name}}</td>
-                {{--                <td class="text-center align-middle">{{$product->user->seller?->company_name}}</td>--}}
                 <td class="text-center align-middle">{{$product->category->name}}</td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-secondary" href="{{route('create.product.properties',$product)}}">
@@ -66,7 +56,6 @@
                         گالری
                     </a>
                 </td>
-                {{--                @if(auth()->user()->is_admin)--}}
                 <td class="text-center align-middle">
                     <div wire:click="changeStatus({{$product->id}})" class="status-interactive-wrapper">
 
@@ -106,7 +95,6 @@
                     </div>
                 </td>
 
-                {{--                @endif--}}
                 <td class="text-center align-middle">
                     @if(auth()->user()->id == $product->user->id)
                         <a class="btn btn-outline-info" href="{{route('products.edit',$product->id)}}">

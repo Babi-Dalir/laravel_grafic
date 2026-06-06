@@ -1,108 +1,224 @@
-<div class="table overflow-auto" tabindex="8">
+<div class="table overflow-auto">
+
     <div class="form-group row">
-        <label class="col-sm-2 col-form-label">عنوان جستجو</label>
+
+        <label class="col-sm-2 col-form-label">
+            جستجو
+        </label>
+
         <div class="col-sm-10">
-            <input type="text" @keyup.enter="$wire.searchData" class="form-control text-left" dir="rtl" wire:model="search">
+
+            <input
+                type="text"
+                class="form-control"
+                wire:model.live.debounce.500ms="search"
+                placeholder="نام محصول را وارد کنید">
+
         </div>
+
     </div>
+
     <table class="table table-striped table-hover">
-        <thead class="thead-light">
+
+        <thead>
+
         <tr>
-            <th class="text-center align-middle text-primary">ردیف</th>
-            <th class="text-center align-middle text-primary">عکس</th>
-            <th class="text-center align-middle text-primary">قیمت اصلی</th>
-            <th class="text-center align-middle text-primary">درصد تخفیف</th>
-            <th class="text-center align-middle text-primary">قیمت تخفیف خورده</th>
-            <th class="text-center align-middle text-primary">گارانتی</th>
-            <th class="text-center align-middle text-primary">تعداد</th>
-            <th class="text-center align-middle text-primary">نهایت فروش</th>
-            <th class="text-center align-middle text-primary">رنگ ها</th>
-            <th class="text-center align-middle text-primary">فروش ویژه</th>
-            <th class="text-center align-middle text-primary">وضعیت</th>
-            <th class="text-center align-middle text-primary">ویرایش</th>
-            <th class="text-center align-middle text-primary">حذف</th>
-            <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
+
+            <th class="text-center">ردیف</th>
+
+            <th class="text-center">تصویر</th>
+
+            <th class="text-center">نام محصول</th>
+
+            <th class="text-center">دسته بندی</th>
+
+            <th class="text-center">قیمت</th>
+
+            <th class="text-center">تخفیف</th>
+
+            <th class="text-center">قیمت نهایی</th>
+
+            <th class="text-center">دانلود</th>
+
+            <th class="text-center">وضعیت</th>
+
+            <th class="text-center">ویرایش</th>
+
+            <th class="text-center">حذف</th>
+
+            <th class="text-center">تاریخ ایجاد</th>
+
         </tr>
+
         </thead>
+
         <tbody>
-        @foreach($product_prices as $index=>$product_price)
+
+        @forelse($products as $index => $product)
+
             <tr>
-                <td class="text-center align-middle">{{$product_prices->firstItem()+$index}}</td>
+
                 <td class="text-center align-middle">
-                    <figure class="avatar avatar">
-                        <img src="{{url('images/products/small/'.$product_price->product->image)}}" class="rounded-circle" alt="image">
-                    </figure>
+                    {{ $products->firstItem() + $index }}
                 </td>
-                <td class="text-center align-middle">{{number_format($product_price->main_price)}} تومان </td>
-                <td class="text-center align-middle">{{$product_price->discount}}</td>
-                <td class="text-center align-middle">{{number_format($product_price->price)}}تومان </td>
-                <td class="text-center align-middle">{{$product_price->guaranty->name}}</td>
-                <td class="text-center align-middle">{{$product_price->count}}</td>
-                <td class="text-center align-middle">{{$product_price->max_sell}}</td>
-                <td class="text-center align-middle">{{$product_price->color->name}}</td>
+
                 <td class="text-center align-middle">
-                    @if($product_price->spacial_start==null && $product_price->spacial_expiration==null)
-                        <span class="cursor-pointer badge badge-light">فروش عادی</span>
+
+                    <img
+                        src="{{ url('images/products/small/'.$product->image) }}"
+                        width="60"
+                        class="rounded">
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    {{ $product->name }}
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    {{ $product->category?->name }}
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    {{ number_format($product->main_price) }}
+
+                    تومان
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    @if($product->discount_percent)
+
+                        <span class="badge badge-danger">
+
+                            {{ $product->discount_percent }} %
+
+                        </span>
+
                     @else
-                        <span class="cursor-pointer badge badge-danger">فروش شگفت انگیز</span>
+
+                        --
+
                     @endif
 
                 </td>
+
                 <td class="text-center align-middle">
-                    @if($product_price->status === \App\Enums\ProductStatus::Active->value)
-                        <span class="cursor-pointer badge badge-success">تایید شده</span>
-                    @elseif($product_price->status === \App\Enums\ProductStatus::InActive->value)
-                        <span class="cursor-pointer badge badge-danger">رد شده</span>
-                    @elseif($product_price->status === \App\Enums\ProductStatus::Waiting->value)
-                        <span class="cursor-pointer badge badge-warning">در حال بررسی</span>
-                    @elseif($product_price->status === \App\Enums\ProductStatus::StopProduction->value)
-                        <span class="cursor-pointer badge badge-secondary">توقف تولید</span>
-                    @elseif($product_price->status === \App\Enums\ProductStatus::Rejected->value)
-                        <span class="cursor-pointer badge badge-danger">غیر مجاز</span>
-                    @endif
+
+                    {{ number_format($product->final_price) }}
+
+                    تومان
 
                 </td>
+
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-info" href="{{route('edit.product.prices',[$product_price->id,$product_price->product->id])}}">
+
+                    {{ $product->downloads()->sum('download_count') }}
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    <div class="status-interactive-wrapper">
+
+                        @if($product->status === \App\Enums\ProductStatus::Active->value)
+                            <div class="modern-status-btn active">
+                                <div class="status-glow"></div>
+                                <i class="ti-check-box mr-1"></i>
+                                <span>تایید شده</span>
+                            </div>
+
+                        @elseif($product->status === \App\Enums\ProductStatus::InActive->value)
+                            <div class="modern-status-btn inactive">
+                                <i class="ti-close mr-1"></i>
+                                <span>رد شده</span>
+                            </div>
+
+                        @elseif($product->status === \App\Enums\ProductStatus::Waiting->value)
+                            <div class="modern-status-btn waiting">
+                                <div class="status-pulse"></div>
+                                <i class="ti-time mr-1"></i>
+                                <span>در حال بررسی</span>
+                            </div>
+
+                        @elseif($product->status === \App\Enums\ProductStatus::Draft->value)
+                            <div class="modern-status-btn stop">
+                                <i class="ti-control-pause mr-1"></i>
+                                <span>نیاز به ویرایش</span>
+                            </div>
+
+                        @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
+                            <div class="modern-status-btn banned">
+                                <i class="ti-na mr-1"></i>
+                                <span>غیر مجاز</span>
+                            </div>
+                        @endif
+
+                    </div>
+
+                </td>
+
+                <td class="text-center align-middle">
+
+                    <a
+                        href="{{ route('products.edit',$product->id) }}"
+                        class="btn btn-outline-info btn-sm">
+
                         ویرایش
+
                     </a>
+
                 </td>
+
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-danger" wire:click="$dispatch('deleteProductPrice',{'product_price_id':{{$product_price->id}}})">
+
+                    <button
+                        class="btn btn-outline-danger btn-sm"
+                        wire:click="$dispatch('deleteProduct',{id:{{ $product->id }}})">
+
                         حذف
-                    </a>
+
+                    </button>
+
                 </td>
-                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($product_price->created_at)->format('%d%B، %Y')}}</td>
+
+                <td class="text-center align-middle">
+
+                    {{ verta($product->created_at)->format('d F، Y') }}
+
+                </td>
+
             </tr>
-        @endforeach
+
+        @empty
+
+            <tr>
+
+                <td colspan="12" class="text-center py-5">
+
+                    محصولی یافت نشد
+
+                </td>
+
+            </tr>
+
+        @endforelse
+
+        </tbody>
+
     </table>
-    <div style="margin: 40px !important;"
-         class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
-        {{$product_prices->appends(Request::except('page'))->links()}}
+
+    <div
+        class="pagination pagination-rounded pagination-sm d-flex justify-content-center mt-4">
+
+        {{ $products->appends(Request::except('page'))->links() }}
+
     </div>
+
 </div>
-@section('scripts')
-    <script>
-        Livewire.on('deleteProductPrice', (event) => {
-            Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "بله",
-                cancelButtonText: "خیر",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_product_price',{product_price_id : event.product_price_id})
-                    Swal.fire({
-                        title: "حذف با موفقیت انجام شد!",
-                        icon: "success"
-                    });
-                }
-            });
-        })
-    </script>
-@endsection
-
-
