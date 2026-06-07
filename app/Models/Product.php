@@ -13,6 +13,7 @@ use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class Product extends Model
 {
@@ -26,13 +27,10 @@ class Product extends Model
         'sold',
         'image',
         'description',
-        'main_file',
-        'file_size',
         'download_count',
         'status',
         'user_id',
         'category_id',
-        'file_extension'
     ];
 
     public function category()
@@ -109,12 +107,21 @@ class Product extends Model
     {
         return $this->hasMany(Downloads::class);
     }
+    public function files()
+    {
+        return $this->hasMany(ProductFile::class);
+    }
+
+    public function mainFile()
+    {
+        return $this->hasOne(ProductFile::class)
+            ->where('is_default', true);
+    }
 
     public static function createProduct($request)
     {
         return DB::transaction(function () use ($request) {
             $slug = str()->slug($request->e_name, '-', null);
-            $mainFile = $request->file('main_file');
 
             // ایجاد محصول بدون ذخیره قیمت نهایی (چون داینامیک است)
             $product = self::create([
@@ -126,9 +133,6 @@ class Product extends Model
                 'description' => $request->input('description'),
                 'main_price' => $request->input('main_price', 0),
                 'image' => $request->image ? ImageManager::saveProductImage('products', $request->image) : null,
-                'main_file' => FileManager::saveDigitalFile($mainFile, $slug),
-                'file_size' => $mainFile ? $mainFile->getSize() : 0,
-                'file_extension' => $mainFile ? $mainFile->getClientOriginalExtension() : null,
             ]);
 
             // اگر درصد تخفیف وارد شده باشد، یک کمپین اختصاصی برای این محصول بساز
@@ -168,15 +172,6 @@ class Product extends Model
             if ($request->hasFile('image')) {
                 ImageManager::unlinkImage('products', $product);
                 $imageName = ImageManager::saveProductImage('products', $request->image);
-            }
-
-            // ۲. مدیریت فایل دیجیتال
-            if ($request->hasFile('main_file')) {
-                FileManager::deleteDigitalFile($product->slug, $product->main_file);
-                $newFile = $request->file('main_file');
-                $product->main_file = FileManager::saveDigitalFile($newFile, $slug);
-                $product->file_size = $newFile->getSize();
-                $product->file_extension = $newFile->getClientOriginalExtension();
             }
 
             // ۳. آپدیت اطلاعات پایه
@@ -315,7 +310,7 @@ class Product extends Model
     {
         $now = now();
 
-        return $query->where('status', ProductStatus::Active->value)
+        return $query->where('status', ProductStatus::Approved->value)
             ->where(function ($q) use ($now) {
                 // ۱. محصولاتی که مستقیماً در یک کمپین هستند
                 $q->whereHas('campaignTargets.campaign', function ($sub) use ($now) {
@@ -347,5 +342,45 @@ class Product extends Model
             })
             ->latest() // جدیدترین تخفیف‌دارها
             ->limit(9);
+    }
+    public function isReadyForReview(): bool
+    {
+        return collect(
+            $this->reviewChecklist()
+        )->every(fn($item) => $item);
+    }
+    public function submitForReview(): void
+    {
+        if (!$this->isReadyForReview()) {
+
+            throw new \Exception(
+                'محصول کامل نشده است'
+            );
+        }
+
+        $this->update([
+            'status' =>
+                ProductStatus::PendingReview->value
+        ]);
+    }
+    public function reviewChecklist(): array
+    {
+        return [
+
+            'image' =>
+                !empty($this->image),
+
+            'description' =>
+                !empty($this->description),
+
+            'gallery' =>
+                $this->galleries()->exists(),
+
+            'properties' =>
+                $this->propertyGroups()->exists(),
+
+            'files' =>
+                $this->files()->exists(),
+        ];
     }
 }

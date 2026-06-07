@@ -28,12 +28,12 @@ class DownloadController extends Controller
         $download->registerDownload(request());
 
         $product = $download->product;
+        $file = $product->mainFile()->firstOrFail();
 
-        $path = 'products/' . $product->slug . '/' . $product->main_file;
-
-        return Storage::disk('digital_files')->download(
-            $path,
-            $product->slug . '.' . $product->file_extension
-        );
+        return Storage::disk('digital_files')
+            ->download(
+                $file->path,
+                $file->original_name
+            );
     }
 }

@@ -26,16 +26,13 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->text('description')->nullable();
 
-            // فایل و آمار
-            $table->string('main_file');
-            $table->integer('file_size');
+            // آمار
             $table->integer('download_count')->default(0);
 
             // وضعیت و دسته‌بندی
-            $table->string('status')->default(\App\Enums\ProductStatus::Waiting->value);
+            $table->string('status')->default(\App\Enums\ProductStatus::Draft->value);
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
-            $table->string('file_extension', 10)->nullable();
 
             $table->softDeletes();
             $table->timestamps();
