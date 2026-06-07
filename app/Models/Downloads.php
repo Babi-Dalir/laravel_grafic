@@ -64,10 +64,7 @@ class Downloads extends Model
     {
         $this->increment('download_count');
 
-        $this->update([
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        $this->refresh();
 
         if ($this->download_count >= $this->max_download) {
 

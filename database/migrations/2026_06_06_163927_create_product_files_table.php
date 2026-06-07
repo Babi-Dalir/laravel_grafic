@@ -17,6 +17,7 @@ return new class extends Migration
 
             $table->foreignId('product_id')
                 ->constrained()
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             // مثلا فایل لایسنس یا بونوس
             $table->string('title')->nullable();

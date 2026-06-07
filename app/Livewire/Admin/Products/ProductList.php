@@ -25,25 +25,29 @@ class ProductList extends Component
     public function changeStatus($id)
     {
         $product = Product::query()->find($id);
-        if ($product->status == ProductStatus::Waiting->value){
+        if ($product->status == ProductStatus::Draft->value){
             $product->update([
-                'status'=>ProductStatus::Active->value
+                'status'=>ProductStatus::PendingReview->value
             ]);
-        }elseif ($product->status == ProductStatus::Active->value){
+        }elseif ($product->status == ProductStatus::PendingReview->value){
             $product->update([
-                'status'=>ProductStatus::InActive->value
+                'status'=>ProductStatus::Approved->value
             ]);
-        }elseif ($product->status == ProductStatus::InActive->value){
+        }elseif ($product->status == ProductStatus::Approved->value){
             $product->update([
-                'status'=>ProductStatus::Draft->value
+                'status'=>ProductStatus::Incomplete->value
             ]);
-        }elseif ($product->status == ProductStatus::Draft->value){
+        }elseif ($product->status == ProductStatus::Incomplete->value){
             $product->update([
                 'status'=>ProductStatus::Rejected->value
             ]);
         }elseif ($product->status == ProductStatus::Rejected->value){
             $product->update([
-                'status'=>ProductStatus::Waiting->value
+                'status'=>ProductStatus::Archived->value
+            ]);
+        }elseif ($product->status == ProductStatus::Archived->value){
+            $product->update([
+                'status'=>ProductStatus::Draft->value
             ]);
         }
     }

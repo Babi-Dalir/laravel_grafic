@@ -28,8 +28,11 @@ class DownloadController extends Controller
         $download->registerDownload(request());
 
         $product = $download->product;
-        $file = $product->mainFile()->firstOrFail();
+        $file = $product->mainFile ?? $product->files()->first();
 
+        if (!$file) {
+            abort(404);
+        }
         return Storage::disk('digital_files')
             ->download(
                 $file->path,

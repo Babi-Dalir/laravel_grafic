@@ -10,9 +10,11 @@ use App\Enums\ProductStatus;
 use App\Helpers\DateManager;
 use App\Helpers\FileManager;
 use App\Helpers\ImageManager;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class Product extends Model
@@ -124,7 +126,7 @@ class Product extends Model
             $slug = str()->slug($request->e_name, '-', null);
 
             // ایجاد محصول بدون ذخیره قیمت نهایی (چون داینامیک است)
-            $product = self::create([
+             $product = self::create([
                 'user_id' => auth()->id(),
                 'category_id' => $request->input('category_id'),
                 'name' => $request->input('name'),
@@ -235,18 +237,38 @@ class Product extends Model
 
         // ۲. مدیریت حذف فایل‌ها و تصاویر (کد قبلی خودت)
         static::deleting(function ($product) {
-            if ($product->isForceDeleting()) {
-                ImageManager::unlinkImage('products', $product);
 
-                if ($product->main_file) {
-                    FileManager::deleteDigitalFile($product->slug, $product->main_file);
-                }
+            if ($product->isForceDeleting()) {
+
+                ImageManager::unlinkImage(
+                    'products',
+                    $product
+                );
+
+                Storage::disk('digital_files')
+                    ->deleteDirectory(
+                        "products/{$product->id}"
+                    );
             }
         });
     }
+    public function getCompletionPercentAttribute()
+    {
+        $items = $this->reviewChecklist();
+
+        $total = count($items);
+
+        $completed = collect($items)
+            ->filter()
+            ->count();
+
+        return intval(
+            ($completed / $total) * 100
+        );
+    }
 
     // ۱. اضافه کردن نام اکسسور جدید به لیست اپندها
-    protected $appends = ['final_price', 'discount_percent'];
+    protected $appends = ['final_price', 'discount_percent','completion_percent',];
 
     /**
      * اکسسور قیمت نهایی
@@ -351,9 +373,9 @@ class Product extends Model
     }
     public function submitForReview(): void
     {
-        if (!$this->isReadyForReview()) {
+        if (! $this->isReadyForReview()) {
 
-            throw new \Exception(
+            throw new Exception(
                 'محصول کامل نشده است'
             );
         }
@@ -381,6 +403,8 @@ class Product extends Model
 
             'files' =>
                 $this->files()->exists(),
+
+            'price' => $this->main_price > 0,
         ];
     }
 }

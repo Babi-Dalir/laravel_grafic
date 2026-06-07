@@ -23,9 +23,16 @@
                     </a>
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gallery->created_at)->format('%d%B، %Y')}}</td>
+
             </tr>
         @endforeach
     </table>
+    @if($product->galleries()->exists() && $product->status !== \App\Enums\ProductStatus::Approved->value)
+        <a href="{{ route('create.product.properties', $product->id) }}"
+           class="btn btn-success">
+            ادامه تکمیل محصول →
+        </a>
+    @endif
     <div style="margin: 40px !important;"
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
         {{$galleries->appends(Request::except('page'))->links()}}
@@ -44,7 +51,7 @@
                 cancelButtonText: "خیر",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_gallery',{id : event.id})
+                    Livewire.dispatch('destroy_gallery', {id: event.id})
                     Swal.fire({
                         title: "حذف با موفقیت انجام شد!",
                         icon: "success"

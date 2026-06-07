@@ -63,6 +63,15 @@
             </tr>
         @endforeach
     </table>
+
+    @if($product->properties()->exists() && $product->propertyGroups()->exists())
+        <div class="text-center mt-4">
+            <a href="{{ route('product.file.list', $product->id) }}"
+               class="btn btn-primary btn-lg">
+                مرحله بعد: آپلود فایل‌ها →
+            </a>
+        </div>
+    @endif
 </div>
 @section('scripts')
     <script>

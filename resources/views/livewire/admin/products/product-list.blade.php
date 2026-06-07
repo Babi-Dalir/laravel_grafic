@@ -30,6 +30,7 @@
             <th class="text-center align-middle text-primary">ویرایش</th>
             <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
+            <th class="text-center align-middle text-primary">تکمیل محصول</th>
         </tr>
         </thead>
         <tbody>
@@ -59,36 +60,42 @@
                 <td class="text-center align-middle">
                     <div wire:click="changeStatus({{$product->id}})" class="status-interactive-wrapper">
 
-                        @if($product->status === \App\Enums\ProductStatus::Active->value)
+                        @if($product->status === \App\Enums\ProductStatus::Approved->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
                                 <span>تایید شده</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::InActive->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
                             <div class="modern-status-btn inactive">
                                 <i class="ti-close mr-1"></i>
                                 <span>رد شده</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::Waiting->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::PendingReview->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>
                                 <i class="ti-time mr-1"></i>
-                                <span>در حال بررسی</span>
+                                <span>ارسال شده برای بررسی</span>
                             </div>
 
                         @elseif($product->status === \App\Enums\ProductStatus::Draft->value)
                             <div class="modern-status-btn stop">
                                 <i class="ti-control-pause mr-1"></i>
-                                <span>نیاز به ویرایش</span>
+                                <span>درخواست اولیه</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::Incomplete->value)
                             <div class="modern-status-btn banned">
                                 <i class="ti-na mr-1"></i>
-                                <span>غیر مجاز</span>
+                                <span>اطلاعات ناقص</span>
+                            </div>
+
+                        @elseif($product->status === \App\Enums\ProductStatus::Archived->value)
+                            <div class="modern-status-btn banned">
+                                <i class="ti-na mr-1"></i>
+                                <span>غیر فعال</span>
                             </div>
                         @endif
 
@@ -111,6 +118,23 @@
                     @endif
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($product->created_at)->format('%d%B، %Y')}}</td>
+
+                <td class="text-center align-middle">
+
+                    <div class="progress">
+                        <div
+                            class="progress-bar"
+                            role="progressbar"
+                            style="width: {{ $product->completion_percent }}%"
+                            aria-valuenow="{{ $product->completion_percent }}"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                        >
+                            {{ $product->completion_percent }}%
+                        </div>
+                    </div>
+
+                </td>
             </tr>
         @empty
             <tr>

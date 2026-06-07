@@ -40,8 +40,11 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        Product::createProduct($request);
-        return redirect()->route('products.index')->with('message', 'محصول جدید با موفقیت ایجاد شد');
+        $product = Product::createProduct($request);
+
+        return redirect()
+            ->route('add.product.gallery', $product->id)
+            ->with('message', 'محصول ایجاد شد. حالا تصاویر گالری را ثبت کنید.');
     }
 
     /**

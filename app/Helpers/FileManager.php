@@ -52,7 +52,7 @@ class FileManager
             "app/private/tmp/products/{$tempName}"
         );
     }
-    public static function metadata(UploadedFile $file): array {
+    public static function metadata(UploadedFile $file, ?string $hash = null): array {
 
         return [
 
@@ -71,6 +71,7 @@ class FileManager
                 $file->getSize(),
 
             'sha256' =>
+                $hash ??
                 hash_file(
                     'sha256',
                     $file->getRealPath()

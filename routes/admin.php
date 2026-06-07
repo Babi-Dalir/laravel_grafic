@@ -104,9 +104,3 @@ Route::resource('discount_campaigns', DiscountCampaignController::class);
 
 //Product File Route
 Route::get('products/{product}/files',[ProductFileController::class,'index'])->name('product.file.list');
-
-Route::post('products/{product}/files',[ProductFileController::class,'store'])->name('product.file.store');
-
-Route::delete('product-files/{file}',[ProductFileController::class,'destroy'])->name('product.file.destroy');
-
-Route::patch('product-files/{file}/default',[ProductFileController::class,'setDefault'])->name('product.files.default');
