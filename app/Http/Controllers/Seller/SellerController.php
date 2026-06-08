@@ -54,21 +54,21 @@ class SellerController extends Controller
     public function sellerTransactionList()
     {
         $title = "لیست تراکنشهای فروشنده";
-        $user_transactions = UserTransaction::query()
-            ->where('user_id',auth()->user()->id)
-            ->paginate(10);
-
-        $deposit = UserTransaction::query()
-            ->where('user_id',auth()->user()->id)
-            ->where('type',TransactionType::Deposit->value)
-            ->sum('money');
-
-        $withdraw = UserTransaction::query()
-            ->where('user_id',auth()->user()->id)
-            ->where('type',TransactionType::Withdraw->value)
-            ->sum('money');
-
-        $total_money = $deposit - $withdraw;
-        return view('seller.seller_transactions.list', compact('title','user_transactions','deposit','withdraw','total_money'));
+//        $user_transactions = UserTransaction::query()
+//            ->where('user_id',auth()->user()->id)
+//            ->paginate(10);
+//
+//        $deposit = UserTransaction::query()
+//            ->where('user_id',auth()->user()->id)
+//            ->where('type',TransactionType::Deposit->value)
+//            ->sum('money');
+//
+//        $withdraw = UserTransaction::query()
+//            ->where('user_id',auth()->user()->id)
+//            ->where('type',TransactionType::Withdraw->value)
+//            ->sum('money');
+//
+//        $total_money = $deposit - $withdraw;
+        return view('seller.seller_transactions.list', compact('title'));
     }
 }

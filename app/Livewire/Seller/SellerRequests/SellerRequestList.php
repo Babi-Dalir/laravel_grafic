@@ -3,8 +3,11 @@
 namespace App\Livewire\Seller\SellerRequests;
 
 use App\Enums\SellerRequestStatus;
+use App\Enums\SellerStatus;
+use App\Models\Seller;
 use App\Models\SellerRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -18,15 +21,32 @@ class SellerRequestList extends Component
 
     public function approveRequest($id)
     {
-        $sellerRequest = SellerRequest::with('user')->findOrFail($id);
+        DB::transaction(function () use ($id) {
 
-        $sellerRequest->update([
-            'status' => SellerRequestStatus::Approved->value,
-            'reviewed_at' => now(),
-            'admin_note' => null,
-        ]);
+            $sellerRequest = SellerRequest::with('user')->findOrFail($id);
 
-        $sellerRequest->user->assignRole('فروشنده');
+            $user = $sellerRequest->user;
+
+            // 1. آپدیت درخواست
+            $sellerRequest->update([
+                'status' => SellerRequestStatus::Approved->value,
+                'reviewed_at' => now(),
+                'admin_note' => null,
+            ]);
+
+            // 2. دادن نقش فروشنده
+            $user->assignRole('فروشنده');
+
+            // 3. ساخت رکورد seller (اگر وجود ندارد)
+            if (! $user->seller) {
+                Seller::create([
+                    'user_id' => $user->id,
+                    'first_name' => $user->name, // یا از request
+                    'status' => SellerStatus::Active->value,
+                ]);
+            }
+
+        });
 
         session()->flash(
             'message',
