@@ -120,7 +120,6 @@ class Product extends Model
         return $this->hasOne(ProductFile::class)
             ->where('is_default', true);
     }
-
     public function seller()
     {
         return $this->belongsTo(Seller::class);
@@ -377,19 +376,23 @@ class Product extends Model
             $this->reviewChecklist()
         )->every(fn($item) => $item);
     }
-    public function submitForReview(): void
+    public function submitForReview(): array|bool
     {
         if (! $this->isReadyForReview()) {
-
-            throw new Exception(
-                'محصول کامل نشده است'
-            );
+            return $this->reviewErrors();
         }
 
-        $this->update([
-            'status' =>
-                ProductStatus::PendingReview->value
-        ]);
+        if (auth()->user()->hasRole('مدیر')) {
+            $this->update([
+                'status' => ProductStatus::Approved->value
+            ]);
+        } else {
+            $this->update([
+                'status' => ProductStatus::PendingReview->value
+            ]);
+        }
+
+        return true;
     }
     public function reviewChecklist(): array
     {
@@ -412,5 +415,29 @@ class Product extends Model
 
             'price' => $this->main_price > 0,
         ];
+    }
+    public function reviewErrors(): array
+    {
+        $checklist = $this->reviewChecklist();
+
+        return collect($checklist)
+            ->filter(fn ($value) => !$value)
+            ->keys()
+            ->mapWithKeys(fn ($key) => [
+                $key => $this->errorMessage($key)
+            ])
+            ->toArray();
+    }
+    public function errorMessage($key): string
+    {
+        return match ($key) {
+            'image' => 'تصویر محصول ثبت نشده است',
+            'description' => 'توضیحات محصول تکمیل نشده است',
+            'gallery' => 'حداقل یک تصویر در گالری لازم است',
+            'properties' => 'ویژگی‌های محصول تعریف نشده است',
+            'files' => 'حداقل یک فایل باید آپلود شود',
+            'price' => 'قیمت محصول مشخص نیست',
+            default => 'اطلاعات ناقص است',
+        };
     }
 }

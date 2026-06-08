@@ -96,18 +96,15 @@ class ProductList extends Component
     }
     public function render()
     {
-//        if (auth()->user()->is_admin){
-//            $products = Product::query()
-//                ->where('name','like','%'.$this->search.'%')
-//                ->paginate(10);
-//        }
-//        else{
-            $products = Product::query()
-//                ->where('status',ProductStatus::Active->value)
-                ->where('name','like','%'.$this->search.'%')
-                ->paginate(10);
-//        }
+        $query = Product::query()
+            ->where('name', 'like', '%' . $this->search . '%');
 
-        return view('livewire.admin.products.product-list',compact('products'));
+        if (!auth()->user()->hasRole('مدیر')) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $products = $query->paginate(10);
+
+        return view('livewire.admin.products.product-list', compact('products'));
     }
 }

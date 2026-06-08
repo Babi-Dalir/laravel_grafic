@@ -117,46 +117,33 @@ class ProductFileList extends Component
     }
     public function submitForReview()
     {
-        $product = $this->product;
+        $result = $this->product->submitForReview();
 
-        if (!$product->galleries()->exists()) {
+        if ($result !== true) {
 
-            session()->flash(
-                'error',
-                'حداقل یک تصویر برای محصول ثبت کنید'
-            );
-
-            return;
-        }
-
-        if (!$product->properties()->exists()) {
-
-            session()->flash(
-                'error',
-                'حداقل یک ویژگی ثبت کنید'
-            );
+            foreach ($result as $field => $message) {
+                $this->addError($field, $message);
+            }
 
             return;
         }
 
-        if (!$product->files()->exists()) {
+        if (auth()->user()->hasRole('مدیر')) {
 
             session()->flash(
-                'error',
-                'حداقل یک فایل آپلود کنید'
+                'message',
+                'محصول با موفقیت تایید و منتشر شد.'
             );
 
-            return;
+            return $this->redirect(route('products.index'));
         }
-
-        $product->update([
-            'status' => ProductStatus::PendingReview,
-        ]);
 
         session()->flash(
             'message',
-            'محصول با موفقیت برای بررسی ارسال شد'
+            'محصول شما با موفقیت ثبت شد و پس از بررسی مدیر منتشر خواهد شد.'
         );
+
+        return $this->redirect(route('seller.product.list'));
     }
 
     public function render()

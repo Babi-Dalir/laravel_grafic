@@ -125,43 +125,42 @@
 
                 <td class="text-center align-middle">
 
-                    <div class="status-interactive-wrapper">
+                    <div>
 
-                        @if($product->status === \App\Enums\ProductStatus::Active->value)
+                        @if($product->status === \App\Enums\ProductStatus::Approved->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
                                 <span>تایید شده</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::InActive->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
                             <div class="modern-status-btn inactive">
                                 <i class="ti-close mr-1"></i>
                                 <span>رد شده</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::Waiting->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::PendingReview->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>
                                 <i class="ti-time mr-1"></i>
-                                <span>در حال بررسی</span>
+                                <span>ارسال شده برای بررسی</span>
                             </div>
 
                         @elseif($product->status === \App\Enums\ProductStatus::Draft->value)
                             <div class="modern-status-btn stop">
                                 <i class="ti-control-pause mr-1"></i>
-                                <span>نیاز به ویرایش</span>
+                                <span>درخواست اولیه</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
+                        @elseif($product->status === \App\Enums\ProductStatus::Archived->value)
                             <div class="modern-status-btn banned">
                                 <i class="ti-na mr-1"></i>
-                                <span>غیر مجاز</span>
+                                <span>غیر فعال</span>
                             </div>
                         @endif
 
                     </div>
-
                 </td>
 
                 <td class="text-center align-middle">

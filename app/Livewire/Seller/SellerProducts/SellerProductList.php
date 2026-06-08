@@ -16,36 +16,11 @@ class SellerProductList extends Component
     protected $paginationTheme = 'bootstrap';
     public $search;
 
-    #[On('destroy_product_price')]
-    public function destroyProductPrice($id)
+    #[On('destroy_seller_product')]
+    public function destroySellerProduct($id)
     {
-        $product = Product::find($id);
-        $product->delete();
-    }
-    public function changeStatus($id)
-    {
-        $product = Product::query()->find($id);
-        if ($product->status == ProductStatus::Waiting->value){
-            $product->update([
-                'status'=>ProductStatus::Active->value
-            ]);
-        }elseif ($product->status == ProductStatus::Active->value){
-            $product->update([
-                'status'=>ProductStatus::InActive->value
-            ]);
-        }elseif ($product->status == ProductStatus::InActive->value){
-            $product->update([
-                'status'=>ProductStatus::Draft->value
-            ]);
-        }elseif ($product->status == ProductStatus::Draft->value){
-            $product->update([
-                'status'=>ProductStatus::Rejected->value
-            ]);
-        }elseif ($product->status == ProductStatus::Rejected->value){
-            $product->update([
-                'status'=>ProductStatus::Waiting->value
-            ]);
-        }
+        $seller_product = Product::find($id);
+        $seller_product->delete();
     }
 
     public function searchData()
@@ -56,10 +31,11 @@ class SellerProductList extends Component
     public function render()
     {
         $products = Product::query()
-            ->where('user_id',auth()->user()->id)
-            ->where('name','like','%'.$this->search.'%')
+            ->where('user_id', auth()->id())
+            ->where('name', 'like', "%{$this->search}%")
             ->latest()
             ->paginate(10);
-        return view('livewire.seller.seller-products.seller-product-list',compact('products'));
+
+        return view('livewire.seller.seller-products.seller-product-list', compact('products'));
     }
 }

@@ -1,8 +1,27 @@
 <div>
 
-    @if(session()->has('message'))
+    {{-- پیام موفقیت --}}
+    @if (session()->has('message'))
         <div class="alert alert-success">
             {{ session('message') }}
+        </div>
+    @endif
+
+    {{-- پیام خطای کلی --}}
+    @if (session()->has('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- خطاهای review (از addError) --}}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -17,32 +36,21 @@
 
         <div class="form-group mb-3">
 
-            <label class="font-weight-bold">
-                عنوان فایل (اختیاری)
-            </label>
+            <label class="font-weight-bold">عنوان فایل (اختیاری)</label>
 
-            <input
-                type="text"
-                wire:model.defer="title"
-                class="form-control"
-                placeholder="مثلا فایل اصلی PSD یا لایسنس">
+            <input type="text"
+                   wire:model.defer="title"
+                   class="form-control"
+                   placeholder="مثلا فایل اصلی PSD یا لایسنس">
         </div>
 
         <div class="form-group mb-3">
 
-            <label class="font-weight-bold">
-                انتخاب فایل
-            </label>
+            <label class="font-weight-bold">انتخاب فایل</label>
 
-            <input
-                type="file"
-                wire:model="file"
-                class="form-control">
-
-            <small class="text-muted">
-                فرمت‌های مجاز:
-                zip, rar, 7z, psd, ai, eps, pdf, ttf, otf
-            </small>
+            <input type="file"
+                   wire:model="file"
+                   class="form-control">
 
             @error('file')
             <div class="text-danger mt-2">
@@ -57,21 +65,11 @@
 
         </div>
 
-        <button
-            type="submit"
-            class="btn btn-success"
-            wire:loading.attr="disabled">
+        <button type="submit"
+                class="btn btn-success"
+                wire:loading.attr="disabled">
 
-            <span wire:loading.remove wire:target="upload">
-                <i class="ti-upload"></i>
-                آپلود فایل
-            </span>
-
-            <span wire:loading wire:target="upload">
-                <i class="fa fa-spinner fa-spin"></i>
-                در حال پردازش...
-            </span>
-
+            آپلود فایل
         </button>
 
     </form>
@@ -81,8 +79,7 @@
 
         <div class="card-header">
             <h6 class="mb-0">
-                فایل‌های آپلود شده
-                ({{ $files->count() }})
+                فایل‌های آپلود شده ({{ $files->count() }})
             </h6>
         </div>
 
@@ -92,98 +89,58 @@
 
                 <thead class="thead-light">
                 <tr>
-                    <th class="text-center">ردیف</th>
-                    <th class="text-center">نام فایل</th>
-                    <th class="text-center">نوع</th>
-                    <th class="text-center">حجم</th>
-                    <th class="text-center">فایل اصلی</th>
-                    <th class="text-center">حذف</th>
+                    <th>ردیف</th>
+                    <th>نام فایل</th>
+                    <th>نوع</th>
+                    <th>حجم</th>
+                    <th>اصلی</th>
+                    <th>حذف</th>
                 </tr>
                 </thead>
 
                 <tbody>
 
                 @forelse($files as $index => $file)
-
                     <tr>
+                        <td>{{ $index + 1 }}</td>
 
-                        <td class="text-center align-middle">
-                            {{ $index + 1 }}
-                        </td>
-
-                        <td class="align-middle">
-
-                            <strong>
-                                {{ $file->original_name }}
-                            </strong>
+                        <td>
+                            <strong>{{ $file->original_name }}</strong>
 
                             @if($file->title)
                                 <br>
-                                <small class="text-muted">
-                                    {{ $file->title }}
-                                </small>
+                                <small class="text-muted">{{ $file->title }}</small>
                             @endif
-
                         </td>
 
-                        <td class="text-center align-middle">
-                            {{ strtoupper($file->extension) }}
-                        </td>
+                        <td>{{ strtoupper($file->extension) }}</td>
+                        <td>{{ $file->human_size }}</td>
 
-                        <td class="text-center align-middle">
-                            {{ $file->human_size }}
-                        </td>
-
-                        <td class="text-center align-middle">
-
+                        <td>
                             @if($file->is_default)
-
-                                <span class="badge badge-success">
-                        فایل اصلی
-                    </span>
-
+                                <span class="badge badge-success">اصلی</span>
                             @else
-
-                                <button
-                                    wire:click="setDefault({{ $file->id }})"
-                                    class="btn btn-outline-primary btn-sm">
-
+                                <button wire:click="setDefault({{ $file->id }})"
+                                        class="btn btn-sm btn-outline-primary">
                                     انتخاب
-
                                 </button>
-
                             @endif
-
                         </td>
 
-                        <td class="text-center align-middle">
-
-                            <button
-                                class="btn btn-outline-danger btn-sm"
-                                wire:click="$dispatch('deleteProductFile',{
-                        file_id: {{ $file->id }}
-                    })">
-
+                        <td>
+                            <button class="btn btn-sm btn-danger"
+                                    wire:click="$dispatch('deleteProductFile',{ file_id: {{ $file->id }} })">
                                 حذف
-
                             </button>
-
                         </td>
 
                     </tr>
-
                 @empty
-
                     <tr>
-
                         <td colspan="6" class="text-center text-muted">
-
                             هنوز فایلی آپلود نشده است
-
                         </td>
-
                     </tr>
-
                 @endforelse
 
                 </tbody>
@@ -191,52 +148,35 @@
             </table>
 
         </div>
-
     </div>
 
-    {{-- مرحله بعد --}}
-        @if($files->count())
+    {{-- دکمه ارسال برای بررسی + خطاهای مرحله --}}
+    @if($files->count())
 
-            <button
-                wire:click="submitForReview"
-                class="btn btn-success btn-lg">
+        <div class="mt-4">
 
+            <button wire:click="submitForReview"
+                    class="btn btn-success btn-lg">
                 ثبت محصول و ارسال برای بررسی
-
             </button>
 
-        @endif
+            {{-- 👇 نمایش خطاهای بررسی محصول --}}
+            @if (session()->has('review_errors'))
+
+                <div class="alert alert-danger mt-3">
+                    <ul class="mb-0">
+                        @foreach (session('review_errors') as $field => $message)
+                            <li>
+                                <strong>{{ $field }}:</strong> {{ $message }}
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+
+            @endif
+
+        </div>
+
+    @endif
 
 </div>
-@section('scripts')
-
-    <script>
-        Livewire.on('deleteProductFile', (event) => {
-
-            Swal.fire({
-                title: "آیا از حذف فایل مطمئن هستید؟",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "بله",
-                cancelButtonText: "خیر",
-            }).then((result) => {
-
-                if (result.isConfirmed) {
-
-                    Livewire.dispatch(
-                        'destroy_product_file',
-                        {
-                            fileId: event.file_id
-                        }
-                    );
-
-                    Swal.fire({
-                        title: "فایل حذف شد",
-                        icon: "success"
-                    });
-                }
-            });
-        });
-    </script>
-
-@endsection
