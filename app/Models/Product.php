@@ -31,6 +31,7 @@ class Product extends Model
         'description',
         'download_count',
         'status',
+        'review_note',
         'user_id',
         'category_id',
     ];

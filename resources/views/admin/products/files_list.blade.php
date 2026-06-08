@@ -15,7 +15,7 @@
         </div>
         <div class="card">
             <div class="card-body">
-                <livewire:admin.products.product-file-list/>
+                <livewire:admin.products.product-file-list :product="$product"/>
             </div>
         </div>
     </main>

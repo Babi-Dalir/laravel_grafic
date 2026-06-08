@@ -27,6 +27,7 @@
             <th class="text-center align-middle text-primary">ویژگی های محصول</th>
             <th class="text-center align-middle text-primary">گالری</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
+            <th class="text-center align-middle text-primary">عملیات</th>
             <th class="text-center align-middle text-primary">ویرایش</th>
             <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
@@ -58,7 +59,13 @@
                     </a>
                 </td>
                 <td class="text-center align-middle">
-                    <div wire:click="changeStatus({{$product->id}})" class="status-interactive-wrapper">
+                    <div
+                        @role('مدیر')
+                        wire:click="changeStatus({{ $product->id }})"
+                        style="cursor:pointer"
+                        class="status-interactive-wrapper"
+                        @endrole
+                    >
 
                         @if($product->status === \App\Enums\ProductStatus::Approved->value)
                             <div class="modern-status-btn active">
@@ -86,12 +93,6 @@
                                 <span>درخواست اولیه</span>
                             </div>
 
-                        @elseif($product->status === \App\Enums\ProductStatus::Incomplete->value)
-                            <div class="modern-status-btn banned">
-                                <i class="ti-na mr-1"></i>
-                                <span>اطلاعات ناقص</span>
-                            </div>
-
                         @elseif($product->status === \App\Enums\ProductStatus::Archived->value)
                             <div class="modern-status-btn banned">
                                 <i class="ti-na mr-1"></i>
@@ -100,6 +101,30 @@
                         @endif
 
                     </div>
+                </td>
+
+                <td class="text-center">
+
+                    @role('مدیر')
+                    @if($product->status === \App\Enums\ProductStatus::PendingReview->value)
+
+                        <button
+                            wire:click="approveProductRequest({{ $product->id }})"
+                            class="btn btn-success btn-sm">
+                            تایید
+                        </button>
+
+                        <button
+                            class="btn btn-danger btn-sm"
+                            wire:click="$set('productRequestId', {{ $product->id }})"
+                            data-toggle="modal"
+                            data-target="#rejectModal">
+                            رد
+                        </button>
+
+                    @endif
+                    @endrole
+
                 </td>
 
                 <td class="text-center align-middle">
@@ -121,17 +146,21 @@
 
                 <td class="text-center align-middle">
 
+                    @php
+                        $percent = $product->completion_percent;
+                    @endphp
+
                     <div class="progress">
+
                         <div
-                            class="progress-bar"
-                            role="progressbar"
-                            style="width: {{ $product->completion_percent }}%"
-                            aria-valuenow="{{ $product->completion_percent }}"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                        >
-                            {{ $product->completion_percent }}%
+                            class="progress-bar
+                            {{ $percent == 100 ? 'bg-success' : ($percent >= 70 ? 'bg-info' : ($percent >= 40 ? 'bg-warning' : 'bg-danger')) }}"
+                            style="width: {{ $percent }}%">
+
+                            {{ $percent }}%
+
                         </div>
+
                     </div>
 
                 </td>
@@ -161,6 +190,61 @@
             </tr>
         @endforelse
     </table>
+    <div
+        wire:ignore.self
+        class="modal fade"
+        id="rejectModal"
+        tabindex="-1">
+
+        <div class="modal-dialog">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        دلیل رد درخواست
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="close"
+                        data-dismiss="modal">
+
+                        <span>&times;</span>
+
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                <textarea
+                    wire:model="review_note"
+                    rows="5"
+                    class="form-control"
+                    placeholder="دلیل رد درخواست را وارد کنید...">
+                </textarea>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        wire:click="rejectProductRequest"
+                        class="btn btn-danger">
+
+                        ثبت و رد درخواست
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
     <div style="margin: 40px !important;"
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
         {{$products->appends(Request::except('page'))->links()}}
@@ -187,6 +271,19 @@
                 }
             });
         })
+
+
+        document.addEventListener('livewire:init', () => {
+
+            Livewire.on('closeRejectModal', () => {
+
+                console.log('EVENT FIRED');
+
+                $('#rejectModal').modal('hide');
+
+            });
+
+        });
     </script>
 @endsection
 

@@ -12,7 +12,7 @@
     </h5>
 
     {{-- فرم آپلود --}}
-    <form wire:submit.prevent="upload"
+    <form wire:submit.prevent="uploadFile"
           class="border rounded p-4 mb-4">
 
         <div class="form-group mb-3">
@@ -195,20 +195,17 @@
     </div>
 
     {{-- مرحله بعد --}}
-    @if($files->count())
+        @if($files->count())
 
-        <div class="text-center mt-4">
-
-            <a
-                href="#"
-                class="btn btn-primary btn-lg">
+            <button
+                wire:click="submitForReview"
+                class="btn btn-success btn-lg">
 
                 ثبت محصول و ارسال برای بررسی
-            </a>
 
-        </div>
+            </button>
 
-    @endif
+        @endif
 
 </div>
 @section('scripts')

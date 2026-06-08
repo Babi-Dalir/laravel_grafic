@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Products;
 
+use App\Enums\ProductStatus;
 use App\Helpers\FileManager;
 use App\Models\Product;
 use App\Models\ProductFile;
@@ -10,6 +11,7 @@ use App\Services\ProductFileUploadService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
 
@@ -27,7 +29,7 @@ class ProductFileList extends Component
         $this->product = $product;
     }
 
-    public function upload(ProductFileUploadService $service)
+    public function uploadFile(ProductFileUploadService $service)
     {
         $this->validate([
             'file' => 'required|file|max:512000',
@@ -83,6 +85,17 @@ class ProductFileList extends Component
                     'is_default' => true
                 ]);
         }
+
+        $productFolder = "products/{$file->product_id}";
+        if (count(Storage::disk('digital_files')->files($productFolder)) === 0) {
+            Storage::disk('digital_files')->deleteDirectory($productFolder);
+        }
+    }
+
+    #[On('destroy_product_file')]
+    public function destroyProductFile($fileId)
+    {
+        $this->deleteFile($fileId);
     }
 
     public function setDefault($id)
@@ -101,6 +114,49 @@ class ProductFileList extends Component
         $file->update([
             'is_default' => true
         ]);
+    }
+    public function submitForReview()
+    {
+        $product = $this->product;
+
+        if (!$product->galleries()->exists()) {
+
+            session()->flash(
+                'error',
+                'حداقل یک تصویر برای محصول ثبت کنید'
+            );
+
+            return;
+        }
+
+        if (!$product->properties()->exists()) {
+
+            session()->flash(
+                'error',
+                'حداقل یک ویژگی ثبت کنید'
+            );
+
+            return;
+        }
+
+        if (!$product->files()->exists()) {
+
+            session()->flash(
+                'error',
+                'حداقل یک فایل آپلود کنید'
+            );
+
+            return;
+        }
+
+        $product->update([
+            'status' => ProductStatus::PendingReview,
+        ]);
+
+        session()->flash(
+            'message',
+            'محصول با موفقیت برای بررسی ارسال شد'
+        );
     }
 
     public function render()
