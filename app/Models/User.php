@@ -50,10 +50,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(SellerRequest::class);
     }
-//    public function seller()
-//    {
-//        return $this->hasOne(Seller::class);
-//    }
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
+    }
     public function products()
     {
         return $this->hasMany(Product::class);

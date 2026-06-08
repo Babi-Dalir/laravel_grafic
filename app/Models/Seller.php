@@ -2,37 +2,52 @@
 
 namespace App\Models;
 
-use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class Seller extends Model
 {
     protected $fillable = [
         'user_id',
-        'company_name',
-        'company_economy_code',
-        'contract',
+        'brand_name',
+        'national_code',
+        'first_name',
+        'last_name',
+        'card_number',
+        'account_number',
+        'iban',
+        'balance',
+        'pending_balance',
+        'total_income',
+        'total_settlement',
+        'sales_count',
         'status',
+        'bank_verified',
+        'verified_at',
+        'last_settlement_at'
+    ];
 
+    protected $casts = [
+        'bank_verified' => 'boolean',
+        'verified_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    public static function createSellerProduct($request)
+
+    public function walletTransactions()
     {
-        DB::beginTransaction();
-        try {
-            $product = Product::createProduct();
+        return $this->hasMany(SellerWalletTransaction::class);
+    }
 
-            DB::commit();
+    public function settlementRequests()
+    {
+        return $this->hasMany(SellerSettlement::class);
+    }
 
-        }catch (\Exception $exception) {
-
-            DB::rollBack();
-        }
-
+    public function products()
+    {
+        return $this->hasMany(Product::class);
     }
 }

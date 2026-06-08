@@ -121,6 +121,11 @@ class Product extends Model
             ->where('is_default', true);
     }
 
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
+
     public static function createProduct($request)
     {
         return DB::transaction(function () use ($request) {
