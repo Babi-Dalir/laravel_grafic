@@ -11,6 +11,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use App\Models\SellerWalletTransaction;
 use App\Models\UserCart;
 use App\Models\UserTransaction;
 use Illuminate\Http\Request;
@@ -156,7 +157,7 @@ class PaymentController extends Controller
                     $shop_data['gift_cart_code'] ?? null
                 );
 
-                UserTransaction::soldProductBySeller($order_details);
+                SellerWalletTransaction::registerSale($order_details);
 
                 DB::commit();
 
@@ -254,7 +255,7 @@ class PaymentController extends Controller
                 $order->gift_cart_code
             );
 
-            UserTransaction::soldProductBySeller($order_details);
+            SellerWalletTransaction::registerSale($order_details);
 
             DB::commit();
 

@@ -25,7 +25,34 @@
         </div>
 
     </div>
+    <div class="row mb-4">
 
+        <div class="col-md-4">
+            <h6>در انتظار تسویه</h6>
+            <h4>{{ number_format($pending) }}</h4>
+        </div>
+
+        <div class="col-md-4">
+            <h6>تسویه شده</h6>
+            <h4>{{ number_format($settled) }}</h4>
+        </div>
+
+        <div class="col-md-4">
+            <h6>کل درآمد</h6>
+            <h4>{{ number_format($pending + $settled) }}</h4>
+        </div>
+
+    </div>
+
+    <div class="alert alert-info text-center">
+
+        @if($canWithdraw)
+            ✔ شما در دوره تسویه هستید و مبلغ شما در تسویه بعدی آزاد خواهد شد
+        @else
+            ⏳ تسویه بعدی هنوز فعال نشده (حداقل 30 روز + 100 هزار تومان)
+        @endif
+
+    </div>
     {{-- جدول --}}
     <table class="table table-striped table-hover">
 
@@ -35,8 +62,7 @@
             <th class="text-center">مبلغ</th>
             <th class="text-center">نوع</th>
             <th class="text-center">توضیحات</th>
-            <th class="text-center">مرجع</th>
-            <th class="text-center">موجودی بعد</th>
+            <th class="text-center">کد سفارش</th>
             <th class="text-center">تاریخ</th>
         </tr>
         </thead>
@@ -52,7 +78,25 @@
                 </td>
 
                 <td class="text-center">
-                    {{ number_format($tx->amount) }}
+
+                    @php
+                        $isNegative = in_array($tx->type, [
+                            \App\Enums\TransactionType::Withdrawal->value,
+                            \App\Enums\TransactionType::Refund->value,
+                            \App\Enums\TransactionType::Commission->value,
+                        ]);
+                    @endphp
+
+                    @if($isNegative)
+                        <span class="text-danger">
+            - {{ number_format($tx->amount) }}
+        </span>
+                    @else
+                        <span class="text-success">
+            + {{ number_format($tx->amount) }}
+        </span>
+                    @endif
+
                 </td>
 
                 <td class="text-center">
@@ -86,19 +130,19 @@
                 </td>
 
                 <td class="text-center">
-                    {{ $tx->description ?? '--' }}
+
+                    <span title="{{ $tx->description }}">
+                        {{ \Illuminate\Support\Str::limit($tx->description,40) }}
+                    </span>
+
                 </td>
 
                 <td class="text-center">
-                    {{ $tx->reference_id ?? '--' }}
+                    {{ $tx->order?->order_code ?? '--' }}
                 </td>
 
                 <td class="text-center">
-                    {{ number_format($tx->balance_after) }}
-                </td>
-
-                <td class="text-center">
-                    {{ $tx->created_at->format('Y-m-d H:i') }}
+                    {{\Hekmatinasser\Verta\Verta::instance($tx->created_at)->format('%d%B، %Y')}}
                 </td>
 
             </tr>
@@ -118,7 +162,7 @@
     </table>
 
     <div class="mt-3">
-        {{ $transactions->links() }}
+        {{ $transactions->appends(Request::except('page'))->links() }}
     </div>
 
 </div>

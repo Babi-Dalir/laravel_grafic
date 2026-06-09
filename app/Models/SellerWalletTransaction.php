@@ -4,22 +4,27 @@ namespace App\Models;
 
 use App\Enums\TransactionType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class SellerWalletTransaction extends Model
 {
     protected $fillable = [
         'seller_id',
+        'order_id',
         'amount',
         'type',
         'description',
-        'order_id',
-        'balance_after',
+        'status',
         'reference_id',
+        'release_at',
+        'settled_at',
+        'settlement_id'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'balance_after' => 'decimal:2',
+        'release_at' => 'datetime',
+        'settled_at' => 'datetime',
     ];
 
     public function seller()
@@ -27,44 +32,48 @@ class SellerWalletTransaction extends Model
         return $this->belongsTo(Seller::class);
     }
 
+    public function settlement()
+    {
+        return $this->belongsTo(SellerSettlement::class, 'settlement_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * 🧠 REGISTER SALE (SAFE LEDGER ENTRY)
+     */
     public static function registerSale($orderDetails): void
     {
-        foreach ($orderDetails as $detail) {
+        DB::transaction(function () use ($orderDetails) {
 
-            $product = $detail->product;
+            foreach ($orderDetails as $detail) {
 
-            $seller = Seller::query()
-                ->where('user_id', $product->user_id)
-                ->first();
+                $product = $detail->product;
+                if (!$product?->seller) continue;
 
-            if (! $seller) {
-                continue;
+                $referenceId = "order_{$detail->order_id}_product_{$product->id}";
+
+                // 🛑 جلوگیری از duplicate
+                $exists = self::where('reference_id', $referenceId)->exists();
+
+                if ($exists) continue;
+
+                self::create([
+                    'seller_id' => $product->seller->id,
+                    'order_id' => $detail->order_id,
+                    'amount' => $detail->seller_share,
+                    'type' => TransactionType::Sale->value,
+                    'description' => "فروش محصول {$product->name}",
+                    'status' => 'pending',
+                    'release_at' => now()->addDays(30),
+
+                    // 🧠 مهم‌ترین بخش
+                    'reference_id' => $referenceId,
+                ]);
             }
-
-            $amount = $detail->price;
-
-            $seller->increment(
-                'pending_balance',
-                $amount
-            );
-
-            $seller->increment(
-                'total_income',
-                $amount
-            );
-
-            $seller->increment(
-                'sales_count'
-            );
-
-            self::create([
-                'seller_id' => $seller->id,
-                'order_id' => $detail->order_id,
-                'amount' => $amount,
-                'type' => TransactionType::Sale->value,
-                'description' => "فروش محصول {$product->name}",
-                'balance_after' => $seller->fresh()->pending_balance,
-            ]);
-        }
+        });
     }
 }

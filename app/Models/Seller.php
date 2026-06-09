@@ -15,15 +15,9 @@ class Seller extends Model
         'card_number',
         'account_number',
         'iban',
-        'balance',
-        'pending_balance',
-        'total_income',
-        'total_settlement',
-        'sales_count',
         'status',
         'bank_verified',
-        'verified_at',
-        'last_settlement_at'
+        'verified_at'
     ];
 
     protected $casts = [
@@ -36,18 +30,28 @@ class Seller extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function walletTransactions()
+    public function transactions()
     {
         return $this->hasMany(SellerWalletTransaction::class);
     }
 
-    public function settlementRequests()
+    /**
+     * 🧠 REAL BALANCE (settled money)
+     */
+    public function getBalanceAttribute()
     {
-        return $this->hasMany(SellerSettlement::class);
+        return $this->transactions()
+            ->where('status', 'settled')
+            ->sum('amount');
     }
 
-    public function products()
+    /**
+     * 🧠 PENDING (30 days lock)
+     */
+    public function getPendingBalanceAttribute()
     {
-        return $this->hasMany(Product::class);
+        return $this->transactions()
+            ->where('status', 'pending')
+            ->sum('amount');
     }
 }

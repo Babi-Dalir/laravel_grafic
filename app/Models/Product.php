@@ -122,7 +122,11 @@ class Product extends Model
     }
     public function seller()
     {
-        return $this->belongsTo(Seller::class);
+        return $this->belongsTo(
+            Seller::class,
+            'user_id',
+            'user_id'
+        );
     }
 
     public static function createProduct($request)
@@ -439,5 +443,10 @@ class Product extends Model
             'price' => 'قیمت محصول مشخص نیست',
             default => 'اطلاعات ناقص است',
         };
+    }
+
+    public function getSellerAttribute()
+    {
+        return $this->user?->seller;
     }
 }

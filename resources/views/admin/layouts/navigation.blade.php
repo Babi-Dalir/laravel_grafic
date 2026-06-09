@@ -164,6 +164,12 @@
                     <li><a href="{{route('admin.orders.list')}}">لیست سفارشات</a></li>
                 </ul>
             </li>
+            <li>
+                <a href="#">تسویه حساب ها</a>
+                <ul>
+                    <li><a href="{{route('seller.settlement.list')}}">لیست تسویه ها</a></li>
+                </ul>
+            </li>
         </ul>
 {{--        @endhasanyrole--}}
 {{--        @hasanyrole('فروشنده|مدیر کل')--}}

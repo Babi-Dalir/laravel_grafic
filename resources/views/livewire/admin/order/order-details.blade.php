@@ -9,6 +9,7 @@
         <thead class="thead-light">
         <tr>
             <th class="text-center align-middle text-primary">ردیف</th>
+            <th class="text-center align-middle text-primary">نام فروشنده</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
             <th class="text-center align-middle text-primary">قیمت</th>
             <th class="text-center align-middle text-primary">تخفیف</th>
@@ -21,6 +22,7 @@
         @foreach($order_details as $index=>$order_detail)
             <tr>
                 <td class="text-center align-middle">{{$order_details->firstItem()+$index}}</td>
+                <td class="text-center align-middle">{{ $order_detail->product?->user?->name }}</td>
                 <td class="text-center align-middle">{{$order_detail->product->name}}</td>
                 <td class="text-center align-middle">{{number_format($order_detail->price)}} تومان </td>
                 <td class="text-center align-middle">{{number_format($order_detail->discount)}} تومان</td>

@@ -11,17 +11,15 @@ class SellerWalletTransactionList extends Component
 {
     use WithPagination;
 
-    protected $paginationTheme = 'bootstrap';
-
     public $search = '';
     public $type = null;
 
-    public function updatingSearch()
+    public function updatedType()
     {
         $this->resetPage();
     }
 
-    public function updatingType()
+    public function updatedSearch()
     {
         $this->resetPage();
     }
@@ -31,18 +29,30 @@ class SellerWalletTransactionList extends Component
         $seller = auth()->user()->seller;
 
         $transactions = SellerWalletTransaction::query()
+            ->with(['order'])
             ->where('seller_id', $seller->id)
-            ->when($this->search, function ($q) {
-                $q->where('description', 'like', '%' . $this->search . '%');
-            })
-            ->when($this->type, function ($q) {
-                $q->where('type', $this->type);
-            })
+
+            ->when($this->search, fn($q) =>
+            $q->where('description', 'like', "%{$this->search}%")
+            )
+
+            ->when($this->type, fn($q) =>
+            $q->where('type', $this->type)
+            )
+
             ->latest()
             ->paginate(10);
 
         return view('livewire.seller.wallet.seller-wallet-transaction-list', [
             'transactions' => $transactions,
+            'seller' => $seller,
+
+            // 🧠 derived from ledger
+            'pending' => $seller->pending_balance,
+            'settled' => $seller->settled_balance,
+            'balance' => $seller->balance,
+
+            'canWithdraw' => $seller->available_balance >= 100000,
             'types' => TransactionType::cases(),
         ]);
     }

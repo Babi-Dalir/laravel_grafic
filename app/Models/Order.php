@@ -38,9 +38,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class);
     }
-    public function userTransactions()
+    public function sellerWalletTransactions()
     {
-        return $this->hasMany(UserTransaction::class);
+        return $this->hasMany(SellerWalletTransaction::class);
     }
     private static function generateOrderCode()
     {
