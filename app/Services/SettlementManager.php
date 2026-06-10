@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\SettlementStatus;
+use App\Enums\WalletTransactionStatus;
 use App\Models\SellerSettlement;
 use Illuminate\Support\Facades\DB;
 
@@ -32,7 +33,7 @@ class SettlementManager
 
             // 2. آپدیت تراکنش‌ها
             $settlement->transactions()->update([
-                'status' => 'settled',
+                'status' => WalletTransactionStatus::Settled->value,
                 'settled_at' => now(),
             ]);
         });

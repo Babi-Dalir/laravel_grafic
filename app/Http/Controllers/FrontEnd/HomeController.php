@@ -5,6 +5,7 @@ namespace App\Http\Controllers\FrontEnd;
 use App\Enums\CartType;
 use App\Enums\DiscountCampaignStatus;
 use App\Enums\DiscountCampaignType;
+use App\Enums\ProductStatus;
 use App\Enums\SliderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
@@ -29,13 +30,16 @@ class HomeController extends Controller
         $most_sold = Product::query()
             ->with(['category', 'campaignTargets.campaign'])
             ->orderBy('sold', 'DESC')
+            ->where('status',ProductStatus::Approved->value)
             ->get();
         $newest_products = Product::query()
             ->with(['category', 'campaignTargets.campaign'])
+            ->where('status',ProductStatus::Approved->value)
             ->orderBy('created_at', 'DESC')
             ->get();
         $spacial_products = Product::query()
             ->with(['category', 'campaignTargets.campaign'])
+            ->where('status',ProductStatus::Approved->value)
             ->where(function ($q) use ($now) {
                 $q->whereHas('campaignTargets.campaign', function ($query) use ($now) {
                     $query->where('status', DiscountCampaignStatus::Active->value)
