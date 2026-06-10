@@ -36,14 +36,4 @@ class SellerSettlement extends Model
     {
         return $this->belongsTo(User::class, 'paid_by');
     }
-
-    public function isPending(): bool
-    {
-        return $this->status === SettlementStatus::Pending->value;
-    }
-
-    public function isPaid(): bool
-    {
-        return $this->status === SettlementStatus::Paid->value;
-    }
 }

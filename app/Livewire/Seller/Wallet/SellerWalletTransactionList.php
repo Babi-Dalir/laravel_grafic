@@ -10,31 +10,37 @@ use Livewire\WithPagination;
 class SellerWalletTransactionList extends Component
 {
     use WithPagination;
+    protected $paginationTheme = 'bootstrap';
 
     public $search = '';
     public $type = null;
 
-    public function updatedType()
+    public function updatingSearch()
     {
         $this->resetPage();
     }
 
-    public function updatedSearch()
+    public function updatingType()
     {
         $this->resetPage();
     }
 
     public function render()
     {
-        $seller = auth()->user()->seller;
+        $user = auth()->user();
+        $seller = $user->seller;
 
         $transactions = SellerWalletTransaction::query()
-            ->with(['order'])
+            ->with([
+                'order.orderDetails.product',
+            ])
             ->where('seller_id', $seller->id)
 
-            ->when($this->search, fn($q) =>
-            $q->where('description', 'like', "%{$this->search}%")
-            )
+            ->when($this->search, function ($q) {
+                $q->where('description', 'like', "%{$this->search}%")
+                    ->orWhere('code', 'like', "%{$this->search}%")
+                    ->orWhere('reference_id', 'like', "%{$this->search}%");
+            })
 
             ->when($this->type, fn($q) =>
             $q->where('type', $this->type)
@@ -47,13 +53,12 @@ class SellerWalletTransactionList extends Component
             'transactions' => $transactions,
             'seller' => $seller,
 
-            // 🧠 derived from ledger
             'pending' => $seller->pending_balance,
-            'settled' => $seller->settled_balance,
-            'balance' => $seller->balance,
+            'paid' => $seller->paid_balance,
 
-            'canWithdraw' => $seller->available_balance >= 100000,
             'types' => TransactionType::cases(),
+
+            'canWithdraw' => $seller->pending_balance >= 100000,
         ]);
     }
 }

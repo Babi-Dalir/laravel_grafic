@@ -44,7 +44,7 @@
                                                     <input type="text"
                                                            class="input-ui pr-2"
                                                            name="brand_name"
-                                                           value="{{ $sellerRequest->brand_name }}"
+                                                           value="{{ $sellerRequest?->brand_name }}"
                                                            placeholder="مثال: Graphic Master">
                                                 </div>
                                             </div>
@@ -58,7 +58,7 @@
                                                     <input type="url"
                                                            class="input-ui pr-2"
                                                            name="portfolio"
-                                                           value="{{ $sellerRequest->portfolio }}"
+                                                           value="{{ $sellerRequest?->portfolio }}"
                                                            placeholder="https://behance.net/...">
                                                 </div>
                                             </div>
@@ -109,7 +109,7 @@
                                 name="reason"
                                 rows="6"
                                 class="input-ui pr-2"
-                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ $sellerRequest->reason }}</textarea>
+                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ $sellerRequest?->reason }}</textarea>
                                                 </div>
 
                                             </div>

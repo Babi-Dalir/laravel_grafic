@@ -55,7 +55,7 @@
                         <br>
 
                         <small class="text-muted">
-                            #{{ $settlement->seller->id }}
+                            {{ $settlement->seller->user?->email }}
                         </small>
                     </div>
                 </td>
@@ -106,7 +106,7 @@
 
                 {{-- پرداخت‌کننده --}}
                 <td class="text-center align-middle">
-                    {{ $settlement->admin?->name ?? '---' }}
+                    {{ $settlement->user?->name ?? '---' }}
                 </td>
 
                 {{-- تاریخ پرداخت --}}

@@ -59,7 +59,7 @@ class SellerController extends Controller
 
     public function sellerSettlementList()
     {
-        $title = "لیست تراکنشهای فروشنده";
+        $title = "لیست تسویه حساب ها";
         return view('seller.seller_settlements.list', compact('title'));
     }
 }

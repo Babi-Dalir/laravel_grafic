@@ -38,13 +38,12 @@ class Seller extends Model
     /**
      * 🧠 REAL BALANCE (settled money)
      */
-    public function getBalanceAttribute()
+    public function getPaidBalanceAttribute()
     {
         return $this->transactions()
             ->where('status', 'settled')
             ->sum('amount');
     }
-
     /**
      * 🧠 PENDING (30 days lock)
      */

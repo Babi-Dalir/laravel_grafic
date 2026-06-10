@@ -9,7 +9,4 @@ enum SettlementStatus:string
     // پول پرداخت شده
     case Paid = 'paid';
 
-    // درخواست رد شده
-    case Rejected = 'rejected';
-
 }

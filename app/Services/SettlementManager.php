@@ -34,7 +34,6 @@ class SettlementManager
             $settlement->transactions()->update([
                 'status' => 'settled',
                 'settled_at' => now(),
-                'settlement_id' => $settlement->id,
             ]);
         });
     }

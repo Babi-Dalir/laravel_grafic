@@ -19,5 +19,5 @@ Route::post('store_seller_product',[SellerController::class,'storeSellerProduct'
 //Seller Transaction Route
 Route::get('seller_transaction_list',[SellerController::class,'sellerTransactionList'])->name('seller.transaction.list');
 
-//Seller Transaction Route
+//Seller Settlement Route
 Route::get('seller_settlement_list',[SellerController::class,'sellerSettlementList'])->name('seller.settlement.list');
