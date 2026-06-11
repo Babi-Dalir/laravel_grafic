@@ -67,6 +67,7 @@
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($user->created_at)->format('%d%B، %Y')}}</td>
             </tr>
+        </tbody>
         @empty
             <tr>
                 <td colspan="9" class="text-center py-5" style="background-color: #f9f9f966;">

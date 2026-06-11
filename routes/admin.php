@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -104,3 +105,6 @@ Route::resource('discount_campaigns', DiscountCampaignController::class);
 
 //Product File Route
 Route::get('products/{product}/files',[ProductFileController::class,'index'])->name('product.file.list');
+
+//Seller Transaction Route
+Route::get('seller_transaction',[SellerController::class,'adminSellerTransactionList'])->name('admin.seller.transaction.list');

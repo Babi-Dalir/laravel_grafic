@@ -175,6 +175,12 @@
                     <li><a href="{{route('seller.settlement.list')}}">لیست تسویه ها</a></li>
                 </ul>
             </li>
+            <li>
+                <a href="#">تراکنش فروشندگان</a>
+                <ul>
+                    <li><a href="{{route('admin.seller.transaction.list')}}">لیست تراکنش ها</a></li>
+                </ul>
+            </li>
         </ul>
 {{--        @endhasanyrole--}}
 {{--        @hasanyrole('فروشنده|مدیر کل')--}}

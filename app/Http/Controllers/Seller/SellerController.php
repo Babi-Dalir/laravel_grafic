@@ -95,4 +95,11 @@ class SellerController extends Controller
             ->back()
             ->with('success', 'اطلاعات احراز هویت با موفقیت ثبت شد و در انتظار بررسی است.');
     }
+
+    public function adminSellerTransactionList()
+    {
+        $title = 'لیست تراکنش فروشندگان';
+
+        return view('admin.transactions.list', compact('title'));
+    }
 }
