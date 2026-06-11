@@ -28,6 +28,11 @@
                     <i class="icon ti-panel"></i>
                 </a>
             </li>
+            <li data-toggle="tooltip" title="احراز هویت فروشنده">
+                <a href="#verification" title="احراز هویت">
+                    <i class="icon ti-id-badge"></i>
+                </a>
+            </li>
 {{--            @endhasanyrole--}}
         </ul>
         <ul>
@@ -208,6 +213,7 @@
                         </a>
                     </li>
 
+
 {{--                    <li>--}}
 {{--                        <a href="{{route('seller.wallet')}}">--}}
 {{--                            کیف پول--}}
@@ -224,6 +230,22 @@
                     <li>
                         <a href="{{route('profile')}}">
                             پروفایل
+                        </a>
+                    </li>
+
+                </ul>
+            </li>
+
+        </ul>
+        <ul id="verification">
+
+            <li>
+                <a href="#">احراز هویت</a>
+                <ul>
+
+                    <li>
+                        <a href="{{ route('create.seller.verification') }}">
+                            تکمیل اطلاعات فروشنده
                         </a>
                     </li>
 

@@ -62,4 +62,37 @@ class SellerController extends Controller
         $title = "لیست تسویه حساب ها";
         return view('seller.seller_settlements.list', compact('title'));
     }
+
+    public function createSellerVerification()
+    {
+        $title = 'احراز هویت';
+
+        $seller = auth()->user()->seller;
+
+        return view(
+            'seller.seller_verifications.create',
+            compact('title', 'seller')
+        );
+    }
+    public function storeSellerVerification(Request $request)
+    {
+        $seller = auth()->user()->seller;
+
+        $seller->update([
+            'first_name'     => $request->first_name,
+            'last_name'      => $request->last_name,
+            'brand_name'     => $request->brand_name,
+            'national_code'  => $request->national_code,
+            'card_number'    => $request->card_number,
+            'account_number' => $request->account_number,
+            'iban'           => strtoupper($request->iban),
+
+            // ارسال برای بررسی ادمین
+            'status' => 'pending',
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'اطلاعات احراز هویت با موفقیت ثبت شد و در انتظار بررسی است.');
+    }
 }

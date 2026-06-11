@@ -13,6 +13,9 @@
             <th class="text-center align-middle text-primary">نام محصول</th>
             <th class="text-center align-middle text-primary">قیمت</th>
             <th class="text-center align-middle text-primary">تخفیف</th>
+            <th class="text-center align-middle text-primary">درصد کمیسیون</th>
+            <th class="text-center align-middle text-primary">سهم سایت</th>
+            <th class="text-center align-middle text-primary">سهم فروشنده</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">تعداد دانلود</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
@@ -26,6 +29,9 @@
                 <td class="text-center align-middle">{{$order_detail->product->name}}</td>
                 <td class="text-center align-middle">{{number_format($order_detail->price)}} تومان </td>
                 <td class="text-center align-middle">{{number_format($order_detail->discount)}} تومان</td>
+                <td class="text-center align-middle">{{number_format($order_detail->product->category->commission?->commission_percent)}} %</td>
+                <td class="text-center align-middle">{{number_format($order_detail->site_share)}} تومان</td>
+                <td class="text-center align-middle">{{number_format($order_detail->seller_share)}} تومان</td>
                 <td class="text-center align-middle" wire:click="changeOrderDetailStatus({{$order_detail->id}})">
                     @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid->value)
                         <span class="cursor-pointer badge badge-success">پرداخت شده</span>

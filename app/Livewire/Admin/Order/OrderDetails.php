@@ -45,6 +45,7 @@ class OrderDetails extends Component
     public function render()
     {
         $order_details = OrderDetail::query()
+            ->where('order_id',$this->order->id)
             ->whereHas('product',function ($q){
                 return $q->where('name','like','%'.$this->search.'%');
             })

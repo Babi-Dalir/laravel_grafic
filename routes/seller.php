@@ -21,3 +21,7 @@ Route::get('seller_transaction_list',[SellerController::class,'sellerTransaction
 
 //Seller Settlement Route
 Route::get('seller_settlement_list',[SellerController::class,'sellerSettlementList'])->name('seller.settlement.list');
+
+//Seller verification Route
+Route::get('create_seller_verification',[SellerController::class,'createSellerVerification'])->name('create.seller.verification');
+Route::post('store_seller_verification',[SellerController::class,'storeSellerVerification'])->name('store.seller.verification');
