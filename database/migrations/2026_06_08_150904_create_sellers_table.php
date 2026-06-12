@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('account_number', 50)->nullable();
             $table->string('iban', 50)->nullable();
 
-            $table->string('status')->default(\App\Enums\SellerStatus::Active->value);
+            $table->string('status')->default(\App\Enums\SellerStatus::Pending->value);
 
             $table->boolean('bank_verified')->default(false);
             $table->timestamp('verified_at')->nullable();

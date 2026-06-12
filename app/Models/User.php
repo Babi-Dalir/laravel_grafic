@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\SellerStatus;
 use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -113,9 +114,12 @@ class User extends Authenticatable
             'image'=>$request->image ? $imageName : $user->image
         ]);
     }
-    public function increaseWallet($amount)
+
+    public function isActiveSeller(): bool
     {
-        $this->increment('wallet_balance', $amount);
+        return $this->hasAnyRole(['فروشنده'])
+            && $this->seller
+            && $this->seller->status === SellerStatus::Active->value;
     }
 
 }

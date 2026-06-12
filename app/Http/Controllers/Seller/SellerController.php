@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Enums\SellerRequestStatus;
+use App\Enums\SellerStatus;
 use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
@@ -77,7 +78,7 @@ class SellerController extends Controller
             'iban'           => strtoupper($request->iban),
 
             // ارسال برای بررسی ادمین
-            'status' => 'pending',
+            'status' => SellerStatus::Pending->value,
         ]);
 
         return redirect()

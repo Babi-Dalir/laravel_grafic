@@ -39,10 +39,10 @@ class SellerRequestList extends Component
 
             // 3. ساخت رکورد seller (اگر وجود ندارد)
             if (! $user->seller) {
-                Seller::create([
+                Seller::query()->create([
                     'user_id' => $user->id,
                     'first_name' => $user->name, // یا از request
-                    'status' => SellerStatus::Active->value,
+                    'status' => SellerStatus::Pending->value,
                 ]);
             }
 

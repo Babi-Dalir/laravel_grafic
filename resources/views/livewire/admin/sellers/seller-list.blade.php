@@ -45,6 +45,12 @@
                                 <i class="ti-check-box mr-1"></i>
                                 <span>فعال</span>
                             </div>
+                        @elseif($seller->status === \App\Enums\SellerStatus::Pending->value)
+                            <div class="modern-status-btn waiting">
+                                <div class="status-pulse"></div>
+                                <i class="ti-time mr-1"></i>
+                                <span> در حال بررسی</span>
+                            </div>
                         @elseif($seller->status === \App\Enums\SellerStatus::Rejected->value)
                             <div class="modern-status-btn inactive">
                                 <i class="ti-power-off mr-1"></i>

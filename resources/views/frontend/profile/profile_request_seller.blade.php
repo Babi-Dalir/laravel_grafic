@@ -195,23 +195,58 @@
                                             @endif
 
                                         </div>
+                                        @if(
+                                            $sellerRequest &&
+                                            $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value
+                                        )
 
-                                        <div class="dt-sl">
+                                            <div class="verification-card mt-4 p-4 shadow-sm rounded-lg">
 
-                                            <div class="form-row mt-3 justify-content-end">
+                                                <div class="d-flex align-items-center justify-content-between flex-wrap">
 
-                                                <button type="submit"
-                                                        class="btn-primary-cm btn-with-icon ml-2">
+                                                    <div class="d-flex align-items-center mb-2 mb-md-0">
 
-                                                    <i class="mdi mdi-account-check-outline"></i>
+                                                        <div class="verification-icon mr-3">
+                                                            <i class="mdi mdi-shield-check-outline"></i>
+                                                        </div>
 
-                                                    ارسال درخواست همکاری
+                                                        <div>
+                                                            <h5 class="mb-1">احراز هویت فروشنده</h5>
+                                                            <small class="text-muted">
+                                                                درخواست شما تایید شده است. برای فعال‌سازی کامل حساب، احراز هویت را تکمیل کنید.
+                                                            </small>
+                                                        </div>
 
-                                                </button>
+                                                    </div>
+
+                                                    <a href="{{ route('profile.verification.seller') }}"
+                                                       class="verification-btn">
+                                                        شروع احراز هویت
+                                                        <i class="mdi mdi-arrow-left ml-1"></i>
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+                                        @else
+                                            <div class="dt-sl">
+
+                                                <div class="form-row mt-3 justify-content-end">
+
+                                                    <button type="submit"
+                                                            class="btn-primary-cm btn-with-icon ml-2">
+
+                                                        <i class="mdi mdi-account-check-outline"></i>
+
+                                                        ارسال درخواست همکاری
+
+                                                    </button>
+
+                                                </div>
 
                                             </div>
 
-                                        </div>
+                                        @endif
 
                                     </form>
 

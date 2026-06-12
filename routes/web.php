@@ -46,4 +46,5 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile_downloads', [ProfileController::class, 'profileDownloads'])->name('profile.downloads');
     Route::get('/profile_seller_request', [ProfileController::class, 'profileRequestSeller'])->name('profile.request.seller');
     Route::post('/profile_store_seller_request', [ProfileController::class, 'profileStoreRequestSeller'])->name('profile.store.request.seller');
+    Route::get('/profile_verification_request', [ProfileController::class, 'profileVerificationSeller'])->name('profile.verification.seller');
 });

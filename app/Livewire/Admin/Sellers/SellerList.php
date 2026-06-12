@@ -18,17 +18,22 @@ class SellerList extends Component
     public function changeStatus($id)
     {
         $seller = Seller::query()->find($id);
-        if ($seller->status == SellerStatus::Active->value){
+        if ($seller->status == SellerStatus::Pending->value){
             $seller->update([
-                'status'=>SellerStatus::Suspended->value
+                'status'=>SellerStatus::Active->value
             ]);
-        }elseif ($seller->status == SellerStatus::Suspended->value){
+        }elseif ($seller->status == SellerStatus::Active->value){
             $seller->update([
                 'status'=>SellerStatus::Rejected->value
             ]);
         }elseif ($seller->status == SellerStatus::Rejected->value){
             $seller->update([
-                'status'=>SellerStatus::Active->value
+                'status'=>SellerStatus::Suspended->value
+            ]);
+        }
+        elseif ($seller->status == SellerStatus::Suspended->value){
+            $seller->update([
+                'status'=>SellerStatus::Pending->value
             ]);
         }
     }

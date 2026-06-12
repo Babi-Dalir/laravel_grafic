@@ -10,6 +10,7 @@ use App\Models\Downloads;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\Seller;
 use App\Models\SellerRequest;
 use Illuminate\Http\Request;
 
@@ -108,5 +109,20 @@ class ProfileController extends Controller
             'message',
             'درخواست شما با موفقیت ثبت شد'
         );
+    }
+
+    public function profileVerificationSeller()
+    {
+        $user = auth()->user();
+
+        // گرفتن اطلاعات فروشنده مربوط به کاربر
+        $seller = Seller::query()->where('user_id', $user->id)->first();
+
+        // اگر نبود، یک instance خالی برای جلوگیری از error در view
+        if (!$seller) {
+            $seller = new Seller();
+        }
+
+        return view('frontend.profile.profile_verification_seller', compact('seller'));
     }
 }
