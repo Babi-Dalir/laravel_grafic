@@ -11785,3 +11785,9 @@ body.dark .ui-datepicker select {
     color: white;
     box-shadow: 0 4px 12px rgba(99, 110, 114, 0.3);
 }
+
+
+.main-content {
+    margin-right: 260px; /* برای RTL (سایدبار راست) */
+    transition: all 0.3s ease;
+}

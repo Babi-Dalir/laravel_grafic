@@ -1,87 +1,157 @@
 @extends('admin.layouts.master')
+
 @section('content')
-    <main class="main-content">
-        <div class="row">
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card">
+
+    <div class="main-content p-4">
+
+        {{-- KPI CARDS --}}
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="font-weight-bold m-b-10 line-height-30 primary-font">1</h2>
-                                <h6 class="mb-2 font-size-13 font-weight-bold primary-font" style="color: rgb(220, 53, 69);">تعداد کاربران</h6>
-                            </div>
-                            <div>
-                                <span class="dashboard-pie-1" style="display: none;">2/5</span>
-                                <svg class="peity" height="60" width="60">
-                                    <path d="M 30 0 A 30 30 0 0 1 47.63 54.27 L 30 30" fill="rgba(220, 53, 69, 0.3)"></path>
-                                    <path d="M 47.63 54.27 A 30 30 0 1 1 30 0 L 30 30" fill="rgb(220, 53, 69)"></path>
-                                </svg>
-                            </div>
-                        </div>
+                        <small>سفارش امروز</small>
+                        <h3>{{ $kpis['today_orders'] }}</h3>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="font-weight-bold m-b-10 line-height-30 primary-font">1</h2>
-                                <h6 class="mb-2 font-size-13 font-weight-bold primary-font" style="color: rgb(111, 66, 193);">تعداد فروش</h6>
-                            </div>
-                            <div>
-                                <span class="dashboard-pie-2" style="display: none;">4/5</span>
-                                <svg class="peity" height="60" width="60">
-                                    <path d="M 30 0 A 30 30 0 1 1 1.47 20.73 L 30 30" fill="rgba(111, 66, 193, 0.3)"></path>
-                                    <path d="M 1.47 20.73 A 30 30 0 0 1 30 0 L 30 30" fill="rgb(111, 66, 193)"></path>
-                                </svg>
-                            </div>
-                        </div>
+                        <small>فروش امروز</small>
+                        <h3>{{ number_format($kpis['today_sales']) }}</h3>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="font-weight-bold m-b-10 line-height-30 primary-font">1</h2>
-                                <h6 class="mb-2 font-size-13 font-weight-bold primary-font" style="color: rgb(255, 123, 0);">مجموع نظرات</h6>
-                            </div>
-                            <div>
-                                <span class="dashboard-pie-3" style="display: none;">1/5</span>
-                                <svg class="peity" height="60" width="60">
-                                    <path d="M 30 0 A 30 30 0 0 1 58.53 20.73 L 30 30" fill="rgba(255, 123, 0, 0.3)"></path>
-                                    <path d="M 58.53 20.73 A 30 30 0 1 1 30 0 L 30 30" fill="rgb(255, 123, 0)"></path>
-                                </svg>
-                            </div>
-                        </div>
+                        <small>فروش ماه</small>
+                        <h3>{{ number_format($kpis['month_sales']) }}</h3>
                     </div>
                 </div>
             </div>
 
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="font-weight-bold m-b-10 line-height-30 primary-font">1</h2>
-                                <h6 class="mb-2 font-size-13 font-weight-bold primary-font" style="color: rgb(40, 167, 69);">تعداد محصولات</h6>
-                            </div>
-                            <div>
-                                <span class="dashboard-pie-4" style="display: none;">2/5</span>
-                                <svg class="peity" height="60" width="60">
-                                    <path d="M 30 0 A 30 30 0 0 1 47.63 54.27 L 30 30" fill="rgba(40, 167, 69, 0.3)"></path>
-                                    <path d="M 47.63 54.27 A 30 30 0 1 1 30 0 L 30 30" fill="rgb(40, 167, 69)"></path>
-                                </svg>
-                            </div>
-                        </div>
+                        <small>درآمد سایت</small>
+                        <h3>{{ number_format($kpis['total_site_income']) }}</h3>
                     </div>
                 </div>
             </div>
 
         </div>
-    </main>
+
+        {{-- SELLERS --}}
+        <div class="row mt-4 g-3">
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6>فروشندگان فعال</h6>
+                        <h3>{{ $sellers['active_sellers'] }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6>بالانس در انتظار</h6>
+                        <h3>{{ number_format($sellers['pending_balance']) }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6>تسویه شده</h6>
+                        <h3>{{ number_format($sellers['settled_balance']) }}</h3>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- CHART --}}
+        <div class="card mt-4 shadow-sm border-0">
+            <div class="card-body">
+                <h5>نمودار فروش سالانه</h5>
+                <canvas id="chart"></canvas>
+            </div>
+        </div>
+
+        {{-- LATEST --}}
+        <div class="row mt-4">
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5>آخرین سفارش‌ها</h5>
+
+                        @foreach($latest['latest_orders'] as $order)
+                            <div class="border-bottom py-2">
+                                #{{ $order->id }} - {{ $order->user->name ?? '---' }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5>آخرین تسویه‌ها</h5>
+
+                        @foreach($latest['latest_settlements'] as $settlement)
+                            <div class="border-bottom py-2">
+                                {{ $settlement->seller->user->name ?? '---' }}
+                                {{ $settlement->seller->user->mobile ?? '---' }}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+@endsection
+
+@section('scripts')
+
+    <script>
+        const ctx = document.getElementById('chart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: @json($chart['months']),
+                datasets: [{
+                    label: 'Sales',
+                    data: @json($chart['sales']),
+                    borderColor: '#3b82f6',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        console.log("month clicked:", index);
+                    }
+                }
+            }
+        });
+    </script>
+
 @endsection
