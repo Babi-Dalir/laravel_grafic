@@ -1,7 +1,7 @@
 @extends('frontend.layouts.master')
 
 @section('content')
-
+    @include('frontend.layouts.header')
     <main class="main-content dt-sl mb-3">
 
         <div class="container main-container">
@@ -112,10 +112,17 @@
                             </div>
 
                             {{-- Warning Box --}}
-                            <div class="alert alert-warning mt-4">
-                                <strong>توجه:</strong>
-                                پس از ثبت اطلاعات، درخواست شما بررسی خواهد شد و امکان ویرایش محدود می‌شود.
-                            </div>
+                            @if($seller->status === \App\Enums\SellerStatus::Active->value)
+                                <div class="alert alert-success mt-4">
+                                    احراز هویت شما تکمیل است و مورد تایید مدیر قرار گرفته است.
+                                </div>
+
+                            @else
+                                <div class="alert alert-warning mt-4">
+                                    <strong>توجه:</strong>
+                                    پس از ثبت اطلاعات، درخواست شما بررسی خواهد شد و امکان ویرایش محدود می‌شود.
+                                </div>
+                            @endif
 
                             {{-- Submit --}}
                             <div class="text-left mt-4">
