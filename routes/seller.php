@@ -7,9 +7,6 @@ Route::get('seller_requests', [SellerController::class, 'sellerRequestsList'])
     ->name('seller.requests.list');
 
 
-//Download Resume Route
-Route::get('download_resume/{request}', [SellerController::class, 'downloadResume'])
-    ->name('download.resume');
 //Seller Product Route
 Route::get('seller_product_list',[SellerController::class,'sellerProductList'])->name('seller.product.list');
 
@@ -18,9 +15,6 @@ Route::post('store_seller_product',[SellerController::class,'storeSellerProduct'
 
 //Seller Transaction Route
 Route::get('seller_transaction_list',[SellerController::class,'sellerTransactionList'])->name('seller.transaction.list');
-
-//Seller Settlement Route
-Route::get('seller_settlement_list',[SellerController::class,'sellerSettlementList'])->name('seller.settlement.list');
 
 //Seller verification Route
 Route::get('create_seller_verification',[SellerController::class,'createSellerVerification'])->name('create.seller.verification');

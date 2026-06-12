@@ -87,10 +87,4 @@ class UserController extends Controller
         $user->syncRoles($request->roles);
         return redirect()->route('users.index')->with('message', 'کاربر باموفقیت به نقش متصل شد');
     }
-
-    public function sellerList()
-    {
-        $title = "لیست فروشندگان";
-        return view('admin.sellers.list',compact('title'));
-    }
 }

@@ -55,7 +55,7 @@
                         <br>
 
                         <small class="text-muted">
-                            {{ $settlement->seller->user?->email }}
+                            {{ $settlement->seller->user?->mobile }}
                         </small>
                     </div>
                 </td>

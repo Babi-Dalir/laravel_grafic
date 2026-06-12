@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -39,8 +40,6 @@ Route::get('/', [PanelController::class, 'index'])->name('panel');
 Route::resource('users', UserController::class);
 Route::get('create_user_role/{id}', [UserController::class, 'createUserRole'])->name('create.user.role');
 Route::post('store_user_role/{id}', [UserController::class, 'storeUserRole'])->name('store.user.role');
-
-Route::get('seller_list', [UserController::class, 'sellerList'])->name('seller.list');
 
 //roles Route
 Route::resource('roles', RoleController::class);
@@ -106,5 +105,16 @@ Route::resource('discount_campaigns', DiscountCampaignController::class);
 //Product File Route
 Route::get('products/{product}/files',[ProductFileController::class,'index'])->name('product.file.list');
 
+//Download Resume Route
+Route::get('download_resume/{request}', [AdminSellerController::class, 'downloadResume'])
+    ->name('download.resume');
+
+//Seller List Route
+Route::get('seller_list', [AdminSellerController::class, 'sellerList'])->name('seller.list');
+
+//Seller Settlement Route
+Route::get('seller_settlement_list',[AdminSellerController::class,'sellerSettlementList'])->name('seller.settlement.list');
+
 //Seller Transaction Route
-Route::get('seller_transaction',[SellerController::class,'adminSellerTransactionList'])->name('admin.seller.transaction.list');
+Route::get('seller_transaction',[AdminSellerController::class,'adminSellerTransactionList'])->name('admin.seller.transaction.list');
+

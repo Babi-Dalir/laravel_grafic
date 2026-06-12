@@ -27,11 +27,6 @@ class SellerController extends Controller
         return view('seller.seller_requests.list',compact('title','requests'));
     }
 
-    public function downloadResume(SellerRequest $request)
-    {
-        $path = Storage::disk('files')->path($request->resume);
-        return response()->download($path);
-    }
     public function sellerProductList()
     {
         $title = "لیست محصولات فروشنده";
@@ -55,12 +50,6 @@ class SellerController extends Controller
     {
         $title = "لیست تراکنشهای فروشنده";
         return view('seller.seller_transactions.list', compact('title'));
-    }
-
-    public function sellerSettlementList()
-    {
-        $title = "لیست تسویه حساب ها";
-        return view('seller.seller_settlements.list', compact('title'));
     }
 
     public function createSellerVerification()
@@ -94,12 +83,5 @@ class SellerController extends Controller
         return redirect()
             ->back()
             ->with('success', 'اطلاعات احراز هویت با موفقیت ثبت شد و در انتظار بررسی است.');
-    }
-
-    public function adminSellerTransactionList()
-    {
-        $title = 'لیست تراکنش فروشندگان';
-
-        return view('admin.transactions.list', compact('title'));
     }
 }

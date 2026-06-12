@@ -18,7 +18,7 @@
             <th class="text-center align-middle text-primary">نام برند</th>
             <th class="text-center align-middle text-primary">کد ملی</th>
             <th class="text-center align-middle text-primary"> وضعیت</th>
-            <th class="text-center align-middle text-primary">ویرایش</th>
+            <th class="text-center align-middle text-primary"> جزئیات فروشنده</th>
             <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
         </tr>
