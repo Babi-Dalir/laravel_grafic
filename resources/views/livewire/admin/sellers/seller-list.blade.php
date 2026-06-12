@@ -60,8 +60,8 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-info" href="#">
-                        ویرایش
+                    <a class="btn btn-outline-info" href="{{route('admin.seller.detail',$seller->id)}}">
+                        جزئیات فروشنده
                     </a>
                 </td>
                 <td class="text-center align-middle">

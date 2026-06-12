@@ -118,3 +118,6 @@ Route::get('seller_settlement_list',[AdminSellerController::class,'sellerSettlem
 //Seller Transaction Route
 Route::get('seller_transaction',[AdminSellerController::class,'adminSellerTransactionList'])->name('admin.seller.transaction.list');
 
+//Seller Detail Route
+Route::get('seller_detail/{seller_id}',[AdminSellerController::class,'adminSellerDetail'])->name('admin.seller.detail');
+
