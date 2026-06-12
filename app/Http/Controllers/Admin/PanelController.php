@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrderDetailStatus;
+use App\Enums\OrderStatus;
 use App\Enums\SellerStatus;
 use App\Enums\SettlementStatus;
 use App\Enums\WalletTransactionStatus;
@@ -29,10 +31,12 @@ class PanelController extends Controller
             ->count();
 
         $todaySales = OrderDetail::query()
+            ->where('status',OrderDetailStatus::Paid->value)
             ->whereDate('created_at', today())
             ->sum('price');
 
         $monthSales = OrderDetail::query()
+            ->where('status',OrderDetailStatus::Paid->value)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('price');
@@ -50,11 +54,13 @@ class PanelController extends Controller
             ->sum('amount');
 
         $siteIncomeMonth = OrderDetail::query()
+            ->where('status',OrderDetailStatus::Paid->value)
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('site_share');
 
         $totalSiteIncome = OrderDetail::query()
+            ->where('status',OrderDetailStatus::Paid->value)
             ->sum('site_share');
 
         $latestSettlements = SellerSettlement::query()
@@ -66,6 +72,7 @@ class PanelController extends Controller
 
         $latestOrders = Order::query()
             ->with('user')
+            ->where('status', OrderStatus::Payed->value)
             ->latest()
             ->take(10)
             ->get();

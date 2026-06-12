@@ -34,11 +34,16 @@
                 </div>
             </div>
 
+
             <div class="col-md-3">
                 <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <small>درآمد سایت</small>
+                        <small>کل درآمد سایت</small>
                         <h3>{{ number_format($kpis['total_site_income']) }}</h3>
+                    </div>
+                    <div class="card-body">
+                        <small>درآمد ماهانه سایت</small>
+                        <h3>{{ number_format($kpis['site_income_month']) }}</h3>
                     </div>
                 </div>
             </div>
@@ -60,7 +65,7 @@
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <h6>بالانس در انتظار</h6>
+                        <h6>در انتظار تسویه</h6>
                         <h3>{{ number_format($sellers['pending_balance']) }}</h3>
                     </div>
                 </div>
