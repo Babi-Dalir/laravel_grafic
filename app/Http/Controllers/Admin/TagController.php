@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TagRequest;
 use App\Models\Brand;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class TagController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TagRequest $request)
     {
         Tag::createTag($request);
         return redirect()->route('tags.index')->with('message', 'تگ جدید با موفقیت ایجاد شد');
@@ -58,7 +59,7 @@ class TagController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(TagRequest $request, string $id)
     {
         Tag::updateTag($request,$id);
         return redirect()->route('tags.index')->with('message', 'تگ با موفقیت ویرایش شد');

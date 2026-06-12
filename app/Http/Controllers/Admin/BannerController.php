@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBannerRequest;
 use App\Models\Banner;
-use App\Models\Brand;
-use Illuminate\Http\Request;
 
 class BannerController extends Controller
 {
@@ -31,7 +30,7 @@ class BannerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBannerRequest $request)
     {
         Banner::createBanner($request);
         return redirect()->route('banners.index')->with('message', 'بنر جدید با موفقیت ایجاد شد');
@@ -58,7 +57,7 @@ class BannerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreBannerRequest $request, string $id)
     {
         Banner::updateBanner($request,$id);
         return redirect()->route('banners.index')->with('message', 'بنر با موفقیت ویرایش شد');

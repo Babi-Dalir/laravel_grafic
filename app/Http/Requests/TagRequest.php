@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProductPriceRequest extends FormRequest
+class TagRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,19 +23,22 @@ class ProductPriceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id'=>[
+            'name' => [
                 'required',
-                Rule::unique('product_prices','product_id')
-                ->where('guaranty_id',$this->input('guaranty_id'))
-                ->where('color_id',$this->input('color_id'))
-                ->where('user_id',auth()->user()->id)
-            ]
+                'string',
+                'max:255',
+                Rule::unique('tags', 'name')->ignore($this->tag),
+            ],
         ];
     }
-    public function messages()
+
+    public function messages(): array
     {
         return [
-            'product_id.unique'=>"برای این محصول با این رنگ و گارانتی تنوع قیمت ثبت شده"
+            'name.required' => 'نام تگ الزامی است',
+            'name.string' => 'نام تگ باید متن باشد',
+            'name.max' => 'نام تگ نباید بیشتر از 255 کاراکتر باشد',
+            'name.unique' => 'این تگ قبلاً ثبت شده است',
         ];
     }
 }

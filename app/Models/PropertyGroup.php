@@ -35,7 +35,7 @@ class PropertyGroup extends Model
 
     public static function updatePropertyGroup($request,$id)
     {
-        $property_group = PropertyGroup::query()->find($id);
+        $property_group = PropertyGroup::query()->findOrFail($id);
         $property_group->update([
             'name'=>$request->input('name'),
             'category_id'=>$request->input('category_id'),

@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DiscountCampaignRequest;
 use App\Models\Category;
 use App\Models\DiscountCampaign;
 use App\Models\Product;
-use App\Models\Tag;
-use Illuminate\Http\Request;
 
 class DiscountCampaignController extends Controller
 {
@@ -35,7 +34,7 @@ class DiscountCampaignController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(DiscountCampaignRequest $request)
     {
         DiscountCampaign::createCampaign($request);
         return redirect()->route('discount_campaigns.index')->with('message', 'کمپین جدید با موفقیت ایجاد شد');
@@ -66,7 +65,7 @@ class DiscountCampaignController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(DiscountCampaignRequest $request, string $id)
     {
         DiscountCampaign::updateCampaign($request,$id);
         return redirect()->route('discount_campaigns.index')->with('message', 'کمپین با موفقیت ویرایش شد');

@@ -4,12 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PropertyGroupRequest;
-use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Product;
 use App\Models\PropertyGroup;
-use App\Models\Tag;
-use Illuminate\Http\Request;
 
 class PropertyGroupController extends Controller
 {

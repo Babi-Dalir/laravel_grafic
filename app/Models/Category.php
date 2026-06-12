@@ -49,7 +49,7 @@ class Category extends Model
         Category::query()->create([
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
-            'slug' => str()->slug($request->e_name),
+            'slug' => str()->slug($request->input('e_name')),
             'image' => ImageManager::saveImage('categories', $request->image),
             'parent_id' => $request->input('parent_id'),
 
@@ -65,7 +65,7 @@ class Category extends Model
         $category->update([
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
-            'slug' => str()->slug($request->e_name),
+            'slug' => str()->slug($request->input('e_name')),
             'image' => $request->image ? $imageName : $category->image,
             'parent_id' => $request->input('parent_id'),
 

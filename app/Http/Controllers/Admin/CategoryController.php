@@ -4,11 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
-use App\Http\Requests\createUserRequest;
-use App\Http\Requests\EditUserRequest;
 use App\Models\Category;
-use App\Models\User;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {

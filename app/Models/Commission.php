@@ -26,7 +26,7 @@ class Commission extends Model
 
     public static function updateCommission($request,$id)
     {
-        $commission = Commission::query()->find($id);
+        $commission = Commission::query()->findOrFail($id);
         $commission->update([
             'commission_percent'=>$request->input('commission_percent'),
             'category_id'=>$request->input('category_id'),

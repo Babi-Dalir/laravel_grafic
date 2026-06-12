@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SliderRequest;
 use App\Models\Brand;
 use App\Models\Slider;
 use Illuminate\Http\Request;
@@ -31,7 +32,7 @@ class SliderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(SliderRequest $request)
     {
         Slider::createSlider($request);
         return redirect()->route('sliders.index')->with('message', 'اسلایدر جدید با موفقیت ایجاد شد');
@@ -58,7 +59,7 @@ class SliderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(SliderRequest $request, string $id)
     {
         Slider::updateSlider($request,$id);
         return redirect()->route('sliders.index')->with('message', 'اسلایدر با موفقیت ویرایش شد');

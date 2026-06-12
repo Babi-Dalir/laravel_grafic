@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PropertyGroupRequest;
+use App\Http\Requests\CommissionRequest;
 use App\Models\Category;
 use App\Models\Commission;
-use App\Models\PropertyGroup;
-use Illuminate\Http\Request;
 
 class CommissionController extends Controller
 {
@@ -34,7 +32,7 @@ class CommissionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CommissionRequest $request)
     {
         Commission::createCommission($request);
         return redirect()->route('commissions.index')->with('message', 'کمیسیون با موفقیت ایجاد شد');
@@ -62,7 +60,7 @@ class CommissionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CommissionRequest $request, string $id)
     {
         Commission::updateCommission($request,$id);
         return redirect()->route('commissions.index')->with('message', 'کمیسیون با موفقیت ویرایش شد');
