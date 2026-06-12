@@ -4,8 +4,6 @@
 
     <main class="main-content">
 
-        @include('admin.layouts.error')
-
         <div class="card">
             <div class="card-body">
 
@@ -20,85 +18,97 @@
 
                         @csrf
 
+                        {{-- first_name --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                نام
-                            </label>
+                            <label class="col-sm-2 col-form-label">نام</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
                                        name="first_name"
                                        class="form-control"
                                        value="{{ old('first_name',$seller?->first_name) }}">
+
+                                @error('first_name')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
+                        {{-- last_name --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                نام خانوادگی
-                            </label>
+                            <label class="col-sm-2 col-form-label">نام خانوادگی</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
                                        name="last_name"
                                        class="form-control"
                                        value="{{ old('last_name',$seller?->last_name) }}">
+
+                                @error('last_name')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
+                        {{-- brand_name --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                نام برند (اختیاری)
-                            </label>
+                            <label class="col-sm-2 col-form-label">نام برند (اختیاری)</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
                                        name="brand_name"
                                        class="form-control"
                                        value="{{ old('brand_name',$seller?->brand_name) }}">
+
+                                @error('brand_name')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
+                        {{-- national_code --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                کد ملی
-                            </label>
+                            <label class="col-sm-2 col-form-label">کد ملی</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
-                                       maxlength="10"
                                        name="national_code"
                                        class="form-control text-left"
                                        dir="ltr"
+                                       maxlength="10"
                                        value="{{ old('national_code',$seller?->national_code) }}">
+
+                                @error('national_code')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
                         <hr>
 
-                        <h6 class="text-info mb-4">
-                            اطلاعات بانکی
-                        </h6>
+                        <h6 class="text-info mb-4">اطلاعات بانکی</h6>
 
+                        {{-- card_number --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                شماره کارت
-                            </label>
+                            <label class="col-sm-2 col-form-label">شماره کارت</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
-                                       maxlength="16"
                                        name="card_number"
                                        class="form-control text-left"
                                        dir="ltr"
+                                       maxlength="16"
                                        value="{{ old('card_number',$seller?->card_number) }}">
+
+                                @error('card_number')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
+                        {{-- account_number --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                شماره حساب
-                            </label>
+                            <label class="col-sm-2 col-form-label">شماره حساب</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
@@ -106,13 +116,16 @@
                                        class="form-control text-left"
                                        dir="ltr"
                                        value="{{ old('account_number',$seller?->account_number) }}">
+
+                                @error('account_number')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
+                        {{-- iban --}}
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">
-                                شماره شبا
-                            </label>
+                            <label class="col-sm-2 col-form-label">شماره شبا</label>
 
                             <div class="col-sm-10">
                                 <input type="text"
@@ -121,31 +134,24 @@
                                        dir="ltr"
                                        placeholder="IRxxxxxxxxxxxxxxxxxxxxxxxx"
                                        value="{{ old('iban',$seller?->iban) }}">
+
+                                @error('iban')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
                             </div>
                         </div>
 
                         <hr>
 
                         <div class="alert alert-warning">
-
                             <strong>توجه:</strong>
-
-                            پس از ثبت اطلاعات، درخواست شما جهت بررسی برای مدیریت ارسال خواهد شد.
-                            تا زمان تایید اطلاعات بانکی امکان تسویه حساب وجود نخواهد داشت.
-
+                            پس از ثبت اطلاعات، درخواست شما بررسی می‌شود.
                         </div>
 
                         <div class="form-group row mt-4">
-
-                            <button type="submit"
-                                    class="btn btn-success btn-uppercase">
-
-                                <i class="ti-check-box m-r-5"></i>
-
+                            <button type="submit" class="btn btn-success btn-uppercase">
                                 ذخیره اطلاعات
-
                             </button>
-
                         </div>
 
                     </form>

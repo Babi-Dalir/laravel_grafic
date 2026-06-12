@@ -6,6 +6,8 @@ use App\Enums\SellerRequestStatus;
 use App\Enums\SellerStatus;
 use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
+use App\Http\Requests\SellerVerificationRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Seller;
@@ -41,7 +43,7 @@ class SellerController extends Controller
         $tags = Tag::query()->pluck('name','id');
         return view('admin.sellers.create',compact('title','categories','tags'));
     }
-    public function storeSellerProduct(Request $request)
+    public function storeSellerProduct(ProductRequest $request)
     {
         Seller::createSellerProduct($request);
         return redirect()->route('products.index')->with('message', 'محصول وارد شده توسط فروشنده با موفقیت ثبت شد');
@@ -64,7 +66,7 @@ class SellerController extends Controller
             compact('title', 'seller')
         );
     }
-    public function storeSellerVerification(Request $request)
+    public function storeSellerVerification(SellerVerificationRequest $request)
     {
         $seller = auth()->user()->seller;
 

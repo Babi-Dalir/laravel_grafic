@@ -5,6 +5,8 @@ namespace App\Http\Controllers\FrontEnd;
 use App\Helpers\FileManager;
 use App\Helpers\ImageManager;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProfileSellerRequest;
+use App\Http\Requests\ProfileUpdate;
 use App\Models\Comment;
 use App\Models\Downloads;
 use App\Models\Order;
@@ -27,7 +29,7 @@ class ProfileController extends Controller
         return view('frontend.profile.profile', compact('user','instant_offers'));
     }
 
-    public function profileUpdate(Request $request)
+    public function profileUpdate(ProfileUpdate $request)
     {
         $user = auth()->user();
         if ($request->hasFile('image')) {
@@ -92,7 +94,7 @@ class ProfileController extends Controller
         return view('frontend.profile.profile_request_seller', compact('user','sellerRequest'));
     }
 
-    public function profileStoreRequestSeller(Request $request)
+    public function profileStoreRequestSeller(ProfileSellerRequest $request)
     {
         $user = auth()->user();
 

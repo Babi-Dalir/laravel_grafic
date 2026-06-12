@@ -47,6 +47,9 @@
                                                            value="{{ $sellerRequest?->brand_name }}"
                                                            placeholder="مثال: Graphic Master">
                                                 </div>
+                                                @error('brand_name')
+                                                <small class="text-danger">{{ $message }}</small>
+                                                @enderror
                                             </div>
 
                                             {{-- لینک نمونه کار --}}
@@ -61,6 +64,9 @@
                                                            value="{{ $sellerRequest?->portfolio }}"
                                                            placeholder="https://behance.net/...">
                                                 </div>
+                                                @error('portfolio')
+                                                <small class="text-danger">{{ $message }}</small>
+                                                @enderror
                                             </div>
 
                                             {{-- وضعیت درخواست --}}
@@ -111,7 +117,9 @@
                                 class="input-ui pr-2"
                                 placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ $sellerRequest?->reason }}</textarea>
                                                 </div>
-
+                                                @error('reason')
+                                                <small class="text-danger">{{ $message }}</small>
+                                                @enderror
                                             </div>
 
                                             {{-- فایل رزومه --}}
@@ -144,7 +152,9 @@
                                                     </div>
 
                                                 </div>
-
+                                                @error('resume')
+                                                <small class="text-danger">{{ $message }}</small>
+                                                @enderror
                                             </div>
                                             @if(
                                                 $sellerRequest &&
