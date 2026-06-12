@@ -9359,3 +9359,124 @@ footer.mini-footer .copy-right-mini-footer {
     text-decoration: line-through;
     opacity: 0.7;
 }
+
+
+#page-loader{
+    position:fixed;
+    inset:0;
+    background:#ffffff;
+    z-index:99999;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    transition:all .8s ease;
+}
+
+#page-loader.hide{
+    opacity:0;
+    visibility:hidden;
+}
+
+.loader-logo{
+    position:relative;
+    width:320px;
+    height:320px;
+}
+
+/* لوگو */
+
+.logo-image{
+    width:100%;
+    position:relative;
+    z-index:2;
+
+    animation: logoFade 1.5s ease;
+}
+
+/* حلقه چرخان */
+
+.leaf-ring{
+    position:absolute;
+    inset:-10px;
+    border-radius:50%;
+    z-index:1;
+
+    animation: rotateRing 12s linear infinite;
+}
+
+/* نور روی RB */
+
+.rb-shimmer{
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:60%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff,
+            #f2fff5,
+            #eef8ff
+        );
+
+    transform:skewX(-20deg);
+
+    animation: shimmer 3s infinite;
+
+    z-index:3;
+}
+
+/* متن RUBY GRAFIC */
+
+.logo-image{
+    animation:
+        fadeText 2s ease,
+        pulseLogo 3s infinite;
+}
+
+/* انیمیشن ها */
+
+@keyframes rotateRing{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes shimmer{
+    0%{
+        left:-100%;
+    }
+
+    100%{
+        left:200%;
+    }
+}
+
+@keyframes fadeText{
+    from{
+        opacity:0;
+        transform:translateY(10px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes pulseLogo{
+    0%,100%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.03);
+    }
+}

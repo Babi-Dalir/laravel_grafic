@@ -102,3 +102,21 @@
     });
 </script>
 {{-- ایجکس برای سرچ زدن محصول در هدر صفحاتی که سرچ دارند --}}ّ
+
+{{--حذف لودر لوگو--}}
+<script>
+
+    window.addEventListener('load',function(){
+
+        setTimeout(function(){
+
+            document
+                .getElementById('page-loader')
+                .classList
+                .add('hide');
+
+        },1500);
+
+    });
+
+</script>

@@ -12,7 +12,7 @@
                 <div class="col-lg-2 col-md-3 col-6">
                     <div class="logo-area">
                         <a href="{{ route('home') }}">
-                            <img src="{{ url('frontend/img/logo.png') }}" alt="">
+                            <img src="{{ url('frontend/img/logo.jp') }}" alt="">
                         </a>
                     </div>
                 </div>
