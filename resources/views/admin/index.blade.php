@@ -138,7 +138,7 @@
             data: {
                 labels: @json($chart['months']),
                 datasets: [{
-                    label: 'Sales',
+                    label: 'فروش',
                     data: @json($chart['sales']),
                     borderColor: '#3b82f6',
                     tension: 0.4

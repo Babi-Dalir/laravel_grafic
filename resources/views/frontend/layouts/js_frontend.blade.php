@@ -106,17 +106,47 @@
 {{--حذف لودر لوگو--}}
 <script>
 
-    window.addEventListener('load',function(){
+    window.addEventListener('DOMContentLoaded', () => {
 
-        setTimeout(function(){
+        const bar = document.getElementById('progress-bar');
+        const loader = document.getElementById('robi-loader-wrapper');
 
-            document
-                .getElementById('page-loader')
-                .classList
-                .add('hide');
+        if (!bar || !loader) return;
 
-        },1500);
+        let percent = 0;
+
+        const interval = setInterval(() => {
+
+            // پیشرفت نرم و سریع بدون گیر
+            percent += 2 + Math.random() * 5;
+
+            if (percent >= 100) {
+                percent = 100;
+
+                // فول شدن نوار
+                bar.style.width = '100%';
+
+                clearInterval(interval);
+
+                // خروج نرم لودر
+                setTimeout(() => {
+
+                    loader.classList.add('fade-out');
+
+                    // حذف کامل از DOM
+                    setTimeout(() => {
+                        if (loader && loader.parentNode) {
+                            loader.parentNode.removeChild(loader);
+                        }
+                    }, 700);
+
+                }, 250);
+            }
+
+            // آپدیت نوار
+            bar.style.width = percent + '%';
+
+        }, 60);
 
     });
-
 </script>
