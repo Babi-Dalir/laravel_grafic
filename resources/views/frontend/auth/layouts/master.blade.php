@@ -5,6 +5,8 @@
 
 <body>
 <div class="wrapper">
+
+    @include('frontend.layouts.loader')
     <!-- Start main-content -->
     @yield('content')
     <!-- End main-content -->

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class VerificationCode extends Model
@@ -14,55 +13,49 @@ class VerificationCode extends Model
 
     ];
 
-    public static function checkTimeCode($entry)
+    public static function canSendCode($entry)
     {
-        $check = self::query()
-            ->where('mobile',$entry)
-            ->orWhere('email',$entry)
-            ->where('created_at','<',Carbon::now()->subMinute(2))
-            ->first();
-        if ($check){
-            return false;
-        }
-        return true;
+        return ! self::query()
+            ->where(function ($query) use ($entry) {
+                $query->where('mobile', $entry)
+                    ->orWhere('email', $entry);
+            })
+            ->where('created_at', '>=', now()->subMinutes(2))
+            ->exists();
     }
 
+    //ساخت کد جدید
     public static function createVerificationCode($entry,$code)
     {
-       if (filter_var($entry, FILTER_VALIDATE_EMAIL)){
-           self::query()->create([
-               'email'=>$entry,
-               'code'=>$code
-           ]);
-       }elseif (preg_match('/^([0-9\s\-\+\(\)]*)$/',$entry)){
-           self::query()->create([
-               'mobile'=>$entry,
-               'code'=>$code
-           ]);
-       }
+        self::query()
+            ->where('mobile',$entry)
+            ->orWhere('email', $entry)
+            ->delete();
+
+        if (filter_var($entry, FILTER_VALIDATE_EMAIL)){
+            self::query()->create([
+                'email'=>$entry,
+                'code'=>$code
+            ]);
+        }else {
+            self::query()->create([
+                'mobile'=>$entry,
+                'code'=>$code
+            ]);
+        }
     }
 
+    //بررسی اعتبار کد
     public static function checkVerificationCode($entry,$code)
     {
-        if (filter_var($entry, FILTER_VALIDATE_EMAIL)){
-            $check = self::query()
-                ->where('email',$entry)
-                ->where('code',$code)
-                ->first();
-            if ($check){
-                return true;
-            }
-            return false;
-        }elseif (preg_match('/^([0-9\s\-\+\(\)]*)$/',$entry)){
-            $check = self::query()
-                ->where('mobile',$entry)
-                ->where('code',$code)
-                ->first();
-            if ($check){
-                return true;
-            }
-            return false;
-        }
+        return self::query()
+            ->where(function ($query) use ($entry) {
+                $query->where('mobile', $entry)
+                    ->orWhere('email', $entry);
+            })
+            ->where('code', $code)
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->exists();
 
     }
 }

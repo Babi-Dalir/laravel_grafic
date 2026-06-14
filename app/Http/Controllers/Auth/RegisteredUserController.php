@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use App\Models\VerificationCode;
 use App\Services\Message\MessageService;
@@ -31,33 +32,38 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(RegisterRequest $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'mobile' => ['required', 'string', 'lowercase', 'max:11', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        Session::put('name', $request->name);
+        Session::put('mobile', $request->mobile);
+        Session::put('password', Hash::make($request->password));
 
-        Session::put('name',$request->name);
-        Session::put('mobile',$request->mobile);
-        Session::put('password',$request->password);
+        $check_send_sms = VerificationCode::canSendCode($request->mobile);
 
-        $check_send_sms = VerificationCode::checkTimeCode($request->mobile);
-        if ($check_send_sms){
-            $code = rand('11111', '99999');
-            VerificationCode::createVerificationCode($request->mobile,$code);
+        if (!$check_send_sms) {
 
-            //send sms
-            $serviceSMS = new ServiceSMS();
-            $serviceSMS->setReciever($request->mobile);
-            $serviceSMS->setContent($code);
-
-            $messageService = new MessageService($serviceSMS);
-            $messageService->send();
-        }else{
-            return redirect()->back()->with('message','برای ارسال مجدد کد تایید 2 دقیقه صبر کنید');
+            return redirect()
+                ->back()
+                ->with(
+                    'message',
+                    'برای ارسال مجدد کد تایید 2 دقیقه صبر کنید'
+                );
         }
+
+        $code = random_int(10000, 99999);
+
+        VerificationCode::createVerificationCode(
+            $request->mobile,
+            $code
+        );
+
+        $serviceSMS = new ServiceSMS();
+        $serviceSMS->setReciever($request->mobile);
+        $serviceSMS->setContent($code);
+
+        $messageService = new MessageService($serviceSMS);
+        $messageService->send();
+
         return redirect()->route('verify.mobile');
     }
 }

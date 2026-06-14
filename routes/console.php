@@ -15,3 +15,6 @@ Schedule::call(function () {
     ->name('seller-settlement')
     ->withoutOverlapping()
     ->daily();
+
+Schedule::command('verification-codes:clean')
+    ->everyTenMinutes();

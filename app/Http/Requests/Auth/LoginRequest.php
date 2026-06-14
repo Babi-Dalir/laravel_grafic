@@ -27,8 +27,26 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mobile' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'mobile' => [
+                'required',
+                'regex:/^09[0-9]{9}$/'
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8'
+            ],
+        ];
+    }
+    public function messages(): array
+    {
+        return [
+            'mobile.required' => 'شماره موبایل الزامی است.',
+            'mobile.regex' => 'شماره موبایل معتبر نیست.',
+
+            'password.required' => 'رمز عبور الزامی است.',
+            'password.min' => 'رمز عبور باید حداقل 8 کاراکتر باشد.',
+            'password.string' => 'فرمت رمز عبور صحیح نیست.',
         ];
     }
 
@@ -59,7 +77,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
             return;
         }
 
