@@ -150,3 +150,10 @@
 
     });
 </script>
+
+{{--برای منو همبرگری--}}
+<script>
+    document.getElementById("categoryToggle").addEventListener("click", function () {
+        document.getElementById("categoryMenu").classList.toggle("show");
+    });
+</script>
