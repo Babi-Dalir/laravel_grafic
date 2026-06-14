@@ -12,16 +12,16 @@
                             <h2 class="font-weight-bold">تایید شماره</h2>
                         </div>
                         <div class="row">
-                            @if(\Illuminate\Support\Facades\Session::has('message'))
-                                <div class="alert alert-info">
-                                    <div>{{session('message')}}</div>
+                            @if(session()->has('message'))
+                                <div class="alert alert-danger">
+                                    {{ session('message') }}
                                 </div>
                             @endif
 
                         </div>
                         <div class="message-light">
-                            برای شماره همراه {{session('mobile')}} کد تایید ارسال گردید
-                            <a href="#" class="btn-link-border">
+                            برای شماره همراه  {{ session('mobile') ?? '---' }} کد تایید ارسال گردید
+                            <a href="{{route('register')}}" class="btn-link-border">
                                 ویرایش شماره
                             </a>
                         </div>
@@ -33,11 +33,11 @@
                             <div class="form-row">
                                 <div class="numbers-verify">
                                     <div class="lines-number-input">
-                                        <input name="code[]" type="text" class="line-number" maxlength="1" autofocus="">
-                                        <input name="code[]" type="text" class="line-number" maxlength="1">
-                                        <input name="code[]" type="text" class="line-number" maxlength="1">
-                                        <input name="code[]" type="text" class="line-number" maxlength="1">
-                                        <input name="code[]" type="text" class="line-number" maxlength="1">
+                                        <input name="code[]" type="text" class="line-number" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                                        <input name="code[]" type="text" class="line-number" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                                        <input name="code[]" type="text" class="line-number" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                                        <input name="code[]" type="text" class="line-number" maxlength="1" inputmode="numeric" pattern="[0-9]*">
+                                        <input name="code[]" type="text" class="line-number" maxlength="1" inputmode="numeric" pattern="[0-9]*">
                                     </div>
                                 </div>
                             </div>

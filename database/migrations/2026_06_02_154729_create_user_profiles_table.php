@@ -19,8 +19,6 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
-            $table->string('phone')->nullable();
-
             $table->string('telegram')->nullable();
             $table->string('eta')->nullable();
             $table->string('instagram')->nullable();

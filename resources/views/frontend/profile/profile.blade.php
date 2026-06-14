@@ -65,23 +65,6 @@
                                         @enderror
                                     </div>
 
-                                    {{-- تلفن --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>تلفن تماس</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui pl-2 text-left dir-ltr"
-                                                   name="phone"
-                                                   value="{{ old('phone', $user->userProfile?->phone) }}">
-                                        </div>
-
-                                        @error('phone')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
                                     {{-- تلگرام --}}
                                     <div class="col-md-6 mb-3">
                                         <div class="form-row-title">

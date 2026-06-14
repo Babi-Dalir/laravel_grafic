@@ -46,7 +46,6 @@ class ProfileController extends Controller
         $user->userProfile()->updateOrCreate(
             ['user_id' => $user->id],
             [
-                'phone' => $request->input('phone'),
                 'telegram' => $request->input('telegram'),
                 'eta' => $request->input('eta'),
                 'instagram' => $request->input('instagram'),

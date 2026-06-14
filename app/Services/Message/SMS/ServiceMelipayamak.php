@@ -20,7 +20,7 @@ class ServiceMelipayamak
 //        }
 //    }
 
-    public function sendSMS($receiver, $content)
+    public function sendSMS($receiver, $content): bool
     {
         try {
 
@@ -32,16 +32,21 @@ class ServiceMelipayamak
                 $content
             );
 
-            Log::info('SMS Sent', [
+            Log::info('SMS Sent Successfully', [
                 'receiver' => $receiver,
                 'response' => $response
             ]);
 
-        } catch (\Exception $e) {
+            return true;
 
-            Log::error('SMS Error', [
+        } catch (\Throwable $e) {
+
+            Log::error('SMS Failed', [
+                'receiver' => $receiver,
                 'message' => $e->getMessage()
             ]);
+
+            return false;
         }
     }
 }
