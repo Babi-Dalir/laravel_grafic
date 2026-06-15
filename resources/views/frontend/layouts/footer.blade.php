@@ -134,7 +134,7 @@
         <div class="container main-container">
             <div class="row">
 
-                <div class="site-description col-12 col-lg-7">
+                <div class="site-description col-12 col-lg-8">
                     <h1 class="site-title">
                         فروشگاه فایل‌های گرافیکی، دیجیتال و لایه‌باز
                     </h1>
@@ -146,9 +146,9 @@
                     </p>
                 </div>
 
-                <div class="symbol col-12 col-lg-5">
-                    <a href="#"><img src="{{url('frontend/img/symbol-digital-01.png')}}"></a>
-                    <a href="#"><img src="{{url('frontend/img/symbol-digital-02.png')}}"></a>
+                <div class="symbol col-12 col-lg-4">
+                    <a href="#"><img src="{{url('frontend/img/symbol-01.png')}}"></a>
+                    <a href="#"><img src="{{url('frontend/img/symbol-02.png')}}"></a>
                 </div>
 
             </div>
