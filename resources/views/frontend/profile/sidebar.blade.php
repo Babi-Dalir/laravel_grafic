@@ -1,3 +1,9 @@
+@php
+    $userImage = auth()->user()->image
+        ? url('images/users/small/' . auth()->user()->image)
+        : url('images/users/default-avatar.png');
+@endphp
+
 <div class="col-xl-3 col-lg-4 col-md-4 col-sm-12">
     <div class="profile-sidebar">
 
@@ -8,7 +14,7 @@
 
             <div class="profile-info text-center">
                 <div class="profile-avatar">
-                    <img src="{{url('images/users/small/'.auth()->user()->image)}}" alt="{{auth()->user()->name}}">
+                    <img src="{{ $userImage }}" alt="{{auth()->user()->name}}">
                 </div>
 
                 <h5 class="profile-name">

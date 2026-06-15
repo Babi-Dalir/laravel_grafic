@@ -308,7 +308,7 @@ button:focus {
     color: #fff;
     border: 0;
     outline: 0;
-    background-color: #f7858d;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
     overflow: hidden;
 }
 

@@ -24,7 +24,6 @@ class ProfileController extends Controller
         // پیشنهاد لحظه ای
 
         $instant_offers = Product::smartOffer()
-            ->limit(9)
             ->get();
         return view('frontend.profile.profile', compact('user','instant_offers'));
     }
@@ -59,17 +58,32 @@ class ProfileController extends Controller
 
     public function profileOrders()
     {
-        return view('frontend.profile.profile_orders');
+        // پیشنهاد لحظه ای
+
+        $instant_offers = Product::smartOffer()
+            ->get();
+
+        return view('frontend.profile.profile_orders',compact('instant_offers'));
     }
 
     public function profileOrdersDetails($order_id)
     {
-        return view('frontend.profile.profile_order_details',compact('order_id'));
+        // پیشنهاد لحظه ای
+
+        $instant_offers = Product::smartOffer()
+            ->get();
+
+        return view('frontend.profile.profile_order_details',compact('order_id','instant_offers'));
     }
 
     public function profileFavorites()
     {
-        return view('frontend.profile.profile_favorites');
+        // پیشنهاد لحظه ای
+
+        $instant_offers = Product::smartOffer()
+            ->get();
+
+        return view('frontend.profile.profile_favorites',compact('instant_offers'));
     }
 
 //    public function profileComments()
