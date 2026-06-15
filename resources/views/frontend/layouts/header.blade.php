@@ -134,22 +134,27 @@
                 <div class="nav mr-auto">
                     <livewire:frontend.carts.header-carts/>
                 </div>
-                <button class="btn-menu">
-                    <div class="align align__justify">
+                <button class="btn-menu" id="menuBtn">
+                    <div class="hamburger">
                         <span></span>
                         <span></span>
                         <span></span>
                     </div>
                 </button>
-                <div class="side-menu">
+
+                <div class="side-menu" id="sideMenu">
+                    <button class="close-menu" id="closeMenu">
+                        <i class="mdi mdi-close"></i>
+                    </button>
                     <div class="logo-nav-res dt-sl text-center">
                         <a href="#">
                             <img src="assets/img/logo.png" alt="">
                         </a>
                     </div>
+
                     <span class="menu-toggle" id="categoryToggle">
                         <i class="fal fa-bars ml-1"></i>
-                        دسته بندی کالاها
+                              دسته بندی کالاها
                     </span>
                     <ul class="navbar-nav dt-sl" id="categoryMenu">
                         @foreach ($categories as $category1)
@@ -173,8 +178,7 @@
                         @endforeach
                     </ul>
                 </div>
-                <div class="overlay-side-menu">
-                </div>
+                <div class="overlay-side-menu" id="overlay"></div>
             </nav>
             <!-- End Main-Menu -->
         </div>

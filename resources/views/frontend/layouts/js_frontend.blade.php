@@ -153,7 +153,35 @@
 
 {{--برای منو همبرگری--}}
 <script>
-    document.getElementById("categoryToggle").addEventListener("click", function () {
-        document.getElementById("categoryMenu").classList.toggle("show");
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const btn = document.querySelector(".btn-menu");
+        const menu = document.querySelector(".side-menu");
+        const overlay = document.querySelector(".overlay-side-menu");
+
+        function openMenu(){
+            menu.classList.add("active");
+            overlay.classList.add("active");
+            document.body.classList.add("menu-open");
+        }
+
+        function closeMenu(){
+            menu.classList.remove("active");
+            overlay.classList.remove("active");
+            document.body.classList.remove("menu-open");
+        }
+
+        btn.addEventListener("click", function () {
+            if(menu.classList.contains("active")){
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+
+        document.getElementById("closeMenu").addEventListener("click", closeMenu);
+
+        overlay.addEventListener("click", closeMenu);
+
     });
 </script>
