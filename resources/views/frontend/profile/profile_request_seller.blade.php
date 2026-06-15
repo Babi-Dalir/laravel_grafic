@@ -1,273 +1,295 @@
 @extends('frontend.layouts.master')
+
 @section('content')
+
     @include('frontend.layouts.header')
+
     <main class="main-content dt-sl mb-3">
         <div class="container main-container">
+
             <div class="row">
-                <!-- Start Sidebar -->
+
+                {{-- Sidebar --}}
                 @include('frontend.profile.sidebar')
-                <!-- End Sidebar -->
-                <!-- Start Content -->
+
+                {{-- Content --}}
                 <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12">
-                    <div class="row">
-                        <div class="row">
-                            @if(\Illuminate\Support\Facades\Session::has('message'))
-                                <div class="alert alert-info">
-                                    <div>{{session('message')}}</div>
-                                </div>
+
+                    @if(session()->has('message'))
+                        <div class="alert alert-info mb-3">
+                            {{ session('message') }}
+                        </div>
+                    @endif
+
+                    <div class="profile-form-card">
+
+                        <div class="profile-form-header">
+                            <h4>درخواست همکاری به عنوان طراح</h4>
+                            <p>
+                                اطلاعات خود را تکمیل کنید تا درخواست همکاری شما بررسی شود.
+                            </p>
+                        </div>
+
+                        <form action="{{ route('profile.store.request.seller') }}"
+                              method="POST"
+                              enctype="multipart/form-data">
+
+                            @csrf
+
+                            {{-- وضعیت درخواست --}}
+                            @if($sellerRequest)
+
+                                @if($sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value)
+
+                                    <div class="request-status-card status-warning mb-4">
+
+                                        <div class="status-icon">
+                                            <i class="mdi mdi-timer-sand"></i>
+                                        </div>
+
+                                        <div>
+                                            <h6>در انتظار بررسی</h6>
+                                            <p>درخواست شما توسط مدیریت در حال بررسی است.</p>
+                                        </div>
+
+                                    </div>
+
+                                @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
+
+                                    <div class="request-status-card status-success mb-4">
+
+                                        <div class="status-icon">
+                                            <i class="mdi mdi-check-circle-outline"></i>
+                                        </div>
+
+                                        <div>
+                                            <h6>درخواست تایید شده</h6>
+                                            <p>شما به عنوان طراح تایید شده‌اید.</p>
+                                        </div>
+
+                                    </div>
+
+                                @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value)
+
+                                    <div class="request-status-card status-danger mb-4">
+
+                                        <div class="status-icon">
+                                            <i class="mdi mdi-close-circle-outline"></i>
+                                        </div>
+
+                                        <div>
+                                            <h6>درخواست رد شده</h6>
+                                            <p>{{ $sellerRequest->admin_note }}</p>
+                                        </div>
+
+                                    </div>
+
+                                @endif
+
                             @endif
 
-                        </div>
-                        <div class="col-12">
-                            <div class="px-3 px-res-0">
+                            <div class="row">
 
-                                <div class="section-title text-sm-title title-wide mb-1 no-after-title-wide dt-sl mb-2 px-res-1">
-                                    <h2>درخواست همکاری به عنوان طراح</h2>
+                                {{-- نام برند --}}
+                                <div class="col-md-6 mb-3">
+
+                                    <label class="form-label">
+                                        نام برند یا نام هنری
+                                    </label>
+
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="brand_name"
+                                           value="{{ old('brand_name',$sellerRequest?->brand_name) }}"
+                                           placeholder="مثال: Graphic Master">
+
+                                    @error('brand_name')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+
                                 </div>
 
-                                <div class="form-ui additional-info dt-sl dt-sn pt-4">
+                                {{-- نمونه کار --}}
+                                <div class="col-md-6 mb-3">
 
-                                    <form action="{{ route('profile.store.request.seller') }}"
-                                          method="POST"
-                                          enctype="multipart/form-data">
+                                    <label class="form-label">
+                                        لینک نمونه کار
+                                    </label>
 
-                                        @csrf
+                                    <input type="url"
+                                           class="form-control input-ui"
+                                           name="portfolio"
+                                           value="{{ old('portfolio',$sellerRequest?->portfolio) }}"
+                                           placeholder="https://behance.net/...">
 
-                                        <div class="row">
+                                    @error('portfolio')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
 
-                                            {{-- نام برند --}}
-                                            <div class="col-md-6 mb-3">
-                                                <div class="form-row-title">
-                                                    <h3>نام برند یا نام هنری</h3>
-                                                </div>
-                                                <div class="form-row">
-                                                    <input type="text"
-                                                           class="input-ui pr-2"
-                                                           name="brand_name"
-                                                           value="{{ $sellerRequest?->brand_name }}"
-                                                           placeholder="مثال: Graphic Master">
-                                                </div>
-                                                @error('brand_name')
-                                                <small class="text-danger">{{ $message }}</small>
-                                                @enderror
-                                            </div>
+                                </div>
 
-                                            {{-- لینک نمونه کار --}}
-                                            <div class="col-md-6 mb-3">
-                                                <div class="form-row-title">
-                                                    <h3>لینک نمونه کار</h3>
-                                                </div>
-                                                <div class="form-row">
-                                                    <input type="url"
-                                                           class="input-ui pr-2"
-                                                           name="portfolio"
-                                                           value="{{ $sellerRequest?->portfolio }}"
-                                                           placeholder="https://behance.net/...">
-                                                </div>
-                                                @error('portfolio')
-                                                <small class="text-danger">{{ $message }}</small>
-                                                @enderror
-                                            </div>
+                                {{-- توضیحات --}}
+                                <div class="col-12 mb-3">
 
-                                            {{-- وضعیت درخواست --}}
-                                            @if($sellerRequest)
-                                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">
+                                        معرفی خود و سوابق طراحی
+                                    </label>
 
-                                                    <div class="form-row-title">
-                                                        <h3>
-                                                            وضعیت درخواست :
+                                    <textarea
+                                        name="reason"
+                                        rows="6"
+                                        class="form-control input-ui"
+                                        placeholder="خودتان را معرفی کنید و درباره تخصص‌ها و تجربیات خود توضیح دهید...">{{ old('reason',$sellerRequest?->reason) }}</textarea>
 
-                                                            @if($sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value)
+                                    @error('reason')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
 
-                                                                <span class="badge badge-warning">
-                                            در انتظار بررسی
-                                        </span>
+                                </div>
 
-                                                            @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
+                                {{-- رزومه --}}
+                                <div class="col-12 mb-3">
 
-                                                                <span class="badge badge-success">
-                                            تایید شده
-                                        </span>
+                                    <label class="form-label">
+                                        رزومه (اختیاری)
+                                    </label>
 
-                                                            @elseif($sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value)
+                                    <input type="file"
+                                           name="resume"
+                                           class="form-control input-ui">
 
-                                                                <span class="badge badge-danger">
-                                            رد شده
-                                        </span>
-
-                                                            @endif
-
-                                                        </h3>
-                                                    </div>
-
-                                                </div>
-                                            @endif
-
-                                            {{-- توضیحات --}}
-                                            <div class="col-md-12 mb-3">
-
-                                                <div class="form-row-title">
-                                                    <h3>معرفی خود و سوابق طراحی</h3>
-                                                </div>
-
-                                                <div class="form-row">
-                            <textarea
-                                name="reason"
-                                rows="6"
-                                class="input-ui pr-2"
-                                placeholder="خودتان را معرفی کنید و درباره سوابق طراحی، تخصص‌ها و تجربیاتتان توضیح دهید...">{{ $sellerRequest?->reason }}</textarea>
-                                                </div>
-                                                @error('reason')
-                                                <small class="text-danger">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-
-                                            {{-- فایل رزومه --}}
-                                            <div class="col-md-12 mb-3">
-
-                                                <div class="form-row-title">
-                                                    <h3>رزومه (اختیاری)</h3>
-                                                </div>
-
-                                                <div class="form-row mt-2">
-
-                                                    <div class="input-group">
-
-                                                        <div class="custom-file">
-
-                                                            <input type="file"
-                                                                   class="custom-file-input"
-                                                                   name="resume"
-                                                                   id="resumeFile">
-
-                                                            <label class="custom-file-label"
-                                                                   for="resumeFile">
-
-                                                                انتخاب فایل
-
-                                                            </label>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-                                                @error('resume')
-                                                <small class="text-danger">{{ $message }}</small>
-                                                @enderror
-                                            </div>
-                                            @if(
-                                                $sellerRequest &&
-                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value &&
-                                                $sellerRequest->admin_note
-                                            )
-
-                                                <div class="col-md-12">
-
-                                                    <div class="alert alert-danger shadow-sm">
-
-                                                        <h6 class="mb-2">
-                                                            <i class="ti-alert mr-1"></i>
-                                                            درخواست شما در تاریخ {{\Hekmatinasser\Verta\Verta::instance($sellerRequest->reviewed_at)->format('%d %B، %Y')}} روئیت شد و به دلیل {{ $sellerRequest->admin_note }} رد شده است
-                                                        </h6>
-
-                                                    </div>
-
-                                                </div>
-                                            @elseif( $sellerRequest &&
-                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
-                                                <div class="col-md-12">
-
-                                                    <div class="alert alert-success shadow-sm">
-
-                                                        <h6 class="mb-2">
-                                                            <i class="ti-alert mr-1"></i>
-                                                            درخواست شما در تاریخ {{\Hekmatinasser\Verta\Verta::instance($sellerRequest->reviewed_at)->format('%d %B، %Y')}} روئیت شد و مورد تایید واقع شده است از این پس میتوانید در پنل کاربری خود طرح های خود را ثبت کنید و پس از تایید مدیر سایت در سایت قرار گیرند.
-                                                            با تشکر از همکاری شما.
-                                                        </h6>
-                                                    </div>
-
-                                                </div>
-                                            @elseif($sellerRequest &&
-                                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value)
-                                                <div class="col-md-12">
-
-                                                    <div class="alert alert-warning shadow-sm">
-
-                                                        <h6 class="mb-2">
-                                                            <i class="ti-alert mr-1"></i>
-                                                            درخواست شما درحال بررسی است
-                                                        </h6>
-
-                                                    </div>
-
-                                                </div>
-                                            @endif
-
-                                        </div>
-                                        @if(
-                                            $sellerRequest &&
-                                            $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value
-                                        )
-
-                                            <div class="verification-card mt-4 p-4 shadow-sm rounded-lg">
-
-                                                <div class="d-flex align-items-center justify-content-between flex-wrap">
-
-                                                    <div class="d-flex align-items-center mb-2 mb-md-0">
-
-                                                        <div class="verification-icon mr-3">
-                                                            <i class="mdi mdi-shield-check-outline"></i>
-                                                        </div>
-
-                                                        <div>
-                                                            <h5 class="mb-1">احراز هویت فروشنده</h5>
-                                                            <small class="text-muted">
-                                                                درخواست شما تایید شده است. برای فعال‌سازی کامل حساب، احراز هویت را تکمیل کنید.
-                                                            </small>
-                                                        </div>
-
-                                                    </div>
-
-                                                    <a href="{{ route('profile.verification.seller') }}"
-                                                       class="verification-btn">
-                                                        شروع احراز هویت
-                                                        <i class="mdi mdi-arrow-left ml-1"></i>
-                                                    </a>
-
-                                                </div>
-
-                                            </div>
-                                        @else
-                                            <div class="dt-sl">
-
-                                                <div class="form-row mt-3 justify-content-end">
-
-                                                    <button type="submit"
-                                                            class="btn-primary-cm btn-with-icon ml-2">
-
-                                                        <i class="mdi mdi-account-check-outline"></i>
-
-                                                        ارسال درخواست همکاری
-
-                                                    </button>
-
-                                                </div>
-
-                                            </div>
-
-                                        @endif
-
-                                    </form>
+                                    @error('resume')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
 
                                 </div>
 
                             </div>
-                        </div>
+
+                            {{-- پیام‌های مدیریتی --}}
+
+                            @if(
+                                $sellerRequest &&
+                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Rejected->value &&
+                                $sellerRequest->admin_note
+                            )
+
+                                <div class="alert alert-danger mt-3">
+
+                                    درخواست شما در تاریخ
+
+                                    {{ \Hekmatinasser\Verta\Verta::instance($sellerRequest->reviewed_at)->format('%d %B، %Y') }}
+
+                                    بررسی شد و به دلیل
+
+                                    <strong>{{ $sellerRequest->admin_note }}</strong>
+
+                                    رد شده است.
+
+                                </div>
+
+                            @elseif(
+                                $sellerRequest &&
+                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value
+                            )
+
+                                <div class="alert alert-success mt-3">
+
+                                    درخواست شما در تاریخ
+
+                                    {{ \Hekmatinasser\Verta\Verta::instance($sellerRequest->reviewed_at)->format('%d %B، %Y') }}
+
+                                    تایید شده است و اکنون می‌توانید محصولات و طرح‌های خود را ثبت نمایید.
+
+                                </div>
+
+                            @elseif(
+                                $sellerRequest &&
+                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value
+                            )
+
+                                <div class="alert alert-warning mt-3">
+                                    درخواست شما در حال بررسی است.
+                                </div>
+
+                            @endif
+
+                            {{-- احراز هویت --}}
+                            @if($sellerRequest && $sellerRequest->status === \App\Enums\SellerRequestStatus::Approved->value)
+
+                                <div class="verification-card mt-4">
+
+                                    <div class="verification-content">
+
+                                        <div class="verification-icon">
+                                            <i class="mdi mdi-shield-check-outline"></i>
+                                        </div>
+
+                                        <div>
+                                            <h5>احراز هویت فروشنده</h5>
+
+                                            <p>
+                                                برای فعال سازی کامل حساب فروشندگی،
+                                                احراز هویت خود را تکمیل کنید.
+                                            </p>
+                                        </div>
+
+                                    </div>
+
+                                    <a href="{{ route('profile.verification.seller') }}"
+                                       class="verification-btn">
+
+                                        شروع احراز هویت
+
+                                    </a>
+
+                                </div>
+
+                            @elseif(
+                                $sellerRequest &&
+                                $sellerRequest->status === \App\Enums\SellerRequestStatus::Pending->value
+                            )
+
+                                <div class="form-actions">
+
+                                    <button type="button"
+                                            class="btn-save btn-disabled"
+                                            disabled>
+
+                                        <i class="mdi mdi-clock-outline"></i>
+
+                                        درخواست شما در حال بررسی است
+
+                                    </button>
+
+                                </div>
+
+                            @else
+
+                                <div class="form-actions">
+
+                                    <button type="submit"
+                                            class="btn-save">
+
+                                        <i class="mdi mdi-account-check-outline"></i>
+
+                                        ارسال درخواست همکاری
+
+                                    </button>
+
+                                </div>
+
+                            @endif
+
+                        </form>
+
                     </div>
+
                 </div>
-                <!-- End Content -->
+
             </div>
+
         </div>
     </main>
+
 @endsection

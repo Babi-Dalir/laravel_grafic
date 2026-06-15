@@ -16,7 +16,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-5 d-none d-md-block">
+                <div class="col-lg-6 col-md-5 col-12">
                     <div class="search-area dt-sl">
                         <div class="search position-relative">
 
