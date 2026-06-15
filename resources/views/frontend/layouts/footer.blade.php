@@ -1,164 +1,163 @@
 <footer class="main-footer dt-sl">
     <div class="back-to-top">
-        <a href="#"><span class="icon"><i class="mdi mdi-chevron-up"></i></span> <span>بازگشت به
-                        بالا</span></a>
+        <a href="#">
+            <span class="icon"><i class="mdi mdi-chevron-up"></i></span>
+            <span>بازگشت به بالا</span>
+        </a>
     </div>
+
     <div class="container main-container">
+
+        <!-- Services -->
         <div class="footer-services">
             <div class="row">
+
                 <div class="service-item col">
-                    <a href="#" target="_blank">
-                        <img src="{{url('frontend/img/svg/delivery.svg')}}">
-                    </a>
-                    <p>تحویل اکسپرس</p>
+                    <img src="{{url('frontend/img/svg/download.svg')}}">
+                    <p>دانلود آنی فایل‌ها</p>
                 </div>
+
                 <div class="service-item col">
-                    <a href="#" target="_blank">
-                        <img src="{{url('frontend/img/svg/contact-us.svg')}}">
-                    </a>
+                    <img src="{{url('frontend/img/svg/support.svg')}}">
                     <p>پشتیبانی 24 ساعته</p>
                 </div>
+
                 <div class="service-item col">
-                    <a href="#" target="_blank">
-                        <img src="{{url('frontend/img/svg/payment-terms.svg')}}">
-                    </a>
-                    <p>پرداخت درمحل</p>
+                    <img src="{{url('frontend/img/svg/license.svg')}}">
+                    <p>لایسنس و استفاده قانونی</p>
                 </div>
+
                 <div class="service-item col">
-                    <a href="#" target="_blank">
-                        <img src="{{url('frontend/img/svg/return-policy.svg')}}">
-                    </a>
-                    <p>۷ روز ضمانت بازگشت</p>
+                    <img src="{{url('frontend/img/svg/update.svg')}}">
+                    <p>آپدیت رایگان محصولات</p>
                 </div>
+
                 <div class="service-item col">
-                    <a href="#" target="_blank">
-                        <img src="{{url('frontend/img/svg/origin-guarantee.svg')}}">
-                    </a>
-                    <p>ضمانت اصل بودن کالا</p>
+                    <img src="{{url('frontend/img/svg/original_file.svg')}}">
+                    <p>فایل اورجینال و قابل ویرایش</p>
                 </div>
+
             </div>
         </div>
+
+        <!-- Widgets -->
         <div class="footer-widgets">
             <div class="row">
+
+                <!-- guide -->
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="widget-menu widget card">
                         <header class="card-header">
-                            <h3 class="card-title">راهنمای خرید از  بابی شاپ</h3>
+                            <h3 class="card-title">راهنمای دانلود و خرید</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li>
-                                <a href="#">نحوه ثبت سفارش</a>
-                            </li>
-                            <li>
-                                <a href="#">رویه ارسال سفارش</a>
-                            </li>
-                            <li>
-                                <a href="#">شیوه‌های پرداخت</a>
-                            </li>
+                            <li><a href="#">نحوه خرید و دانلود فایل</a></li>
+                            <li><a href="#">فرمت فایل‌ها (PSD, AI, PNG)</a></li>
+                            <li><a href="#">شرایط استفاده از طرح‌ها</a></li>
                         </ul>
                     </div>
                 </div>
+
+                <!-- support -->
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="widget-menu widget card">
                         <header class="card-header">
-                            <h3 class="card-title">خدمات مشتریان</h3>
+                            <h3 class="card-title">پشتیبانی مشتریان</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li>
-                                <a href="#">پاسخ به پرسش‌های متداول</a>
-                            </li>
-                            <li>
-                                <a href="#">رویه‌های بازگرداندن کالا</a>
-                            </li>
-                            <li>
-                                <a href="#">شرایط استفاده</a>
-                            </li>
-                            <li>
-                                <a href="#">حریم خصوصی</a>
-                            </li>
+                            <li><a href="#">سوالات متداول</a></li>
+                            <li><a href="#">مشکل در دانلود فایل</a></li>
+                            <li><a href="#">بازگشت وجه</a></li>
+                            <li><a href="#">حریم خصوصی</a></li>
                         </ul>
                     </div>
                 </div>
+
+                <!-- about -->
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="widget-menu widget card">
                         <header class="card-header">
-                            <h3 class="card-title"> بابی شاپ</h3>
+                            <h3 class="card-title">درباره ما</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li>
-                                <a href="#">فروش در  بابی شاپ</a>
-                            </li>
-                            <li>
-                                <a href="#">همکاری با سازمان‌ها</a>
-                            </li>
-                            <li>
-                                <a href="#">فرصت‌های شغلی</a>
-                            </li>
-                            <li>
-                                <a href="#">تماس با ما</a>
-                            </li>
-                            <li>
-                                <a href="#">درباره ما</a>
-                            </li>
+                            <li><a href="#">درباره فروشگاه</a></li>
+                            <li><a href="#">فروش طرح‌های گرافیکی</a></li>
+                            <li><a href="#">همکاری با طراحان</a></li>
+                            <li><a href="#">تماس با ما</a></li>
                         </ul>
                     </div>
                 </div>
+
+                <!-- newsletter -->
                 <div class="col-12 col-md-6 col-lg-3">
-                    <div class="newsletter">
-                        <p>از تخفیف‌ها و جدیدترین‌های فروشگاه باخبر شوید:</p>
-                        <form action="">
-                            <input type="email" class="form-control"
-                                   placeholder="آدرس ایمیل خود را وارد کنید...">
-                            <input type="submit" class="btn btn-primary" value="ارسال">
-                        </form>
-                    </div>
-                    <div class="socials">
-                        <p>ما را در شبکه های اجتماعی دنبال کنید.</p>
-                        <div class="footer-social">
-                            <ul class="text-center">
-                                <li><a href="#"><i class="mdi mdi-instagram"></i></a></li>
-                                <li><a href="#"><i class="mdi mdi-telegram"></i></a></li>
-                                <li><a href="#"><i class="mdi mdi-facebook"></i></a></li>
-                                <li><a href="#"><i class="mdi mdi-twitter"></i></a></li>
-                            </ul>
+
+                    <div class="widget-menu widget card footer-contact-card">
+
+                        <p class="footer-title mb-3 text-center">ما را دنبال کنید</p>
+
+                        <!-- Social (بدون تغییر) -->
+                        <ul class="social-list">
+                            <li><a href="#" class="social-icon instagram"><i class="mdi mdi-instagram"></i></a></li>
+                            <li><a href="#" class="social-icon telegram"><i class="mdi mdi-telegram"></i></a></li>
+                            <li><a href="#" class="social-icon behance"><i class="mdi mdi-behance"></i></a></li>
+                            <li><a href="#" class="social-icon dribbble"><i class="mdi mdi-dribbble"></i></a></li>
+                        </ul>
+
+                        <!-- SUPPORT (فقط کنترل layout) -->
+                        <div class="footer-support-wrap">
+
+                            <div class="footer-support">
+
+                                <i class="mdi mdi-headset support-icon"></i>
+
+                                <span class="support-text">پشتیبانی :</span>
+
+                                <a href="tel:02112345678" class="support-phone">
+                                    <i class="mdi mdi-phone"></i>
+                                    021-12345678
+                                </a>
+
+                            </div>
+
                         </div>
+
                     </div>
+
                 </div>
-            </div>
-        </div>
-        <div class="info">
-            <div class="row">
-                <div class="col-12 text-right">
-                    <span>هفت روز هفته ، 24 ساعت شبانه‌روز پاسخگوی شما هستیم.</span>
-                </div>
+
             </div>
         </div>
     </div>
+
+    <!-- description -->
     <div class="description">
         <div class="container main-container">
             <div class="row">
+
                 <div class="site-description col-12 col-lg-7">
-                    <h1 class="site-title">فروشگاه اینترنتی بابی شاپ بررسی، انتخاب و خرید آنلاین</h1>
+                    <h1 class="site-title">
+                        فروشگاه فایل‌های گرافیکی، دیجیتال و لایه‌باز
+                    </h1>
                     <p>
-                        بابی شاپ به عنوان یکی از قدیمی‌ترین فروشگاه های اینترنتی با بیش از یک دهه تجربه، با
-                        پایبندی به سه اصل کلیدی، پرداخت در
-                        محل، 7 روز ضمانت بازگشت کالا و تضمین اصل‌بودن کالا، موفق شده تا همگام با فروشگاه‌های
-                        معتبر جهان، به بزرگ‌ترین فروشگاه
-                        اینترنتی ایران تبدیل شود. به محض ورود به بابی شاپ کالا با یک سایت پر از کالا رو به رو
-                        می‌شوید! هر آنچه که نیاز دارید و به
-                        ذهن شما خطور می‌کند در اینجا پیدا خواهید کرد.
+                        این فروشگاه مرجع دانلود و خرید انواع طرح‌های گرافیکی شامل فایل‌های PSD،
+                        قالب‌های آماده، وکتور، موکاپ و فایل‌های لایه‌باز است.
+                        تمامی فایل‌ها به صورت دیجیتال ارائه شده و پس از خرید، به صورت آنی قابل دانلود هستند.
+                        هدف ما ارائه فایل‌های باکیفیت برای طراحان، کسب‌وکارها و تولیدکنندگان محتوا است.
                     </p>
                 </div>
+
                 <div class="symbol col-12 col-lg-5">
-                    <a href="#" target="_blank"><img src="{{url('frontend/img/symbol-01.png')}}" alt=""></a>
-                    <a href="#" target="_blank"><img src="{{url('frontend/img/symbol-02.png')}}" alt=""></a>
+                    <a href="#"><img src="{{url('frontend/img/symbol-digital-01.png')}}"></a>
+                    <a href="#"><img src="{{url('frontend/img/symbol-digital-02.png')}}"></a>
                 </div>
+
             </div>
         </div>
     </div>
+
     <div class="copyright">
         <div class="container main-container">
-
         </div>
     </div>
+
 </footer>
