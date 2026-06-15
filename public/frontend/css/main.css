@@ -10286,3 +10286,113 @@ body.menu-open .btn-menu{
     }
 
 }
+
+/* =========================
+   FORM CARD
+========================= */
+
+.profile-form-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.06);
+}
+
+.profile-form-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-form-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+.profile-form-header p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    color: #888;
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.form-label {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.input-ui,
+.form-control {
+    border-radius: 12px !important;
+    border: 1px solid #e6e6e6 !important;
+    padding: 10px 14px !important;
+    transition: .3s;
+    box-shadow: none !important;
+}
+
+.input-ui:focus,
+.form-control:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1) !important;
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.form-actions {
+    text-align: left;
+    margin-top: 20px;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .3s;
+    box-shadow: 0 6px 15px rgba(79,70,229,.2);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(79,70,229,.25);
+}
+
+/* =========================
+   ERROR TEXT
+========================= */
+
+.text-danger {
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+    .profile-form-card {
+        padding: 18px;
+    }
+
+    .form-actions {
+        text-align: center;
+    }
+
+    .btn-save {
+        width: 100%;
+    }
+}

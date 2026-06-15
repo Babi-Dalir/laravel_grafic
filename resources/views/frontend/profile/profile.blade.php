@@ -1,4 +1,5 @@
 @extends('frontend.layouts.master')
+
 @section('content')
 
     @include('frontend.layouts.header')
@@ -13,173 +14,131 @@
                 <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12">
 
                     @if(session()->has('message'))
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mb-3">
                             {{ session('message') }}
                         </div>
                     @endif
 
-                    <div class="px-3 px-res-0">
+                    <div class="profile-form-card">
 
-                        <div class="section-title mb-3">
-                            <h2>ویرایش اطلاعات شخصی</h2>
+                        <div class="profile-form-header">
+                            <h4>ویرایش اطلاعات شخصی</h4>
+                            <p>اطلاعات حساب کاربری خود را به‌روز کنید</p>
                         </div>
 
-                        <div class="form-ui additional-info dt-sl dt-sn pt-4">
+                        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
 
-                            <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
+                            <div class="row">
 
-                                <div class="row">
-
-                                    {{-- نام --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>نام</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui pr-2"
-                                                   name="name"
-                                                   value="{{ old('name', $user->name) }}">
-                                        </div>
-
-                                        @error('name')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- نام کاربری --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>نام کاربری</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui pr-2"
-                                                   name="user_name"
-                                                   value="{{ old('user_name', $user->user_name) }}">
-                                        </div>
-
-                                        @error('user_name')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- تلگرام --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>تلگرام</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui"
-                                                   name="telegram"
-                                                   value="{{ old('telegram', $user->userProfile?->telegram) }}">
-                                        </div>
-
-                                        @error('telegram')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- ایتا --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>ایتا</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui"
-                                                   name="eta"
-                                                   value="{{ old('eta', $user->userProfile?->eta) }}">
-                                        </div>
-
-                                        @error('eta')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- اینستاگرام --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>اینستاگرام</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui"
-                                                   name="instagram"
-                                                   value="{{ old('instagram', $user->userProfile?->instagram) }}">
-                                        </div>
-
-                                        @error('instagram')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- وب سایت --}}
-                                    <div class="col-12 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>وب سایت</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="text" class="input-ui"
-                                                   name="website"
-                                                   value="{{ old('website', $user->userProfile?->website) }}">
-                                        </div>
-
-                                        @error('website')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- بیو --}}
-                                    <div class="col-12 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>درباره من</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                        <textarea class="input-ui"
-                                                  name="bio"
-                                                  rows="5">{{ old('bio', $user->userProfile?->bio) }}</textarea>
-                                        </div>
-
-                                        @error('bio')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    {{-- عکس --}}
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-row-title">
-                                            <h3>عکس پروفایل</h3>
-                                        </div>
-
-                                        <div class="form-row">
-                                            <input type="file" name="image">
-                                        </div>
-
-                                        @error('image')
-                                        <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
+                                {{-- نام --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">نام</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="name"
+                                           value="{{ old('name', $user->name) }}">
+                                    @error('name')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
-                                <div class="text-left mt-3">
-                                    <button type="submit" class="btn-primary-cm btn-with-icon">
-                                        ثبت اطلاعات کاربری
-                                    </button>
+                                {{-- نام کاربری --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">نام کاربری</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="user_name"
+                                           value="{{ old('user_name', $user->user_name) }}">
+                                    @error('user_name')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
-                            </form>
+                                {{-- تلگرام --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">تلگرام</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="telegram"
+                                           value="{{ old('telegram', $user->userProfile?->telegram) }}">
+                                    @error('telegram')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
 
-                        </div>
+                                {{-- ایتا --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">ایتا</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="eta"
+                                           value="{{ old('eta', $user->userProfile?->eta) }}">
+                                    @error('eta')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                {{-- اینستاگرام --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اینستاگرام</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="instagram"
+                                           value="{{ old('instagram', $user->userProfile?->instagram) }}">
+                                    @error('instagram')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                {{-- وب سایت --}}
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">وب سایت</label>
+                                    <input type="text"
+                                           class="form-control input-ui"
+                                           name="website"
+                                           value="{{ old('website', $user->userProfile?->website) }}">
+                                    @error('website')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                {{-- بیو --}}
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">درباره من</label>
+                                    <textarea class="form-control input-ui"
+                                              name="bio"
+                                              rows="5">{{ old('bio', $user->userProfile?->bio) }}</textarea>
+
+                                    @error('bio')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                                {{-- عکس --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">عکس پروفایل</label>
+                                    <input type="file" name="image" class="form-control">
+                                    @error('image')
+                                    <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-save">
+                                    ثبت اطلاعات
+                                </button>
+                            </div>
+
+                        </form>
+
                     </div>
 
                 </div>
             </div>
+
         </div>
     </main>
 
