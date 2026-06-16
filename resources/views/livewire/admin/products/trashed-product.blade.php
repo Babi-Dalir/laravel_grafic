@@ -1,4 +1,9 @@
 <div class="table overflow-auto" tabindex="8">
+    @if (session()->has('message'))
+        <div class="alert alert-success">
+            {{ session('message') }}
+        </div>
+    @endif
     <div class="form-group row">
         <div class="col-sm-12 d-flex align-items-center">
             <label class="col-sm-2 col-form-label">جستجو (عنوان دسته بندی)</label>
@@ -47,9 +52,21 @@
                     </a>
                 </td>
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-danger" wire:click="$dispatch('forceDeleteProduct',{'id':{{$product->id}}})">
-                        حذف
-                    </a>
+                    @if(!$product->orderDetails()->exists())
+
+                        <a
+                            class="btn btn-outline-danger"
+                            wire:click="$dispatch('forceDeleteProduct',{'id':{{$product->id}}})">
+                            حذف دائمی
+                        </a>
+
+                    @else
+
+                        <span class="badge badge-danger">
+        دارای سابقه فروش
+    </span>
+
+                    @endif
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($product->created_at)->format('%d%B، %Y')}}</td>
             </tr>
@@ -90,9 +107,19 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     Livewire.dispatch('destroy_trash_product',{id : event.id})
-                    Swal.fire({
-                        title: "حذف با موفقیت انجام شد!",
-                        icon: "success"
+                    Livewire.on('productDeletedTrash', () => {
+                        Swal.fire({
+                            title: 'محصول حذف شد',
+                            icon: 'success'
+                        });
+                    });
+
+                    Livewire.on('productArchivedTrash', () => {
+                        Swal.fire({
+                            title: 'محصول قبلا فروش داشته',
+                            text: 'به جای حذف، آرشیو شد',
+                            icon: 'info'
+                        });
                     });
                 }
             });

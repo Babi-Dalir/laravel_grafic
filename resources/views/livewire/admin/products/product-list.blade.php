@@ -1,4 +1,15 @@
 <div class="table overflow-auto" tabindex="8">
+    @if (session()->has('message'))
+        <div class="alert alert-success">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    @if (session()->has('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="form-group row">
         <label class="col-sm-2 col-form-label">جستجو (نام محصول)</label>
         <div class="col-sm-6 d-flex align-items-center">
@@ -172,8 +183,9 @@
                         {{-- یک SVG ساده و شیک برای حالت جستجو --}}
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
                              stroke-linecap="round" stroke-linejoin="round" class="mb-3">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <small>
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </small>
 
                             <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
@@ -264,9 +276,19 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     Livewire.dispatch('destroy_product', {id: event.id})
-                    Swal.fire({
-                        title: "حذف با موفقیت انجام شد!",
-                        icon: "success"
+                    Livewire.on('productDeleted', () => {
+                        Swal.fire({
+                            title: 'محصول حذف شد',
+                            icon: 'success'
+                        });
+                    });
+
+                    Livewire.on('productArchived', () => {
+                        Swal.fire({
+                            title: 'محصول قبلا فروش داشته',
+                            text: 'به جای حذف، آرشیو شد',
+                            icon: 'info'
+                        });
                     });
                 }
             });

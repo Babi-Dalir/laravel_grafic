@@ -106,6 +106,10 @@ class Product extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class);
+    }
     public function downloads()
     {
         return $this->hasMany(Downloads::class);

@@ -28,7 +28,7 @@ class ProductList extends Component
 
             session()->flash(
                 'message',
-                'درخواست فروشندگی با موفقیت تایید شد.'
+                'محصول با موفقیت تایید شد.'
             );
         }
     }
@@ -59,22 +59,32 @@ class ProductList extends Component
     #[On('destroy_product')]
     public function destroyProduct($id)
     {
-        $product = Product::query()->find($id);
+        $product = Product::findOrFail($id);
+
+        $user = auth()->user();
+
+        if (
+            !$user->hasAnyRole(['مدیر', 'مدیر فروش']) &&
+            $product->user_id !== $user->id
+        ) {
+            abort(403);
+        }
+
+        // اگر محصول فروش داشته باشد حذف نشود
+        if ($product->orderDetails()->exists()) {
+
+            $product->update([
+                'status' => ProductStatus::Archived->value
+            ]);
+
+            $this->dispatch('productArchived');
+
+            return;
+        }
+
         $product->delete();
 
-//        $product = Product::findOrFail($id);
-//
-//        $user = auth()->user();
-//
-//        if (
-//            !$user->hasAnyRole(['مدیر', 'مدیر فروش']) &&
-//            $product->user_id !== $user->id
-//        ) {
-//            abort(403);
-//        }
-//
-//        $product->delete();
-
+        $this->dispatch('productDeleted');
     }
     public function changeStatus($id)
     {
