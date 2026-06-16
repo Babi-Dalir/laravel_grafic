@@ -2,27 +2,22 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\CompanyStatus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminPanelMiddleware
+class SellerMiddleware
 {
     /**
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle($request, Closure $next)
     {
         $user = auth()->user();
 
-        if (!$user) {
-            abort(401);
-        }
-
-        if ($user->hasRole('مدیر')) {
+        if ($user->hasRole('مدیر') || $user->isActiveSeller()) {
             return $next($request);
         }
 

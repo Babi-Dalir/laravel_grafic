@@ -61,6 +61,20 @@ class ProductList extends Component
     {
         $product = Product::query()->find($id);
         $product->delete();
+
+//        $product = Product::findOrFail($id);
+//
+//        $user = auth()->user();
+//
+//        if (
+//            !$user->hasAnyRole(['مدیر', 'مدیر فروش']) &&
+//            $product->user_id !== $user->id
+//        ) {
+//            abort(403);
+//        }
+//
+//        $product->delete();
+
     }
     public function changeStatus($id)
     {

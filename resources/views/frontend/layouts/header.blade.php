@@ -56,7 +56,7 @@
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل کاربری
                                         </a>
                                     @elseif(auth()->user()->isActiveSeller())
-                                        <a class="dropdown-item" href="{{ route('panel') }}">
+                                        <a class="dropdown-item" href="{{ route('seller.transaction.list') }}">
                                             <i class="mdi mdi-account-card-details-outline"></i>پنل فروشنده
                                         </a>
                                         <a class="dropdown-item" href="{{ route('profile') }}">

@@ -128,14 +128,14 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    @if(auth()->user()->id == $product->user->id)
+                    @if(auth()->user()->hasRole('مدیر') || auth()->user()->id == $product->user_id)
                         <a class="btn btn-outline-info" href="{{route('products.edit',$product->id)}}">
                             ویرایش
                         </a>
                     @endif
                 </td>
                 <td class="text-center align-middle">
-                    @if(auth()->user()->id == $product->user->id)
+                    @if(auth()->user()->hasRole('مدیر') || auth()->user()->id == $product->user_id)
                         <a class="btn btn-outline-danger"
                            wire:click="$dispatch('deleteProduct',{'id':{{$product->id}}})">
                             حذف
