@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Frontend\Profiles;
 
+use App\Enums\ProductStatus;
 use App\Models\Favorite;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,7 +20,17 @@ class FavoriteList extends Component
     }
     public function render()
     {
-        $favorites = Favorite::query()->where('user_id',auth()->user()->id)->paginate(1);
+        $favorites = Favorite::query()
+            ->with('product')
+            ->where('user_id',auth()->user()->id)
+            ->whereHas('product', function ($query) {
+                $query->where(
+                    'status',
+                    '!=',
+                    ProductStatus::Archived->value
+                );
+            })
+            ->paginate(1);
         return view('livewire.frontend.profiles.favorite-list',compact('favorites'));
     }
 }

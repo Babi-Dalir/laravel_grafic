@@ -3,7 +3,7 @@
     <div class="row">
 
         @forelse($favorites as $favorite)
-
+            @continue(!$favorite->product)
             <div class="col-lg-6 col-md-12">
                 <div class="card-horizontal-product border-bottom rounded-0">
 
