@@ -3,6 +3,7 @@
 namespace App\Livewire\Frontend\Carts;
 
 use App\Enums\CartType;
+use App\Enums\ProductStatus;
 use App\Models\Discount;
 use App\Models\GiftCart;
 use App\Models\ProductPrice;
@@ -144,35 +145,82 @@ class CartsDetail extends Component
     }
     public function render()
     {
-        $carts = UserCart::query()
+        // -----------------------------
+        // 1. carts query
+        // -----------------------------
+        $cartsQuery = UserCart::query()
             ->with('product')
-            ->where('user_id',auth()->id())
-            ->where('type',CartType::Main->value)
+            ->where('user_id', auth()->id())
+            ->where('type', CartType::Main->value)
             ->get();
-        $reserve_carts = UserCart::query()
+
+        $reserveCartsQuery = UserCart::query()
             ->with('product')
             ->where('user_id', auth()->id())
             ->where('type', CartType::Reserve->value)
             ->get();
+
+        // -----------------------------
+        // 2. FILTER INVALID PRODUCTS (IMPORTANT)
+        // -----------------------------
+        $carts = $cartsQuery->filter(function ($cart) {
+            return $cart->product
+                && in_array($cart->product->status, [
+                    ProductStatus::Approved->value,
+                ]);
+        });
+
+        $reserve_carts = $reserveCartsQuery->filter(function ($cart) {
+            return $cart->product
+                && in_array($cart->product->status, [
+                    ProductStatus::Approved->value,
+                ]);
+        });
+
+        // -----------------------------
+        // 3. AUTO CLEAN ARCHIVED PRODUCTS FROM CART (REAL LOGIC)
+        // -----------------------------
+        UserCart::query()
+            ->where(function ($q) {
+                $q->whereHas('product', function ($p) {
+                    $p->whereIn('status', [
+                        ProductStatus::Archived->value,
+                        ProductStatus::Rejected->value,
+                        ProductStatus::Draft->value
+                    ]);
+                })
+                    ->orWhereDoesntHave('product');
+            })
+            ->delete();
+
+        // -----------------------------
+        // 4. CALCULATIONS
+        // -----------------------------
         $this->total_price = 0;
         $this->discount_price = 0;
 
         foreach ($carts as $cart) {
+
             $this->total_price += $cart->product->final_price;
+
             $this->discount_price += (
                 $cart->product->main_price -
                 $cart->product->final_price
             );
         }
 
-        $final_price = $this->total_price - $this->discount_code_price - $this->gift_cart_price;
+        $final_price = $this->total_price
+            - $this->discount_code_price
+            - $this->gift_cart_price;
+
         $final_price = max($final_price, 0);
+
         return view('livewire.frontend.carts.carts-detail', [
             'carts' => $carts,
             'reserve_carts' => $reserve_carts,
             'total_price' => $this->total_price,
             'discount_price' => $this->discount_price,
-            'final_price' => max($final_price, 0),
+            'final_price' => $final_price,
         ]);
     }
 }

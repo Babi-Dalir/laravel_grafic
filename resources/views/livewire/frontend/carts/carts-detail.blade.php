@@ -61,15 +61,29 @@
                                                                 </li>
                                                             </ul>
                                                             <div class="item-quantity--item-price">
-                                                                <div class="item-quantity">
-                                                                    <button wire:click="deleteCart({{$cart->id}})" class="item-remove-btn mr-3">
-                                                                        <i class="far fa-trash-alt btn-danger"></i>
-                                                                        حذف
+                                                                <div class="item-actions d-flex align-items-center gap-2 mt-2">
+
+                                                                    <!-- حذف -->
+                                                                    <button wire:click="deleteCart({{$cart->id}})" class="action-btn danger">
+
+                                                                        <span class="icon">
+                                                                            <i class="far fa-trash-alt"></i>
+                                                                        </span>
+
+                                                                        <span class="text">حذف</span>
                                                                     </button>
-                                                                    <button class="item-remove-btn mr-3" wire:click="moveToReserveCart({{$cart->id}})">
-                                                                        <i class="far fa-retweet-alt btn-info"></i>
-                                                                        انتقال به لیست خرید بعدی
+
+                                                                    <!-- انتقال -->
+                                                                    <button wire:click="moveToReserveCart({{$cart->id}})"
+                                                                        class="action-btn primary">
+
+                                                                        <span class="icon">
+                                                                            <i class="far fa-snooze"></i>
+                                                                        </span>
+
+                                                                        <span class="text">بعداً می‌خرم</span>
                                                                     </button>
+
                                                                 </div>
                                                                 <div class="item-price">
                                                                     {{number_format(($cart->product->final_price))}}<span
@@ -121,22 +135,6 @@
                                                     </span>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="dt-sn dt-sn--box checkout-feature-aside pt-4">
-                                    <ul>
-                                        <li class="checkout-feature-aside-item">
-                                            <img src="./assets/img/svg/return-policy.svg" alt="">
-                                            هفت روز ضمانت تعویض
-                                        </li>
-                                        <li class="checkout-feature-aside-item">
-                                            <img src="./assets/img/svg/payment-terms.svg" alt="">
-                                            پرداخت در محل با کارت بانکی
-                                        </li>
-                                        <li class="checkout-feature-aside-item">
-                                            <img src="./assets/img/svg/delivery.svg" alt="">
-                                            تحویل اکسپرس
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -281,15 +279,26 @@
                                                                 </li>
                                                             </ul>
                                                             <div class="item-quantity--item-price">
-                                                                <div class="item-quantity">
-                                                                    <button class="item-remove-btn mr-3" wire:click="deleteCart({{$cart->id}})">
-                                                                        <i class="far fa-trash-alt btn-danger"></i>
-                                                                        حذف
+                                                                <div class="item-actions d-flex align-items-center gap-2">
+
+                                                                    <!-- حذف -->
+                                                                    <button
+                                                                        class="action-chip danger mr-2"
+                                                                        wire:click="deleteCart({{$cart->id}})">
+
+                                                                        <i class="far fa-trash-alt"></i>
+                                                                        <span>حذف</span>
                                                                     </button>
-                                                                    <button class="item-remove-btn mr-3" wire:click="moveToMainCart({{$cart->id}})">
-                                                                        <i class="far fa-retweet-alt btn-info"></i>
-                                                                        انتقال به لیست خرید اصلی
+
+                                                                    <!-- انتقال به سبد اصلی -->
+                                                                    <button
+                                                                        class="action-chip primary"
+                                                                        wire:click="moveToMainCart({{$cart->id}})">
+
+                                                                        <i class="far fa-retweet"></i>
+                                                                        <span>انتقال به سبد اصلی</span>
                                                                     </button>
+
                                                                 </div>
                                                                 <div class="item-price">
                                                                     {{number_format(($cart->product->final_price))}}<span

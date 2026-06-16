@@ -3,6 +3,7 @@
 namespace App\Livewire\Frontend\Carts;
 
 use App\Enums\CartType;
+use App\Enums\ProductStatus;
 use App\Models\ProductPrice;
 use App\Models\UserCart;
 use Illuminate\Support\Facades\Session;
@@ -33,29 +34,34 @@ class HeaderCarts extends Component
     public function render()
     {
         $carts = UserCart::query()
-            ->with('product')
-            ->where('user_id',auth()->id())
-            ->where('type',CartType::Main->value)
-            ->get();
+            ->with(['product' => function ($q) {
+                $q->where('status', ProductStatus::Approved->value);
+            }])
+            ->where('user_id', auth()->id())
+            ->where('type', CartType::Main->value)
+            ->get()
+            ->filter(fn($cart) => $cart->product);
 
         $this->total_price = 0;
         $this->discount_price = 0;
 
         foreach ($carts as $cart) {
+
             $this->total_price += $cart->product->final_price;
+
             $this->discount_price += (
                 $cart->product->main_price -
                 $cart->product->final_price
             );
         }
 
-        $final_price = $this->total_price;
-        $final_price = max($final_price, 0);
-        return view('livewire.frontend.carts.header-carts',[
+        $final_price = max($this->total_price, 0);
+
+        return view('livewire.frontend.carts.header-carts', [
             'carts' => $carts,
             'total_price' => $this->total_price,
             'discount_price' => $this->discount_price,
-            'final_price' => max($final_price, 0),
+            'final_price' => $final_price,
         ]);
     }
 }

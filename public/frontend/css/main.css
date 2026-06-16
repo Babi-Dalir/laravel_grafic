@@ -10546,3 +10546,135 @@ body.menu-open .btn-menu{
     }
 
 }
+
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 7px 14px;
+    border-radius: 12px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    border: 1px solid transparent;
+    background: #f8f9fa;
+
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+/* icon bubble */
+.action-btn .icon {
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+/* hover feel */
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+
+/* DANGER (delete) */
+.action-btn.danger {
+    color: #e74c3c;
+    background: #fff5f5;
+}
+
+.action-btn.danger .icon {
+    background: #ffe3e3;
+    color: #e74c3c;
+}
+
+/* PRIMARY (reserve) */
+.action-btn.primary {
+    color: #2f80ed;
+    background: #f1f7ff;
+}
+
+.action-btn.primary .icon {
+    background: #dbe9ff;
+    color: #2f80ed;
+}
+
+/* active press */
+.action-btn:active {
+    transform: scale(0.96);
+}
+
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* base chip button */
+.action-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 12px;
+    border-radius: 10px;
+
+    font-size: 12.5px;
+    font-weight: 500;
+
+    border: 1px solid transparent;
+    background: #f8f9fa;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* icon style */
+.action-chip i {
+    font-size: 13px;
+}
+
+/* hover effect */
+.action-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+}
+
+/* danger (delete) */
+.action-chip.danger {
+    color: #e74c3c;
+    background: #fff5f5;
+}
+
+.action-chip.danger i {
+    color: #e74c3c;
+}
+
+/* primary (move back to cart) */
+.action-chip.primary {
+    color: #2f80ed;
+    background: #f1f7ff;
+}
+
+.action-chip.primary i {
+    color: #2f80ed;
+}
+
+/* click feel */
+.action-chip:active {
+    transform: scale(0.96);
+}
