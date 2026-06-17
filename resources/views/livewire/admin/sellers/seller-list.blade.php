@@ -19,7 +19,6 @@
             <th class="text-center align-middle text-primary">کد ملی</th>
             <th class="text-center align-middle text-primary"> وضعیت</th>
             <th class="text-center align-middle text-primary"> جزئیات فروشنده</th>
-            <th class="text-center align-middle text-primary">حذف</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
         </tr>
         </thead>
@@ -75,11 +74,6 @@
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-info" href="{{route('admin.seller.detail',$seller->id)}}">
                         جزئیات فروشنده
-                    </a>
-                </td>
-                <td class="text-center align-middle">
-                    <a class="btn btn-outline-danger" href="#">
-                        حذف
                     </a>
                 </td>
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($seller->created_at)->format('%d%B، %Y')}}</td>
