@@ -62,7 +62,7 @@ class PermissionController extends Controller
         $permission->update([
             'name'=>$request->input('name')
         ]);
-        return redirect()->route('permissions.index')->with('message', 'مجوز جدید با موفقیت ویرایش شد');
+        return redirect()->route('permissions.index')->with('message', 'مجوز با موفقیت ویرایش شد');
     }
 
 }

@@ -67,7 +67,7 @@ class RoleController extends Controller
         $role->update([
             'name'=>$request->input('name')
         ]);
-        return redirect()->route('roles.index')->with('message', 'نقش جدید با موفقیت ویرایش شد');
+        return redirect()->route('roles.index')->with('message', 'نقش با موفقیت ویرایش شد');
     }
 
 
