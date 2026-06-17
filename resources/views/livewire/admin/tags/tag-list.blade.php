@@ -43,8 +43,9 @@
                         {{-- یک SVG ساده و شیک برای حالت جستجو --}}
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
                              stroke-linecap="round" stroke-linejoin="round" class="mb-3">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <small>
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </small>
 
                             <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>

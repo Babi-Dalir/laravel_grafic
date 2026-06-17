@@ -36,7 +36,7 @@ class CategoryList extends Component
     #[On('destroy_category')]
     public function destroyCategory($id)
     {
-        $category = Category::find($id);
+        $category = Category::findOrFail($id);
         $category->delete();
         $this->mount();
     }

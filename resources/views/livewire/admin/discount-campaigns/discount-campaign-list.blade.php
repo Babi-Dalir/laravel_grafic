@@ -43,7 +43,8 @@
 
                 {{-- تغییر وضعیت تعاملی --}}
                 <td class="text-center align-middle">
-                    <div class="status-interactive-wrapper" style="cursor: pointer" wire:click="changeStatus({{ $campaign->id }})">
+                    <div class="status-interactive-wrapper" style="cursor: pointer"
+                         wire:click="changeStatus({{ $campaign->id }})">
                         @if($campaign->status === \App\Enums\DiscountCampaignStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
@@ -120,7 +121,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     // فراخوانی متد حذف در کامپوننت لایووایر
-                    Livewire.dispatch('destroy_discount_campaign', { id: event.id });
+                    Livewire.dispatch('destroy_discount_campaign', {id: event.id});
 
                     Swal.fire({
                         title: "حذف شد!",
