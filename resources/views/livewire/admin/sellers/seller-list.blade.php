@@ -27,9 +27,16 @@
         @forelse($sellers as $index => $seller)
             <tr>
                 <td class="text-center align-middle">{{$sellers->firstItem()+$index}}</td>
+
+                @php
+                    $image = $seller->user->image
+                        ? asset('images/users/small/'.$seller->user->image)
+                        : asset('images/users/default-avatar.png');
+                @endphp
+
                 <td class="text-center align-middle">
                     <figure class="avatar avatar">
-                        <img src="{{url('images/users/small/'.$seller->user->image)}}" class="rounded-circle" alt="image">
+                        <img src="{{$image}}" class="rounded-circle" alt="{{$seller->user->name}}">
                     </figure>
                 </td>
                 <td class="text-center align-middle">{{$seller->user->name}} -- {{$seller->last_name}}</td>
