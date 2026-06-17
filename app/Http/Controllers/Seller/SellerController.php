@@ -7,9 +7,11 @@ use App\Enums\SellerStatus;
 use App\Enums\TransactionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Http\Requests\SellerProductRequest;
 use App\Http\Requests\SellerVerificationRequest;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerRequest;
 use App\Models\Tag;
@@ -43,10 +45,27 @@ class SellerController extends Controller
         $tags = Tag::query()->pluck('name','id');
         return view('admin.sellers.create',compact('title','categories','tags'));
     }
-    public function storeSellerProduct(ProductRequest $request)
+    public function storeSellerProduct(SellerProductRequest $request)
     {
-        Seller::createSellerProduct($request);
-        return redirect()->route('products.index')->with('message', 'محصول وارد شده توسط فروشنده با موفقیت ثبت شد');
+        $product = Product::createProduct($request);
+        return redirect()
+            ->route('add.product.gallery', $product->id)
+            ->with('message', 'محصول ایجاد شد. حالا تصاویر گالری را ثبت کنید.');
+    }
+
+    public function editSellerProduct(string $id)
+    {
+        $title ="ویرایش محصول";
+        $categories = Category::getCategories();
+        $tags = Tag::query()->pluck('name','id');
+        $product = Product::findOrfail($id);
+        return view('seller.seller_products.edit',compact('title','categories','tags','product'));
+    }
+
+    public function updateSellerProduct(SellerProductRequest $request, string $id)
+    {
+        Product::updateProduct($request,$id);
+        return redirect()->route('seller.product.list')->with('message', 'محصول با موفقیت ویرایش شد');
     }
 
     public function sellerTransactionList()

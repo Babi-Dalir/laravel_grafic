@@ -148,6 +148,10 @@ class Product extends Model
                 'description' => $request->input('description'),
                 'main_price' => $request->input('main_price', 0),
                 'image' => $request->image ? ImageManager::saveProductImage('products', $request->image) : null,
+
+                 'status' => auth()->user()->hasRole('مدیر')
+                     ? ProductStatus::Approved->value
+                     : ProductStatus::PendingReview->value,
             ]);
 
             // اگر درصد تخفیف وارد شده باشد، یک کمپین اختصاصی برای این محصول بساز
@@ -198,6 +202,10 @@ class Product extends Model
                 'category_id' => $request->input('category_id'),
                 'main_price' => $request->input('main_price', 0),
                 'image' => $imageName,
+
+                'status' => auth()->user()->hasRole('مدیر')
+                    ? ProductStatus::Approved->value
+                    : ProductStatus::PendingReview->value,
             ]);
 
             // ۴. مدیریت تخفیف (آپدیت یا ایجاد کمپین اختصاصی محصول)

@@ -5,19 +5,23 @@
         <div class="card">
             <div class="card-body">
                 <div class="container">
-                    <h6 class="card-title">ایجاد محصول</h6>
-                    <form method="POST" action="{{route('store.seller.product')}}" enctype="multipart/form-data">
+                    <h6 class="card-title">ویرایش محصول</h6>
+                    <form method="POST" action="{{route('update.seller.product',$product->id)}}"
+                          enctype="multipart/form-data">
                         @csrf
+                        @method('PUT')
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">نام محصول</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control text-left" dir="rtl" name="name">
+                                <input type="text" class="form-control text-left" dir="rtl" name="name"
+                                       value="{{$product->name}}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">نام انگلیسی محصول</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control text-left" dir="rtl" name="e_name">
+                                <input type="text" class="form-control text-left" dir="ltr" name="e_name"
+                                       value="{{$product->e_name}}">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -25,7 +29,11 @@
                             <div class="col-sm-10">
                                 <select name="category_id" class="form-select">
                                     @foreach($categories as $key => $value)
-                                        <option value="{{$key}}">{{$value}}</option>
+                                        @if($product->category_id == $key)
+                                            <option selected value="{{$key}}">{{$value}}</option>
+                                        @else
+                                            <option value="{{$key}}">{{$value}}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -33,22 +41,36 @@
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">قیمت اصلی</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control text-left" dir="rtl" name="main_price">
+                                <input type="text" class="form-control text-left" dir="rtl" name="main_price"
+                                       value="{{$product->main_price}}">
                             </div>
                         </div>
+                        @php
+                            // پیدا کردن کمپین اختصاصی این محصول برای نمایش در فرم
+                            $productCampaign = \App\Models\DiscountCampaignTarget::where('target_id', $product->id)
+                                ->whereHas('campaign', fn($q) => $q->where('type', 'product'))
+                                ->first()?->campaign;
+                        @endphp
+
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">درصد تخفیف محصول(اختیاری)</label>
+                            <label class="col-sm-2 col-form-label">درصد تخفیف فعلی</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control text-left" dir="rtl" name="discount">
+                                <input type="text" class="form-control text-left" dir="rtl" name="discount"
+                                       value="{{ $productCampaign ? $productCampaign->percent : '' }}">
                             </div>
                         </div>
+                        {{-- فیلدهای تاریخ هم دقیقاً به همین شکل با مقدار $productCampaign->starts_at پر میشن --}}
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">تگ ها</label>
                             <div class="col-sm-10">
                                 <select name="tags[]" id="tags"
                                         class="form-control js-example-basic-single select2-hidden-accessible" multiple>
                                     @foreach($tags as $key => $value)
-                                        <option value="{{$key}}">{{$value}}</option>
+                                        @if(in_array($key,$product->tags->pluck('id')->toArray()))
+                                            <option selected value="{{$key}}">{{$value}}</option>
+                                        @else
+                                            <option value="{{$key}}">{{$value}}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -57,26 +79,32 @@
                             <label class="col-sm-2 col-form-label">توضیحات</label>
                             <div class="col-sm-10">
                                 <textarea type="text" class="form-control text-left" dir="rtl" name="description"
-                                          id="editor1" cols="30" rows="10"></textarea>
+                                          id="editor1" cols="30" rows="10">{{$product->description}}</textarea>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="file"> آپلود عکس </label>
-                            <input class="col-sm-10 form-control-file" type="file" name="image" id="image">
+                            <div class="col-sm-10">
+                                <input class="form-control-file" type="file" name="image" id="image">
+                                @if($product->image)
+                                    <small>فایل فعلی: {{ basename($product->image) }}</small>
+                                @endif
+                            </div>
                         </div>
-                        <h6 class="mb-4 text-primary">تنظیمات تخفیف شگفت‌انگیز (اختیاری)</h6>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ شروع شگفت انگیز</label>
                             <div class="col-sm-10">
                                 <input type="text" id="spacial_start" class="text-left form-control" dir="rtl"
-                                       name="spacial_start">
+                                       name="spacial_start"
+                                       value="{{$product->spacial_start==null ? null : \Hekmatinasser\Verta\Verta::instance($product->spacial_start)}}">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ انقضای شگفت انگیز</label>
                             <div class="col-sm-10">
                                 <input type="text" id="spacial_expiration" class="text-left form-control" dir="rtl"
-                                       name="spacial_expiration">
+                                       name="spacial_expiration"
+                                       value="{{$product->spacial_start==null ? null : \Hekmatinasser\Verta\Verta::instance($product->spacial_expiration)}}">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -98,23 +126,6 @@
             dropdownAutoWidth: true,
             $dropdownParent: $('#parent')
         })
-        $('.form-select').select2()
-
-        var customOptions = {
-            placeholder: "روز / ماه / سال"
-            , twodigit: false
-            , closeAfterSelect: true
-            , nextButtonIcon: "fa fa-arrow-circle-right"
-            , previousButtonIcon: "fa fa-arrow-circle-left"
-            , buttonsColor: "#5867dd"
-            , markToday: true
-            , markHolidays: true
-            , highlightSelectedDay: true
-            , sync: true
-            , gotoToday: true
-        }
-        kamaDatepicker('spacial_start', customOptions);
-        kamaDatepicker('spacial_expiration', customOptions);
         $('.form-select').select2()
     </script>
 @endsection

@@ -24,42 +24,86 @@ class ImageManager
     }
     public static function saveProductImage($table, $image)
     {
-        if ($image) {
-            $name = $image->hashName();
-            $manager = new IM(new \Intervention\Image\Drivers\Imagick\Driver());
+        if (!$image) {
+            return null;
+        }
 
-            try {
-                $img = $manager->read($image->getRealPath());
+        $name = pathinfo($image->hashName(), PATHINFO_FILENAME) . '.jpg';
 
-                // ۱. Thumbnail (برای لیست‌های کوچک در موبایل و دسکتاپ)
-                $smallImage = clone $img;
-                $smallImage->cover(300, 300); // کمی بزرگتر از قبل برای کیفیت بهتر در نمایشگرهای Retina
-                Storage::disk('public')->put($table.'/small/'.$name, (string)$smallImage->toJpeg(75));
+        $manager = new IM(new \Intervention\Image\Drivers\Imagick\Driver());
 
-                // ۲. تصویر اصلی (مناسب برای زوم و نمایش در همه دستگاه‌ها)
-                $bigImage = clone $img;
+        try {
 
-                // عرض ۱۲۰۰ پیکسل استاندارد طلایی برای سال ۲۰۲۶ است
-                $bigImage->scale(width: 1200);
+            $img = $manager->read($image->getRealPath());
 
-                // اعمال واترمارک
-                $watermarkPath = public_path('panel/assets/media/image/watermark.png');
-                if (file_exists($watermarkPath)) {
-                    $watermark = $manager->read($watermarkPath);
-                    // واترمارک را متناسب با عرض ۱۲۰۰ تنظیم کن
-                    $watermark->scale(width: 500);
-                    $bigImage->place($watermark, 'center', 0, 0, 25);
-                }
+            /*
+            |--------------------------------------------------------------------------
+            | Thumbnail (300x300)
+            |--------------------------------------------------------------------------
+            */
+            $smallImage = clone $img;
+            $smallImage->cover(300, 300);
 
-                // ذخیره با کیفیت ۸۰ درصد (تعادل عالی بین کیفیت و حجم برای موبایل)
-                Storage::disk('public')->put($table.'/big/'.$name, (string)$bigImage->toJpeg(80));
+            Storage::disk('public')->put(
+                $table . '/small/' . $name,
+                (string) $smallImage->toJpeg(75)
+            );
 
-                return $name;
-            } catch (\Exception $e) {
-                \Log::error("Responsive Image Error: " . $e->getMessage());
-                Storage::disk('public')->put($table.'/big/'.$name, file_get_contents($image));
-                return $name;
+            /*
+            |--------------------------------------------------------------------------
+            | Main Image (2362x2362)
+            |--------------------------------------------------------------------------
+            */
+            $bigImage = clone $img;
+            $bigImage->cover(2362, 2362);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Watermark (FULL COVER)
+            |--------------------------------------------------------------------------
+            */
+            $watermarkPath = public_path('panel/assets/media/image/watermark.png');
+
+            if (file_exists($watermarkPath)) {
+
+                $watermark = $manager->read($watermarkPath);
+
+                // فیت کامل روی کل تصویر
+                $watermark->cover(2362, 2362);
+
+                // پوشش کامل با opacity بالا
+                $bigImage->place(
+                    $watermark,
+                    'center',
+                    0,
+                    0,
+                    100
+                );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Image
+            |--------------------------------------------------------------------------
+            */
+            Storage::disk('public')->put(
+                $table . '/big/' . $name,
+                (string) $bigImage->toJpeg(85)
+            );
+
+            return $name;
+
+        } catch (\Exception $e) {
+
+            \Log::error('Product Image Error: ' . $e->getMessage());
+
+            // fallback: ذخیره فایل خام
+            Storage::disk('public')->put(
+                $table . '/big/' . $name,
+                file_get_contents($image)
+            );
+
+            return $name;
         }
     }
 

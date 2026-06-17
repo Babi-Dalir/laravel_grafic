@@ -41,6 +41,7 @@
             <th class="text-center">دانلود</th>
 
             <th class="text-center">وضعیت</th>
+            <th class="text-center">دلیل رد محصول</th>
 
             <th class="text-center">ویرایش</th>
 
@@ -164,10 +165,28 @@
                 </td>
 
                 <td class="text-center align-middle">
+                    @if($product->status === \App\Enums\ProductStatus::Rejected->value)
+
+                        <button
+                            class="btn btn-sm btn-outline-danger"
+                            wire:click="showRejectReason({{ $product->id }})">
+
+                            مشاهده دلیل
+                        </button>
+
+                    @else
+                        <span class="text-muted">
+                            --
+                        </span>
+                    @endif
+
+                </td>
+
+                <td class="text-center align-middle">
 
                     <a
-                        href="{{ route('products.edit',$product->id) }}"
-                        class="btn btn-outline-info btn-sm">
+                        href="{{ route('edit.seller.product',$product->id) }}"
+                        class="btn btn-outline-info">
 
                         ویرایش
 
@@ -177,13 +196,11 @@
 
                 <td class="text-center align-middle">
 
-                    <button
-                        class="btn btn-outline-danger btn-sm"
-                        wire:click="$dispatch('deleteProduct',{id:{{ $product->id }}})">
-
+                    <a
+                        class="btn btn-outline-danger"
+                        wire:click="$dispatch('deleteSellerProduct', {id: {{ $product->id }}})">
                         حذف
-
-                    </button>
+                    </a>
 
                 </td>
 
@@ -196,22 +213,68 @@
             </tr>
 
         @empty
-
             <tr>
+                <td colspan="14" class="text-center py-5" style="background-color: #f9f9f966;">
+                    <div class="empty-state">
+                        {{-- یک SVG ساده و شیک برای حالت جستجو --}}
+                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                             stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                            <small>
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </small>
 
-                <td colspan="12" class="text-center py-5">
+                            <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
+                            <p class="text-muted">محصولی با عبارت <strong class="text-danger">"{{ $search }}"</strong>
+                                در سیستم ثبت نشده است.</p>
 
-                    محصولی یافت نشد
-
+                            @if($search)
+                                <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                                    <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                                </button>
+                        @endif
+                    </div>
                 </td>
-
             </tr>
-
         @endforelse
 
         </tbody>
 
     </table>
+
+    <div class="modal fade @if($showRejectModal) show d-block @endif"
+         tabindex="-1"
+         style="background: rgba(0,0,0,0.5);">
+
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">دلیل رد محصول</h5>
+                    <button type="button" class="close" wire:click="$set('showRejectModal', false)">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    @if($rejectReason)
+                        <p class="text-danger mb-0">
+                            {{ $rejectReason }}
+                        </p>
+                    @else
+                        <p class="text-muted">دلیلی ثبت نشده است</p>
+                    @endif
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" wire:click="$set('showRejectModal', false)">
+                        بستن
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <div
         class="pagination pagination-rounded pagination-sm d-flex justify-content-center mt-4">
@@ -221,3 +284,43 @@
     </div>
 
 </div>
+
+@section('scripts')
+    <script>
+        Livewire.on('deleteSellerProduct', (event) => {
+
+            Swal.fire({
+                title: "آیا از حذف مطمئن هستید؟",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "بله",
+                cancelButtonText: "خیر",
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    Livewire.dispatch('destroy_seller_product', {
+                        id: event.id
+                    });
+
+                    Livewire.on('sellerProductDeleted', () => {
+                        Swal.fire({
+                            title: 'محصول حذف شد',
+                            icon: 'success'
+                        });
+                    });
+
+                    Livewire.on('sellerProductArchived', () => {
+                        Swal.fire({
+                            title: 'محصول حذف نشد',
+                            text: 'به دلیل وجود سفارش، آرشیو شد',
+                            icon: 'info'
+                        });
+                    });
+
+                }
+            });
+
+        });
+    </script>
+@endsection

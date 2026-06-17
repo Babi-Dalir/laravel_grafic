@@ -13,6 +13,9 @@ Route::get('seller_product_list',[SellerController::class,'sellerProductList'])-
 Route::get('create_seller_product',[SellerController::class,'createSellerProduct'])->name('create.seller.product');
 Route::post('store_seller_product',[SellerController::class,'storeSellerProduct'])->name('store.seller.product');
 
+Route::get('edit_seller_product/{id}', [SellerController::class, 'editSellerProduct'])->name('edit.seller.product');
+Route::put('update_seller_product/{id}', [SellerController::class, 'updateSellerProduct'])->name('update.seller.product');
+
 //Seller Transaction Route
 Route::get('seller_transaction_list',[SellerController::class,'sellerTransactionList'])->name('seller.transaction.list');
 

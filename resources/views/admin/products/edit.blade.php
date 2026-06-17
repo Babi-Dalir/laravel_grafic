@@ -76,15 +76,6 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">فایل اصلی محصول</label>
-                            <div class="col-sm-10">
-                                <input type="file" class="form-control-file" name="main_file">
-                                @if($product->main_file)
-                                    <small>فایل فعلی: {{ basename($product->main_file) }}</small>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label">توضیحات</label>
                             <div class="col-sm-10">
                                 <textarea type="text" class="form-control text-left" dir="rtl" name="description"
