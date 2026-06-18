@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Seller;
 use App\Enums\SellerRequestStatus;
 use App\Enums\SellerStatus;
 use App\Enums\TransactionType;
+use App\Helpers\ImageManager;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\SellerProductRequest;
 use App\Http\Requests\SellerVerificationRequest;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerRequest;
@@ -43,13 +45,13 @@ class SellerController extends Controller
         $title = "ایجاد محصول توسط فروشنده";
         $categories = Category::getCategories();
         $tags = Tag::query()->pluck('name','id');
-        return view('admin.sellers.create',compact('title','categories','tags'));
+        return view('seller.seller_products.create',compact('title','categories','tags'));
     }
     public function storeSellerProduct(SellerProductRequest $request)
     {
         $product = Product::createProduct($request);
         return redirect()
-            ->route('add.product.gallery', $product->id)
+            ->route('add.seller.product.gallery', $product->id)
             ->with('message', 'محصول ایجاد شد. حالا تصاویر گالری را ثبت کنید.');
     }
 
@@ -66,6 +68,27 @@ class SellerController extends Controller
     {
         Product::updateProduct($request,$id);
         return redirect()->route('seller.product.list')->with('message', 'محصول با موفقیت ویرایش شد');
+    }
+
+    public function addSellerProductGallery($id)
+    {
+        $product = Product::query()->find($id);
+        return view('seller.seller_products.add_seller_product_gallery',compact('product'));
+    }
+
+    public function storeSellerProductGallery(Request $request,$id)
+    {
+        Gallery::query()->create([
+            'product_id'=>$id,
+            'image'=>ImageManager::saveProductImage('products',$request->file),
+            'position'=>Gallery::query()->where('product_id',$id)->count()
+        ]);
+        return redirect()->back();
+    }
+
+    public function createSellerProductProperty(Product $product)
+    {
+        return view('seller.seller_products.seller_product_properties',compact('product'));
     }
 
     public function sellerTransactionList()

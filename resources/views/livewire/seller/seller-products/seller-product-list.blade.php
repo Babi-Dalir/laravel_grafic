@@ -40,8 +40,13 @@
 
             <th class="text-center">دانلود</th>
 
+            <th class="text-center">ویژگی های محصول</th>
+            <th class="text-center">گالری</th>
+
             <th class="text-center">وضعیت</th>
             <th class="text-center">دلیل رد محصول</th>
+
+            <th class="text-center">تکمیل محصول</th>
 
             <th class="text-center">ویرایش</th>
 
@@ -125,6 +130,17 @@
                 </td>
 
                 <td class="text-center align-middle">
+                    <a class="btn btn-outline-secondary" href="{{route('create.seller.product.properties',$product)}}">
+                        ویژگی های محصول
+                    </a>
+                </td>
+                <td class="text-center align-middle">
+                    <a class="btn btn-outline-success" href="{{route('add.seller.product.gallery',$product->id)}}">
+                        گالری
+                    </a>
+                </td>
+
+                <td class="text-center align-middle">
 
                     <div>
 
@@ -179,6 +195,26 @@
                             --
                         </span>
                     @endif
+
+                </td>
+                <td class="text-center align-middle">
+
+                    @php
+                        $percent = $product->completion_percent;
+                    @endphp
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar
+                            {{ $percent == 100 ? 'bg-success' : ($percent >= 70 ? 'bg-info' : ($percent >= 40 ? 'bg-warning' : 'bg-danger')) }}"
+                            style="width: {{ $percent }}%">
+
+                            {{ $percent }}%
+
+                        </div>
+
+                    </div>
 
                 </td>
 

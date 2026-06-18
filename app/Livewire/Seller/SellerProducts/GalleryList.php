@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Livewire\Seller\SellerProducts;
+
+use App\Helpers\ImageManager;
+use App\Models\Gallery;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class GalleryList extends Component
+{
+    public $product;
+
+    use WithPagination;
+    protected $paginationTheme = 'bootstrap';
+    public $search;
+
+    #[On('destroy_seller_product_gallery')]
+    public function destroyGallery($id)
+    {
+        $gallery = Gallery::findOrFail($id);
+        // حذف فیزیکی فایل‌ها
+        ImageManager::unlinkImage('products', $gallery);
+        $gallery->delete();
+    }
+
+    public function searchData()
+    {
+        $this->resetPage();
+    }
+    public function render()
+    {
+        $galleries = Gallery::query()
+            ->where('product_id',$this->product->id)
+            ->orderBy('position',"DESC")
+            ->paginate(10);
+        return view('livewire.seller.seller-products.gallery-list',compact('galleries'));
+    }
+}
