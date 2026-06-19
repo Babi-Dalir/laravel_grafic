@@ -105,12 +105,17 @@ Route::resource('discount_campaigns', DiscountCampaignController::class);
 //Product File Route
 Route::get('products/{product}/files',[ProductFileController::class,'index'])->name('product.file.list');
 
+Route::get('product_files/{file}/download',[ProductFileController::class,'downloadFile'])->name('product.files.download');
+
 //Download Resume Route
 Route::get('download_resume/{request}', [AdminSellerController::class, 'downloadResume'])
     ->name('download.resume');
 
 //Seller List Route
 Route::get('seller_list', [AdminSellerController::class, 'sellerList'])->name('seller.list');
+
+//Seller Request Route
+Route::get('seller_requests', [AdminSellerController::class,'sellerRequestsList'])->name('seller.requests.list');
 
 //Seller Settlement Route
 Route::get('seller_settlement_list',[AdminSellerController::class,'sellerSettlementList'])->name('seller.settlement.list');

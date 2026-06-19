@@ -209,6 +209,7 @@ return [
         'postal_code'=>'کد پستی',
         'send_type'=>'نوع ارسال',
         'discount'=>'تخفیف',
+        'file'=>'فایل',
 
     ],
 ];

@@ -120,7 +120,7 @@ class ProductList extends Component
     }
     public function render()
     {
-        $query = Product::query()
+        $query = Product::query()->with('files')
             ->where('name', 'like', '%' . $this->search . '%');
 
         if (!auth()->user()->hasRole('مدیر')) {

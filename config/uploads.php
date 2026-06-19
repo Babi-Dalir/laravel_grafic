@@ -3,9 +3,22 @@ return [
 
     'allowed_extensions' => [
 
+        'dxf',
+        'png',
+        'jpg',
+        'jpeg',
+        'cdr',
+        'art',
+        'svg',
+        'webp',
+        'tiff',
+        'stl',
+        'obj',
+        '3ds',
+        'stp',
+        'step',
+
         'zip',
-        'rar',
-        '7z',
 
         'psd',
         'ai',

@@ -27,7 +27,7 @@
             </tr>
         @endforeach
     </table>
-    @if($product->galleries()->exists() && $product->status !== \App\Enums\ProductStatus::Approved->value)
+    @if($product->galleries()->exists())
         <a href="{{ route('create.product.properties', $product->id) }}"
            class="btn btn-success">
             ادامه تکمیل محصول →

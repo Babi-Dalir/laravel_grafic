@@ -4,10 +4,6 @@ use App\Http\Controllers\Admin\ProductFileController;
 use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
-//Seller Request Route
-Route::get('seller_requests', [SellerController::class, 'sellerRequestsList'])
-    ->name('seller.requests.list');
-
 
 //Seller Product Route
 Route::get('seller_product_list',[SellerController::class,'sellerProductList'])->name('seller.product.list');

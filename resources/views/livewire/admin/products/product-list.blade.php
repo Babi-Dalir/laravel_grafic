@@ -34,9 +34,11 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">عکس</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
+            <th class="text-center align-middle text-primary">نام فروشنده</th>
             <th class="text-center align-middle text-primary">دسته بندی</th>
             <th class="text-center align-middle text-primary">ویژگی های محصول</th>
             <th class="text-center align-middle text-primary">گالری</th>
+            <th class="text-center align-middle text-primary">فایل محصول</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary">عملیات</th>
             <th class="text-center align-middle text-primary">ویرایش</th>
@@ -58,6 +60,14 @@
 
                 </td>
                 <td class="text-center align-middle">{{$product->name}}</td>
+                <td class="text-center align-middle">
+                    {{$product->user?->name}}
+                    <br>
+
+                    <small class="text-muted">
+                        {{ $product->user?->mobile }}
+                    </small>
+                </td>
                 <td class="text-center align-middle">{{$product->category->name}}</td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-secondary" href="{{route('create.product.properties',$product)}}">
@@ -69,6 +79,29 @@
                         گالری
                     </a>
                 </td>
+
+                <td class="text-center align-middle">
+
+                    @if($product->files->count())
+
+                        <a
+                            href="{{ route('product.file.list',$product) }}"
+                            class="btn btn-outline-info">
+
+                            فایل‌ها ({{ $product->files->count() }})
+
+                        </a>
+
+                    @else
+
+                        <span class="badge badge-secondary">
+                            بدون فایل
+                        </span>
+
+                    @endif
+
+                </td>
+
                 <td class="text-center align-middle">
                     <div
                         @role('مدیر')

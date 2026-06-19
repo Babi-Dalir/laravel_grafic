@@ -45,6 +45,8 @@
 <script src="{{url('panel/plugins/persian_date_picker/persian-date.min.js')}}"></script>
 <script src="{{url('panel/plugins/persian_date_picker/persian-datepicker.min.js')}}"></script>
 
+<script src="{{url('panel/plugins/resumable/resumable.min.js')}}"></script>
+
 <script src="{{url('panel/vendors/charts/chartjs/chart.umd.min.js')}}"></script>
 
 {{--<script>--}}

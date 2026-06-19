@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('original_name');
 
             // نام ذخیره شده روی سرور
-            $table->string('stored_name');
+            $table->string('stored_name',50);
 
             // zip, rar, psd ...
             $table->string('extension', 20);
@@ -38,7 +38,7 @@ return new class extends Migration
             $table->unsignedBigInteger('size');
 
             // جلوگیری از فایل تکراری
-            $table->string('sha256', 64)->index();
+            $table->string('sha256', 64);
 
             // فایل اصلی محصول
             $table->boolean('is_default')->default(false);
