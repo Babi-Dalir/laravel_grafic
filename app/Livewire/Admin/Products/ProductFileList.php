@@ -27,9 +27,11 @@ class ProductFileList extends Component
         $this->productId = $product->id;
     }
 
+    protected ?Product $cachedProduct = null;
+
     public function getProductProperty()
     {
-        return Product::findOrFail($this->productId);
+        return $this->cachedProduct ??= Product::with('files')->findOrFail($this->productId);
     }
 
     #[On('refresh-file-list')]
@@ -52,7 +54,7 @@ class ProductFileList extends Component
                 $service->delete($file);
 
                 if ($wasDefault) {
-                    $nextDefault = $this->product->files()->first();
+                    $nextDefault = $this->product->files()->where('id', '!=', $file->id)->first();
                     if ($nextDefault) {
                         $nextDefault->update(['is_default' => true]);
                     }
@@ -77,8 +79,10 @@ class ProductFileList extends Component
     public function setDefault($id)
     {
         $file = $this->product->files()->findOrFail($id);
-        $this->product->files()->where('is_default', true)->update(['is_default' => false]);
-        $file->update(['is_default' => true]);
+        DB::transaction(function () use ($file) {
+            $this->product->files()->lockForUpdate()->update(['is_default' => false]);
+            $file->update(['is_default' => true]);
+        });
 
         session()->flash('message', 'فایل اصلی با موفقیت تغییر کرد.');
     }

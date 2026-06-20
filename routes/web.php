@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProductFileController;
 use App\Http\Controllers\FrontEnd\DownloadController;
 use App\Http\Controllers\FrontEnd\HomeController;
 use App\Http\Controllers\FrontEnd\PaymentController;
@@ -47,4 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile_seller_request', [ProfileController::class, 'profileRequestSeller'])->name('profile.request.seller');
     Route::post('/profile_store_seller_request', [ProfileController::class, 'profileStoreRequestSeller'])->name('profile.store.request.seller');
     Route::get('/profile_verification_request', [ProfileController::class, 'profileVerificationSeller'])->name('profile.verification.seller');
+
+
+    Route::post('products/{product}/upload-chunk', [ProductFileController::class, 'uploadChunk'])->name('product.upload-chunk');
 });

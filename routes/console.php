@@ -5,6 +5,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -20,21 +21,46 @@ Schedule::call(function () {
 Schedule::command('verification-codes:clean')
     ->everyTenMinutes();
 
+
+
 Schedule::call(function () {
     $disk = Storage::disk('digital_files');
 
-    // دریافت تمام دایرکتوری‌های داخل پوشه چانک‌های موقت
-    $directories = $disk->directories('tmp/chunks');
+    // آدرس دقیق را با FileManager خود ست کنید. ما اینجا هر دو الگو را ایمن می‌کنیم.
+    $targetFolder = 'tmp/products';
+
+    if (!$disk->exists($targetFolder)) {
+        return;
+    }
+
+    $directories = $disk->directories($targetFolder);
 
     foreach ($directories as $dir) {
         try {
-            // اگر پوشه قدیمی‌تر از ۲۴ ساعت (۸۶۴۰۰ ثانیه) است، حذف شود
-            if (time() - $disk->lastModified($dir) > 86400) {
+            // پیدا کردن فایل‌های داخل دایرکتوری برای تشخیص زمان دقیق تغییر
+            $files = $disk->files($dir);
+
+            if (empty($files)) {
+                // اگر پوشه کاملاً خالی است، آن را حذف کن
+                $disk->deleteDirectory($dir);
+                continue;
+            }
+
+            // بررسی زمان آخرین فایل آپلود شده در این پوشه چانک
+            $lastModifiedTime = 0;
+            foreach ($files as $file) {
+                $time = $disk->lastModified($file);
+                if ($time > $lastModifiedTime) {
+                    $lastModifiedTime = $time;
+                }
+            }
+
+            // اگر از آخرین چانک آپلود شده بیش از ۲۴ ساعت گذشته باشد، یعنی آپلود رها شده است
+            if (time() - $lastModifiedTime > 86400) {
                 $disk->deleteDirectory($dir);
             }
         } catch (\Throwable $e) {
-            // جلوگیری از متوقف شدن کل فرآیند در صورت بروز خطا برای یک پوشه خاص
-            logger()->error("خطا در پاکسازی چانک موقت: {$dir}", ['error' => $e->getMessage()]);
+            Log::error("خطا در پاکسازی چانک موقت در مسیر: {$dir}", ['error' => $e->getMessage()]);
         }
     }
 })->daily()->name('cleanup-expired-upload-chunks');

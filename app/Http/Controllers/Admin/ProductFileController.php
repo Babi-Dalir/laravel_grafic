@@ -43,18 +43,17 @@ class ProductFileController extends Controller
         $this->uploadService = $uploadService;
     }
 
-    public function uploadChunk(Request $request, $productId)
+    public function uploadChunk(Request $request, Product $product)
     {
-        $product = Product::findOrFail($productId);
         $user = auth()->user();
 
         if (!$user) {
             return response()->json(['status' => 'error', 'message' => 'نشست کاربری شما منقضی شده است.'], 401);
         }
 
-        // 🔒 لایه امنیت و احراز هویت کنترلر
-        if (!$user->hasRole('مدیر') && (int)$product->user_id !== (int)$user->id) {
-            return response()->json(['status' => 'error', 'message' => 'شما دسترسی لازم برای این محصول را ندارید.'], 403);
+        $isOwner = (int)$product->user_id === (int)$user->id;
+        if (!$user->hasRole('مدیر') && !$isOwner) {
+            return response()->json(['status' => 'error', 'message' => 'شما دسترسی لازم برای ویرایش فایل‌های این محصول را ندارید.'], 403);
         }
 
         $request->validate([
@@ -63,14 +62,23 @@ class ProductFileController extends Controller
             'resumableChunkNumber' => 'required|integer',
             'resumableTotalChunks' => 'required|integer',
             'resumableFilename' => 'required|string',
+            'resumableTotalSize' => 'required|integer', // 👈 دریافت حجم کل فایل از فرانت‌اند
             'title' => 'nullable|string|max:255',
         ]);
 
+        // 🔒 بررسی سقف حجم ۴ گیگابایت (4294967296 بایت)
+        $maxFourGigabytes = 4294967296;
+        if ((int)$request->input('resumableTotalSize') > $maxFourGigabytes) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'حجم فایل انتخاب شده بیشتر از حد مجاز (۴ گیگابایت) است. لطفاً با فشرده‌سازی (ZIP) یا کاهش کیفیت خروجی، حجم فایل را کاهش داده و سپس مجدداً تلاش کنید.'
+            ], 422);
+        }
+
         try {
-            // دریافت مستقیم فایل به صورت شیء باینری (مستقیماً از Temp سرور بدون تبدیل به متن)
             $uploadedFile = $request->file('file');
             $fileUuid = $request->input('resumableIdentifier');
-            $chunkIndex = (int)$request->input('resumableChunkNumber') - 1; // Resumable index 1-based است
+            $chunkIndex = (int)$request->input('resumableChunkNumber') - 1;
             $totalChunks = (int)$request->input('resumableTotalChunks');
             $originalName = $request->input('resumableFilename');
             $title = $request->input('title');
@@ -91,7 +99,7 @@ class ProductFileController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-            Log::error("خطا در API آپلود چانک: " . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error("خطا در API آپلود چانک: " . $e->getMessage());
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()

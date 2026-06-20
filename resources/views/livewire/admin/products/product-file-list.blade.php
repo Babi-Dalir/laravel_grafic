@@ -23,7 +23,7 @@
         {{-- بخش باکس آپلود هوشمند --}}
         <div class="upload-box" wire:ignore>
             <div class="row">
-                <div class="col-12 mb-4 text-right">
+                <div class="col-12 mb-4 text-left">
                     <label class="input-label">عنوان نمایشی فایل <span class="optional-tag">(اختیاری)</span></label>
                     <input type="text" id="file-title" class="input-modern w-100" placeholder="مثلاً: منبع لایه‌باز اصلی، نمونه سه‌بعدی خروجی...">
                 </div>
@@ -42,7 +42,7 @@
 
             {{-- بخش فرمت‌ها و دکمه شروع آپلود در یک ردیف ریسپانسیو --}}
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 style-gap">
-                <div class="text-right w-100 mb-3 mb-md-0">
+                <div class="text-left w-100 mb-3 mb-md-0">
                     <small class="formats-label">پسوندهای ساختاری مجاز سیستم:</small>
                     <div class="badge-container">
                         @foreach(config('uploads.allowed_extensions', ['dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff', 'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf']) as $extension)
@@ -187,7 +187,7 @@
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     const r = new Resumable({
-        target: '/admin/products/' + @js($productId) + '/upload-chunk',
+        target: '{{ route("product.upload-chunk", $product->id) }}',
         chunkSize: 2 * 1024 * 1024,
         forceChunkSize: true,
         simultaneousUploads: 1,
@@ -199,20 +199,52 @@
 
     r.assignBrowse(uploadContainer);
 
+    // 🔒 اعمال لایه اعتبارسنجی حجم ۴ گیگابایت در فرانت‌اند
     r.on('fileAdded', function (file) {
         completed = false;
+        const maxFourGigabytes = 4294967296;
+
+        if (file.size > maxFourGigabytes) {
+            startBtn.setAttribute('disabled', 'true');
+            progressBar.style.width = '100%';
+            progressBar.style.background = '#ef4444';
+            progressPercent.innerText = 'خطا';
+            progressWrapper.classList.remove('d-none');
+
+            fileInfo.innerHTML = '<span class="text-danger font-weight-bold">خطای حجم غیرمجاز!</span>';
+            statusText.style.color = '#b91c1c';
+            statusText.innerHTML = `<i class="fa fa-exclamation-triangle ml-1"></i> حجم فایل انتخاب شده (${(file.size / 1024 / 1024 / 1024).toFixed(2)} GB) بیشتر از حد مجاز (۴ گیگابایت) است. لطفاً حجم فایل را کاهش داده و دوباره تلاش کنید.`;
+
+            r.removeFile(file);
+            return false;
+        }
+
+        // روال عادی و ریست کامل المان‌های گرافیکی خطای احتمالی قبلی
         fileInfo.innerHTML = '<i class="fa fa-file-text text-primary ml-2"></i> <span class="text-primary font-weight-bold">' + file.fileName + '</span> (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
         startBtn.removeAttribute('disabled');
+
         progressBar.style.width = '0%';
+        progressBar.style.background = '';
         progressPercent.innerText = '0%';
+        progressPercent.style.background = '';
+        progressPercent.style.color = '';
+        statusText.style.color = '';
+        statusText.innerText = '';
         progressWrapper.classList.add('d-none');
     });
 
     startBtn.addEventListener('click', function () {
-        r.opts.query = { title: titleInput.value };
+        if (r.files.length === 0) return;
+
+        r.opts.query = {
+            title: titleInput.value,
+            resumableTotalSize: r.files[0].size
+        };
+
         r.upload();
         startBtn.setAttribute('disabled', 'true');
         progressWrapper.classList.remove('d-none');
+        statusText.innerText = 'در حال آماده‌سازی و تفکیک باینری پارت‌ها...';
     });
 
     r.on('fileProgress', function (file) {
@@ -228,6 +260,7 @@
             if(data.status === 'success' && data.completed && !completed){
                 completed = true;
                 statusText.innerText = 'فایل با موفقیت آپلود و سرهم‌بندی شد.';
+                r.removeFile(file);
                 fileInfo.innerText = 'فایل خود را به این‌جا بکشید یا کلیک کنید';
                 titleInput.value = '';
                 $wire.dispatch('refresh-file-list');
@@ -244,18 +277,24 @@
         progressPercent.style.color = '#ef4444';
         progressPercent.innerText = 'خطا';
 
-        let errorMessage = 'خطایی در تایید چانک‌ها رخ داد.';
-        try {
-            const response = JSON.parse(message);
-            errorMessage = response.message || errorMessage;
-        } catch(e) {}
+        let errorMessage = 'خطایی در ارتباط با سرور یا تایید پارت‌ها رخ داد. لطفا اتصال اینترنت خود را چک کنید.';
+        if (message) {
+            try {
+                const response = JSON.parse(message);
+                errorMessage = response.message || errorMessage;
+            } catch(e) {
+                // اگر ریسپانس JSON نبود ولی متنی از سرور آمد
+                if(typeof message === 'string' && message.length < 150) {
+                    errorMessage = message;
+                }
+            }
+        }
 
         statusText.style.color = '#b91c1c';
         statusText.innerHTML = '<i class="fa fa-exclamation-triangle ml-1"></i> ' + errorMessage;
         startBtn.removeAttribute('disabled');
     });
 
-    // منطق مدیریت باز و بسته شدن مودال حذف مدرن
     let targetFileId = null;
     const deleteModal = document.getElementById('delete-confirmation-modal');
     const modalFileNamePlaceholder = document.getElementById('modal-file-name-placeholder');
@@ -265,7 +304,7 @@
         targetFileId = id;
         modalFileNamePlaceholder.innerText = `«${name}»`;
         deleteModal.classList.remove('d-none');
-        document.body.style.overflow = 'hidden'; // قفل کردن اسکرول صفحه عقب
+        document.body.style.overflow = 'hidden';
     }
 
     window.closeDeleteModal = function(event) {
@@ -278,7 +317,7 @@
 
     modalConfirmDeleteBtn.addEventListener('click', function() {
         if (targetFileId) {
-            $wire.dispatch('destroy_product_file', { fileId: targetFileId });
+            $wire.dispatch('destroy_product_file', [targetFileId]);
             closeDeleteModal(null);
         }
     });

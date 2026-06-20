@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Product;
 use App\Models\ProductFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\FileManager;
 use App\Services\FileValidation\ZipScannerService;
@@ -59,8 +60,17 @@ class ProductFileUploadService
             $tempPath = FileManager::tempPath($tempName);
 
             try {
+                // 🔒 بررسی حجم واقعی فایل سرهم شده روی دیسک
+                $actualFileSize = filesize($tempPath);
+                $maxFourGigabytes = 4294967296;
+
+                if ($actualFileSize > $maxFourGigabytes) {
+                    throw new Exception('حجم فایل نهایی فراتر از حد مجاز (۴ گیگابایت) است. لطفاً فایل را فشرده‌تر کنید.');
+                }
+
                 // ۱. بررسی هویت واقعی فایل بر اساس ساختار داخلی آن
                 $realMime = FileManager::realMime($tempPath);
+
                 if (!$this->isValidMimeForExtension($extension, $realMime)) {
                     throw new Exception('محتوای داخلی فایل با پسوند ظاهری آن مطابقت ندارد!');
                 }
@@ -146,6 +156,7 @@ class ProductFileUploadService
     {
         $productId = $file->product_id;
 
+        // حذف فایل اصلی
         FileManager::deleteDigitalFile($productId, $file->stored_name);
         $file->delete();
 
@@ -153,14 +164,21 @@ class ProductFileUploadService
 
         if (!$hasAnyFiles) {
             $disk = Storage::disk('digital_files');
-            $productDirectory = "products/{$productId}";
 
-            if ($disk->exists($productDirectory)) {
-                $disk->deleteDirectory($productDirectory);
-            }
+            // ایمن‌سازی حذف دایرکتوری‌ها با try-catch
+            try {
+                $productDirectory = "products/{$productId}";
+                if ($disk->exists($productDirectory)) {
+                    $disk->deleteDirectory($productDirectory);
+                }
 
-            if ($disk->exists("tmp/products/{$productId}")) {
-                $disk->deleteDirectory("tmp/products/{$productId}");
+                // هماهنگی با مسیرهای موقت (مطمئن شوید FileManager هم از همین مسیر استفاده می‌کند)
+                $tmpDirectory = "tmp/products/{$productId}";
+                if ($disk->exists($tmpDirectory)) {
+                    $disk->deleteDirectory($tmpDirectory);
+                }
+            } catch (\Throwable $e) {
+                Log::error("خطا در حذف دایرکتوری‌های محصول پس از حذف آخرین فایل: " . $e->getMessage());
             }
         }
     }

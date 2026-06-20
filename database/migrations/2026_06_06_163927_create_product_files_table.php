@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('original_name');
 
             // نام ذخیره شده روی سرور
-            $table->string('stored_name',50);
+            $table->string('stored_name',100)->index();
 
             // zip, rar, psd ...
             $table->string('extension', 20);
