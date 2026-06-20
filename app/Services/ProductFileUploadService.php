@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Exception;
@@ -8,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\FileManager;
 use App\Services\FileValidation\ZipScannerService;
+use Illuminate\Http\UploadedFile;
 
 class ProductFileUploadService
 {
@@ -18,8 +20,11 @@ class ProductFileUploadService
         $this->zipScanner = $zipScanner;
     }
 
-    public function uploadChunk(
-        string $base64Data,
+    /**
+     * آپلود تکه فایلهای باینری خالص بدون افت سرعت و افزایش حجم شبکه
+     */
+    public function uploadBinaryChunk(
+        UploadedFile $file,
         string $fileUuid,
         int $chunkIndex,
         int $totalChunks,
@@ -30,64 +35,61 @@ class ProductFileUploadService
 
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
 
-        if (!in_array($extension, config('uploads.allowed_extensions', ['zip', 'psd', 'rar']), true)) {
+        $allowedExtensions = config('uploads.allowed_extensions', [
+            'dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff',
+            'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf'
+        ]);
+
+        if (!in_array($extension, $allowedExtensions, true)) {
             throw new Exception('فرمت فایل انتخاب شده مجاز نیست.');
         }
 
-        if (strlen($base64Data) > 8 * 1024 * 1024) {
-            throw new Exception('حجم تکه ارسالی فراتر از ساختار مجاز است. لطفاً افزونه‌های تغییر دهنده سرعت مرورگر خود را خاموش کنید.');
-        }
+        // ذخیره فیزیکی موقت چانک باینری
+        FileManager::storeChunkTemp($file, $fileUuid, $chunkIndex);
 
-        // 🌟 حذف آرگومان دوم برای جلوگیری از خطای سایلنت در چانک‌های باینری طولانی ویندوز
-        $binaryData = base64_decode($base64Data);
-
-        if ($binaryData === false) {
-            throw new Exception('داده ارسالی چانک معتبر نیست یا در طول مسیر ارسال مخدوش شده است.');
-        }
-
-        FileManager::storeChunkTempFromBinary($binaryData, $fileUuid, $chunkIndex);
-
+        // اگر هنوز چانک‌های بعدی مانده است، به کار خود ادامه بده
         if ($chunkIndex + 1 < $totalChunks) {
             return null;
         }
 
+        // چسباندن و اعتبارسنجی در گام پایانی آپلود چانک‌ها
         return DB::transaction(function () use ($fileUuid, $totalChunks, $originalName, $extension, $product, $title) {
 
             $tempName = FileManager::combineChunks($fileUuid, $totalChunks, $extension);
             $tempPath = FileManager::tempPath($tempName);
 
             try {
-                // ۱. بررسی هویت واقعی فایل
+                // ۱. بررسی هویت واقعی فایل بر اساس ساختار داخلی آن
                 $realMime = FileManager::realMime($tempPath);
                 if (!$this->isValidMimeForExtension($extension, $realMime)) {
-                    throw new Exception('محتوای داخلی فایل با پسوند ظاهری آن مطابقت ندارد! فرستادن فایل‌های مخرب با پسوند جعلی ممنوع است.');
+                    throw new Exception('محتوای داخلی فایل با پسوند ظاهری آن مطابقت ندارد!');
                 }
 
-                // ۲. اسکن فایل زیپ
+                // ۲. اسکن امنیتی فایل‌های زیپ
                 if ($extension === 'zip') {
                     $this->zipScanner->scan($tempPath);
                 }
 
-                // ۳. هش فایل نهایی
+                // ۳. هش فایل نهایی جهت اصالت‌سنجی
                 $hash = hash_file('sha256', $tempPath);
 
-                // ۴. بررسی تکراری نبودن
+                // ۴. بررسی تکراری نبودن فایل برای این محصول
                 $exists = ProductFile::where([
                     'product_id' => $product->id,
                     'sha256' => $hash,
                 ])->exists();
 
                 if ($exists) {
-                    throw new Exception('این فایل دقیقاً با همین محتویات قبلاً برای این محصول آپلود شده است (فایل تکراری).');
+                    throw new Exception('این فایل دقیقاً با همین محتویات قبلاً برای این محصول آپلود شده است.');
                 }
 
-                // ۵. استخراج متاداتا و حجم فایل قبل از انتقال
+                // ۵. استخراج متاداتا و مشخصات ساختاری فایل
                 $metadata = FileManager::metadata($tempPath, $originalName, $extension, $hash);
 
-                // ۶. انتقال به دایرکتوری دائمی
+                // ۶. انتقال به دایرکتوری نهایی و دائمی
                 $storedName = FileManager::moveFromTemp($tempName, $product->id);
 
-                // ۷. ذخیره در دیتابیس
+                // ۷. ثبت مشخصات در دیتابیس
                 return ProductFile::create([
                     'product_id' => $product->id,
                     'title' => $title,
@@ -97,7 +99,9 @@ class ProductFileUploadService
                 ]);
 
             } catch (\Throwable $e) {
-                Storage::disk('digital_files')->delete("tmp/products/{$tempName}");
+                if (Storage::disk('digital_files')->exists("tmp/products/{$tempName}")) {
+                    Storage::disk('digital_files')->delete("tmp/products/{$tempName}");
+                }
                 throw $e;
             } finally {
                 FileManager::cleanTrackedChunks($fileUuid);
@@ -108,9 +112,27 @@ class ProductFileUploadService
     protected function isValidMimeForExtension(string $extension, string $mime): bool
     {
         $validMimes = [
-            'zip' => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip'],
-            'rar' => ['application/x-rar-compressed', 'application/x-rar', 'application/octet-stream'],
-            'psd' => ['image/vnd.adobe.photoshop', 'application/x-photoshop', 'image/psd']
+            'jpg'  => ['image/jpeg', 'image/pjpeg', 'application/octet-stream'],
+            'jpeg' => ['image/jpeg', 'image/pjpeg', 'application/octet-stream'],
+            'png'  => ['image/png', 'image/x-png', 'application/octet-stream'],
+            'webp' => ['image/webp', 'image/x-webp', 'application/octet-stream'],
+            'tiff' => ['image/tiff', 'image/x-tiff', 'application/octet-stream'],
+            'svg'  => ['image/svg+xml', 'application/xml', 'text/xml', 'text/plain', 'application/octet-stream'],
+            'psd'  => ['image/vnd.adobe.photoshop', 'application/x-photoshop', 'image/psd', 'application/octet-stream'],
+            'ai'   => ['application/postscript', 'application/pdf', 'application/vnd.adobe.illustrator', 'application/octet-stream'],
+            'eps'  => ['application/postscript', 'image/x-eps', 'image/eps', 'application/octet-stream'],
+            'cdr'  => ['application/cdr', 'application/coreldraw', 'image/cdr', 'application/x-cdr', 'zz-application/zz-winassoc-cdr', 'application/octet-stream'],
+            'art'  => ['image/x-jg', 'application/octet-stream'],
+            'pdf'  => ['application/pdf', 'application/x-pdf', 'application/acrobat', 'text/pdf', 'application/octet-stream'],
+            'zip'  => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/x-zip', 'application/octet-stream'],
+            'dxf'  => ['image/vnd.dxf', 'image/x-dxf', 'application/dxf', 'application/x-dxf', 'text/plain', 'application/octet-stream'],
+            'stl'  => ['application/sla', 'application/stl', 'application/x-navistyle', 'application/octet-stream', 'text/plain'],
+            'obj'  => ['text/plain', 'application/object', 'application/x-tgif', 'application/octet-stream'],
+            '3ds'  => ['image/x-3ds', 'application/x-3ds', 'application/octet-stream'],
+            'stp'  => ['application/step', 'application/octet-stream', 'text/plain'],
+            'step' => ['application/step', 'application/octet-stream', 'text/plain'],
+            'ttf'  => ['font/ttf', 'font/sfnt', 'application/x-font-ttf', 'application/x-font-truetype', 'application/octet-stream'],
+            'otf'  => ['font/otf', 'font/sfnt', 'application/x-font-opentype', 'application/octet-stream'],
         ];
 
         if (!array_key_exists($extension, $validMimes)) {
@@ -122,7 +144,24 @@ class ProductFileUploadService
 
     public function delete(ProductFile $file)
     {
-        FileManager::deleteDigitalFile($file->product_id, $file->stored_name);
+        $productId = $file->product_id;
+
+        FileManager::deleteDigitalFile($productId, $file->stored_name);
         $file->delete();
+
+        $hasAnyFiles = ProductFile::query()->where('product_id', $productId)->exists();
+
+        if (!$hasAnyFiles) {
+            $disk = Storage::disk('digital_files');
+            $productDirectory = "products/{$productId}";
+
+            if ($disk->exists($productDirectory)) {
+                $disk->deleteDirectory($productDirectory);
+            }
+
+            if ($disk->exists("tmp/products/{$productId}")) {
+                $disk->deleteDirectory("tmp/products/{$productId}");
+            }
+        }
     }
 }

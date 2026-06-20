@@ -1,267 +1,286 @@
 <div>
-    {{-- پیام موفقیت --}}
+    {{-- هدرها و آلرت‌های وضعیت پیام سیستم --}}
     @if (session()->has('message'))
-        <div class="alert alert-success">
-            {{ session('message') }}
+        <div class="alert-modern alert-modern-success" role="alert">
+            <i class="fa fa-check-circle alert-icon"></i>
+            <span class="alert-text">{{ session('message') }}</span>
         </div>
     @endif
-
-    {{-- پیام خطای کلی --}}
     @if (session()->has('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
+        <div class="alert-modern alert-modern-danger" role="alert">
+            <i class="fa fa-exclamation-circle alert-icon"></i>
+            <span class="alert-text">{{ session('error') }}</span>
         </div>
     @endif
 
-    {{-- خطاهای سیستم آپلود و بررسی --}}
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <h5 class="mb-4">
-        آپلود فایل‌های محصول:
-        <span class="text-primary">{{ $product->name }}</span>
-    </h5>
-
-    {{-- 🌟 اضافه شدن wire:ignore برای جلوگیری از تداخل باز-رندر لایووایر با دستکاری‌های جاوااسکریپت --}}
-    <div class="border rounded p-4 mb-4 bg-light" wire:ignore>
-        <div class="form-group mb-3">
-            <label class="font-weight-bold">عنوان فایل (اختیاری)</label>
-            <input type="text"
-                   wire:model.blur="title"
-                   id="file-title"
-                   class="form-control"
-                   placeholder="مثلا فایل اصلی PSD یا لایسنس">
+    <div class="modern-wrapper">
+        {{-- هدر --}}
+        <div class="header-section">
+            <h4 class="page-title">مدیریت فایل‌های محصول</h4>
+            <p class="page-subtitle">محصول فعلی: <span class="product-name-highlight">{{ $product->name }}</span></p>
         </div>
 
-        <div class="form-group mb-3">
-            <label class="font-weight-bold">انتخاب فایل محصول</label>
-
-            <div id="upload-container" class="p-3 text-center border-dashed rounded bg-white" style="border: 2px dashed #ccc;">
-                <input type="file" id="file-uploader" class="form-control-file d-none">
-                <button type="button" class="btn btn-outline-primary" id="browse-btn">انتخاب فایل محصول (حجیم)</button>
-                <div class="mt-2 text-muted small" id="selected-file-info">هیچ فایلی انتخاب نشده است</div>
-            </div>
-
-            <div class="mt-2">
-                <small class="text-muted d-block mb-2">فرمت‌های مجاز:</small>
-                @foreach(config('uploads.allowed_extensions', ['zip', 'psd', 'rar']) as $extension)
-                    <span class="badge badge-secondary">{{ strtoupper($extension) }}</span>
-                @endforeach
-                <small class="text-muted d-block mt-2">فایل‌های ZIP رمزگذاری‌شده و تو در تو پذیرفته نمی‌شوند.</small>
-            </div>
-
-            @error('file')
-            <div class="text-danger mt-2">{{ $message }}</div>
-            @enderror
-
-            {{-- پروگرس بار واقعی برای فایلهای حجیم گرافیکی --}}
-            <div id="progress-wrapper" class="mt-3 d-none">
-                <div class="progress" style="height: 20px;">
-                    <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                         role="progressbar" style="width: 0%;">0%</div>
+        {{-- بخش باکس آپلود هوشمند --}}
+        <div class="upload-box" wire:ignore>
+            <div class="row">
+                <div class="col-12 mb-4 text-right">
+                    <label class="input-label">عنوان نمایشی فایل <span class="optional-tag">(اختیاری)</span></label>
+                    <input type="text" id="file-title" class="input-modern w-100" placeholder="مثلاً: منبع لایه‌باز اصلی، نمونه سه‌بعدی خروجی...">
                 </div>
-                <small class="text-muted mt-1 d-block" id="upload-status-text">در حال آماده‌سازی و ارسال تکه‌ها...</small>
+
+                <div class="col-12">
+                    <div id="upload-container" class="custom-dropzone">
+                        <div class="upload-icon-wrapper">
+                            <i class="fa fa-cloud-upload"></i>
+                        </div>
+                        <h5 class="dropzone-title" id="selected-file-info">فایل خود را به این‌جا بکشید یا کلیک کنید</h5>
+                        <p class="dropzone-subtitle">حداکثر حجم پارت‌های ارسالی بهینه شده است</p>
+                        <button type="button" class="d-none" id="browse-btn"></button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- بخش فرمت‌ها و دکمه شروع آپلود در یک ردیف ریسپانسیو --}}
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 style-gap">
+                <div class="text-right w-100 mb-3 mb-md-0">
+                    <small class="formats-label">پسوندهای ساختاری مجاز سیستم:</small>
+                    <div class="badge-container">
+                        @foreach(config('uploads.allowed_extensions', ['dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff', 'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf']) as $extension)
+                            <span class="badge-format">{{ strtoupper($extension) }}</span>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="action-btn-container">
+                    <button type="button" id="start-upload-btn" class="btn-action btn-upload-start" disabled>
+                        <i class="fa fa-rocket"></i> شروع آپلود فایل حجیم
+                    </button>
+                </div>
+            </div>
+
+            {{-- لایه پیشرفت نئونی جذاب --}}
+            <div id="progress-wrapper" class="progress-section d-none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="progress-badge" id="progress-percent">0%</span>
+                    <small class="progress-status" id="upload-status-text">در حال تفکیک باینری پارت‌ها...</small>
+                </div>
+                <div class="neon-progress">
+                    <div id="upload-progress-bar" class="neon-progress-bar"></div>
+                </div>
             </div>
         </div>
 
-        <button type="button" id="start-upload-btn" class="btn btn-success" disabled>
-            شروع آپلود فایل حجیم
-        </button>
-    </div>
-
-    {{-- لیست فایل‌ها --}}
-    <div class="card">
-        <div class="card-header">
-            <h6 class="mb-0">فایل‌های آپلود شده ({{ $files->count() }})</h6>
-        </div>
-
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0">
-                <thead class="thead-light">
-                <tr>
-                    <th>ردیف</th>
-                    <th>نام فایل</th>
-                    <th>نوع</th>
-                    <th>حجم</th>
-                    <th>اصلی</th>
-                    @role('مدیر') <th>دانلود</th> @endrole
-                    <th>حذف</th>
-                </tr>
-                </thead>
-                <tbody>
-                @forelse($files as $index => $file)
+        {{-- لیست فایل‌های آپلود شده --}}
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-modern mb-0 align-middle responsive-table">
+                    <thead>
                     <tr>
-                        <td>{{ $files->firstItem()+$index }}</td>
-                        <td>
-                            <strong>{{ $file->original_name }}</strong>
-                            @if($file->title)
-                                <br><small class="text-muted">{{ $file->title }}</small>
-                            @endif
-                        </td>
-                        <td>{{ strtoupper($file->extension) }}</td>
-                        <td>{{ $file->human_size ?? number_format($file->size / 1048576, 2) . ' MB' }}</td>
-                        <td>
-                            @if($file->is_default)
-                                <span class="badge badge-success">اصلی</span>
-                            @else
-                                <button wire:click="setDefault({{ $file->id }})" class="btn btn-sm btn-outline-primary">انتخاب</button>
-                            @endif
-                        </td>
-                        @role('مدیر')
-                        <td>
-                            <a href="{{ route('product.files.download', $file) }}" class="btn btn-sm btn-success">دانلود</a>
-                        </td>
-                        @endrole
-                        <td>
-                            <button class="btn btn-sm btn-danger" wire:click="deleteFile({{ $file->id }})">حذف</button>
-                        </td>
+                        <th style="width: 80px;">ردیف</th>
+                        <th>مشخصات و عنوان فایل</th>
+                        <th style="width: 120px;">پسوند</th>
+                        <th style="width: 140px;">حجم دقیق</th>
+                        <th style="width: 180px;" class="text-center">وضعیت سند</th>
+                        <th style="width: 100px;" class="text-center">حذف</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="text-center text-muted py-3">هنوز فایلی برای این محصول آپلود نشده است</td>
-                    </tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+                    </thead>
+                    <tbody>
+                    @forelse($files as $index => $file)
+                        <tr wire:key="file-row-{{ $file->id }}">
+                            <td data-label="ردیف" class="row-number">{{ $files->firstItem() + $index }}</td>
+                            <td data-label="مشخصات فایل">
+                                <div class="file-details-wrapper">
+                                    <div class="file-icon-box">
+                                        <i class="fa fa-file-archive-o"></i>
+                                    </div>
+                                    <div class="file-meta">
+                                        <span class="file-title-text">{{ $file->title ?? 'بدون عنوان تعریفی' }}</span>
+                                        <small class="file-name-text" title="{{ $file->original_name }}">{{ $file->original_name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td data-label="پسوند">
+                                <span class="badge-extension">{{ $file->extension }}</span>
+                            </td>
+                            <td data-label="حجم دقیق" class="file-size-text">{{ number_format($file->size / 1024 / 1024, 2) }} MB</td>
+                            <td data-label="وضعیت سند" class="text-center">
+                                @if($file->is_default)
+                                    <span class="badge-status-active">
+                                        <i class="fa fa-star ml-1"></i> فایل اصلی محصول
+                                    </span>
+                                @else
+                                    <button wire:click="setDefault({{ $file->id }})" class="btn-set-default">
+                                        انتخاب به عنوان اصلی
+                                    </button>
+                                @endif
+                            </td>
+                            <td data-label="حذف" class="text-center">
+                                <button type="button" class="btn-delete-file" title="حذف" onclick="openDeleteModal({{ $file->id }}, '{{ $file->title ?? $file->original_name }}')">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="empty-state-row">
+                                <i class="fa fa-folder-open-o empty-icon"></i>
+                                <p class="empty-text">هنوز هیچ فایلی برای این محصول آپلود نشده است.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-    {{-- دکمه ارسال برای بررسی --}}
-    @if($files->count())
-        <div class="mt-4">
-            <button wire:click="submitForReview" class="btn btn-success btn-lg">ثبت محصول </button>
-            @if (session()->has('review_errors'))
-                <div class="alert alert-danger mt-3">
-                    <ul class="mb-0">
-                        @foreach (session('review_errors') as $field => $message)
-                            <li><strong>{{ $field }}:</strong> {{ $message }}</li>
-                        @endforeach
-                    </ul>
+            @if($files->hasPages())
+                <div class="pagination-wrapper">
+                    {{ $files->links() }}
                 </div>
             @endif
         </div>
-    @endif
 
-    <div style="margin: 40px !important;" class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
-        {{$files->appends(Request::except('page'))->links()}}
+        {{-- دکمه ثبت نهایی معلق شیک --}}
+        @if($files->count())
+            <div class="mt-4 text-left">
+                <button wire:click="submitForReview" class="btn-submit-final">
+                    ثبت نهایی محصول و ارسال به بررسی <i class="fa fa-chevron-left mr-2"></i>
+                </button>
+            </div>
+        @endif
     </div>
 
-    {{-- 🔥 بخش جاوااسکریپت اصلاح‌شده --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof Resumable === 'undefined') {
-                console.error('خطا: کتابخانه Resumable.js بارگذاری نشده است. مسیر فایل فیزیکی را بررسی کنید.');
-                return;
-            }
-
-            const browseBtn = document.getElementById('browse-btn');
-            const fileInput = document.getElementById('file-uploader');
-            const fileInfo = document.getElementById('selected-file-info');
-            const startBtn = document.getElementById('start-upload-btn');
-            const progressWrapper = document.getElementById('progress-wrapper');
-            const progressBar = document.getElementById('upload-progress-bar');
-            const statusText = document.getElementById('upload-status-text');
-
-            const r = new Resumable({
-                target: '#',
-                chunkSize: 5 * 1024 * 1024,
-                simultaneousUploads: 1,
-                testChunks: false,
-                throttleProgressCallbacks: 0.1
-            });
-
-            r.assignBrowse(browseBtn);
-            r.assignBrowse(fileInput);
-
-            r.on('fileAdded', function(file) {
-                fileInfo.innerHTML = `<strong>فایل انتخاب شده:</strong> ${file.fileName} (${(file.size / 1048576).toFixed(2)} MB)`;
-                startBtn.disabled = false;
-            });
-
-            // 🌟 اضافه شدن پارامتر e و متد e.preventDefault() برای کنترل دقیق رفتار دکمه
-            startBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                if (r.files.length > 0) {
-                    startBtn.disabled = true;
-                    progressWrapper.classList.remove('d-none');
-
-                    processAndSendChunk(r.files[0], 0);
-                }
-            });
-
-            function processAndSendChunk(resumableFile, index) {
-                const totalChunks = resumableFile.chunks.length;
-                const chunk = resumableFile.chunks[index];
-
-                statusText.innerText = `در حال آماده‌سازی و ارسال تکه ${index + 1} از ${totalChunks}...`;
-
-                const nativeFile = resumableFile.file;
-                const blob = nativeFile.slice(chunk.startByte, chunk.endByte);
-
-                const fileReader = new FileReader();
-                fileReader.onload = function(e) {
-                    const arrayBuffer = e.target.result;
-                    const bytes = new Uint8Array(arrayBuffer);
-
-                    let binaryString = '';
-                    const len = bytes.byteLength;
-                    for (let i = 0; i < len; i++) {
-                        binaryString += String.fromCharCode(bytes[i]);
-                    }
-                    const base64Data = btoa(binaryString);
-
-                    @this.call('handleChunkUpload',
-                        resumableFile.uniqueIdentifier,
-                        index,
-                        totalChunks,
-                        resumableFile.fileName,
-                        base64Data
-                    ).then(response => {
-                        if (response && response.status === 'error') {
-                            // 🌟 تغییر ظاهر پروگرس بار به وضعیت خطا (قرمز رنگ شدن)
-                            progressBar.classList.remove('bg-success', 'progress-bar-animated');
-                            progressBar.classList.add('bg-danger');
-
-                            statusText.innerHTML = `<span class="text-danger font-weight-bold">❌ ${response.message}</span>`;
-                            startBtn.disabled = false;
-                            return;
-                        }
-
-                        const progressPercent = Math.round(((index + 1) / totalChunks) * 100);
-                        progressBar.style.width = `${progressPercent}%`;
-                        progressBar.innerText = `${progressPercent}%`;
-
-                        if (index + 1 < totalChunks) {
-                            processAndSendChunk(resumableFile, index + 1);
-                        } else {
-                            statusText.innerText = 'ادغام تکه‌ها و بررسی امنیت فایل نهایی زیپ...';
-                            setTimeout(() => {
-                                progressWrapper.classList.add('d-none');
-                                r.cancel();
-                                fileInfo.innerText = 'هیچ فایلی انتخاب نشده است';
-
-                                // بازخوانی امن کامپوننت بدون ریلود کل صفحه
-                                @this.dispatch('$refresh');
-                            }, 1500);
-                        }
-                    }).catch(error => {
-                        console.error('Livewire Error:', error);
-                        progressBar.classList.add('bg-danger');
-                        statusText.innerText = 'خطا در ارتباط با سرور یا انقضای نشست (Session). لطفاً صفحه را ریفرش کنید.';
-                        startBtn.disabled = false;
-                    });
-                };
-
-                fileReader.readAsArrayBuffer(blob);
-            }
-        });
-    </script>
+    {{-- ساختار مودال حذف مدرن اختصاصی --}}
+    <div id="delete-confirmation-modal" class="custom-modal-backdrop d-none" onclick="closeDeleteModal(event)">
+        <div class="custom-modal-content" onclick="event.stopPropagation()">
+            <div class="modal-graphic-icon">
+                <i class="fa fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="modal-confirm-title">حذف قطعی سند</h3>
+            <p class="modal-confirm-text">
+                آیا از حذف فایل <span id="modal-file-name-placeholder" class="text-danger font-weight-bold"></span> مطمئن هستید؟ این عملیات غیرقابل بازگشت است.
+            </p>
+            <div class="modal-actions-wrapper">
+                <button type="button" class="btn-modal-action btn-modal-cancel" onclick="closeDeleteModal(null)">
+                    انصراف و بازگشت
+                </button>
+                <button type="button" id="modal-confirm-delete-btn" class="btn-modal-action btn-modal-confirm">
+                    بله، حذف شود
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+@script
+<script>
+    const browseBtn = document.getElementById('browse-btn');
+    const uploadContainer = document.getElementById('upload-container');
+    const startBtn = document.getElementById('start-upload-btn');
+    const fileInfo = document.getElementById('selected-file-info');
+    const progressWrapper = document.getElementById('progress-wrapper');
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressPercent = document.getElementById('progress-percent');
+    const statusText = document.getElementById('upload-status-text');
+    const titleInput = document.getElementById('file-title');
+    let completed = false;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    const r = new Resumable({
+        target: '/admin/products/' + @js($productId) + '/upload-chunk',
+        chunkSize: 2 * 1024 * 1024,
+        forceChunkSize: true,
+        simultaneousUploads: 1,
+        testChunks: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        }
+    });
+
+    r.assignBrowse(uploadContainer);
+
+    r.on('fileAdded', function (file) {
+        completed = false;
+        fileInfo.innerHTML = '<i class="fa fa-file-text text-primary ml-2"></i> <span class="text-primary font-weight-bold">' + file.fileName + '</span> (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
+        startBtn.removeAttribute('disabled');
+        progressBar.style.width = '0%';
+        progressPercent.innerText = '0%';
+        progressWrapper.classList.add('d-none');
+    });
+
+    startBtn.addEventListener('click', function () {
+        r.opts.query = { title: titleInput.value };
+        r.upload();
+        startBtn.setAttribute('disabled', 'true');
+        progressWrapper.classList.remove('d-none');
+    });
+
+    r.on('fileProgress', function (file) {
+        const progress = Math.floor(file.progress() * 100);
+        progressBar.style.width = progress + '%';
+        progressPercent.innerText = progress + '%';
+        statusText.innerText = 'در حال ارسال قطعه پارت (' + r.files[0].chunks.filter(c => c.status() === 'complete').length + ' از ' + r.files[0].chunks.length + ')...';
+    });
+
+    r.on('fileSuccess', function(file, message){
+        try {
+            const data = JSON.parse(message);
+            if(data.status === 'success' && data.completed && !completed){
+                completed = true;
+                statusText.innerText = 'فایل با موفقیت آپلود و سرهم‌بندی شد.';
+                fileInfo.innerText = 'فایل خود را به این‌جا بکشید یا کلیک کنید';
+                titleInput.value = '';
+                $wire.dispatch('refresh-file-list');
+            }
+        } catch(e) {
+            console.error('Error parsing response', e);
+        }
+    });
+
+    r.on('fileError', function (file, message) {
+        progressBar.style.width = '100%';
+        progressBar.style.background = '#ef4444';
+        progressPercent.style.background = '#fef2f2';
+        progressPercent.style.color = '#ef4444';
+        progressPercent.innerText = 'خطا';
+
+        let errorMessage = 'خطایی در تایید چانک‌ها رخ داد.';
+        try {
+            const response = JSON.parse(message);
+            errorMessage = response.message || errorMessage;
+        } catch(e) {}
+
+        statusText.style.color = '#b91c1c';
+        statusText.innerHTML = '<i class="fa fa-exclamation-triangle ml-1"></i> ' + errorMessage;
+        startBtn.removeAttribute('disabled');
+    });
+
+    // منطق مدیریت باز و بسته شدن مودال حذف مدرن
+    let targetFileId = null;
+    const deleteModal = document.getElementById('delete-confirmation-modal');
+    const modalFileNamePlaceholder = document.getElementById('modal-file-name-placeholder');
+    const modalConfirmDeleteBtn = document.getElementById('modal-confirm-delete-btn');
+
+    window.openDeleteModal = function(id, name) {
+        targetFileId = id;
+        modalFileNamePlaceholder.innerText = `«${name}»`;
+        deleteModal.classList.remove('d-none');
+        document.body.style.overflow = 'hidden'; // قفل کردن اسکرول صفحه عقب
+    }
+
+    window.closeDeleteModal = function(event) {
+        if (event === null || event.target === deleteModal) {
+            deleteModal.classList.add('d-none');
+            document.body.style.overflow = '';
+            targetFileId = null;
+        }
+    }
+
+    modalConfirmDeleteBtn.addEventListener('click', function() {
+        if (targetFileId) {
+            $wire.dispatch('destroy_product_file', { fileId: targetFileId });
+            closeDeleteModal(null);
+        }
+    });
+</script>
+@endscript

@@ -126,3 +126,5 @@ Route::get('seller_transaction',[AdminSellerController::class,'adminSellerTransa
 //Seller Detail Route
 Route::get('seller_detail/{seller_id}',[AdminSellerController::class,'adminSellerDetail'])->name('admin.seller.detail');
 
+Route::post('products/{product}/upload-chunk', [ProductFileController::class, 'uploadChunk'])->name('product.upload-chunk');
+

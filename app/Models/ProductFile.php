@@ -38,6 +38,10 @@ class ProductFile extends Model
     {
         $bytes = $this->size;
 
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+
         if ($bytes >= 1073741824) {
             return round($bytes / 1073741824, 2) . ' GB';
         }

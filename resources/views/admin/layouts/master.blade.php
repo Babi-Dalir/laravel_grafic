@@ -7,6 +7,9 @@
     <title> قالب مدیریتی </title>
     <link rel="shortcut icon" href="{{url('panel/assets/media/image/favicon.png')}}">
     <meta name="theme-color" content="#5867dd">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link rel="stylesheet" href="{{url('panel/vendors/bundle.css')}}" type="text/css">
     <link rel="stylesheet" href="{{url('panel/vendors/slick/slick.css')}}">
     <link rel="stylesheet" href="{{url('panel/vendors/slick/slick-theme.css')}}">
