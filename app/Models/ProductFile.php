@@ -17,6 +17,8 @@ class ProductFile extends Model
         'size',
         'sha256',
         'is_default',
+        'status',
+        'failure_reason'
     ];
 
     protected $casts = [

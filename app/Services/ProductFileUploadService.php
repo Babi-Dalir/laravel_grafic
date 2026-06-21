@@ -5,37 +5,22 @@ namespace App\Services;
 use Exception;
 use App\Models\Product;
 use App\Models\ProductFile;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use App\Helpers\FileManager;
-use App\Services\FileValidation\ZipScannerService;
-use Illuminate\Http\UploadedFile;
+use App\Events\ProductFileUploaded;
 
 class ProductFileUploadService
 {
-    protected $zipScanner;
-
-    public function __construct(ZipScannerService $zipScanner)
-    {
-        $this->zipScanner = $zipScanner;
-    }
-
-    /**
-     * آپلود تکه فایلهای باینری خالص بدون افت سرعت و افزایش حجم شبکه
-     */
     public function uploadBinaryChunk(
-        UploadedFile $file,
+        $file,
         string $fileUuid,
         int $chunkIndex,
         int $totalChunks,
         string $originalName,
         Product $product,
         ?string $title = null
-    ): ?ProductFile {
+    ): bool {
 
         $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-
         $allowedExtensions = config('uploads.allowed_extensions', [
             'dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff',
             'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf'
@@ -45,81 +30,25 @@ class ProductFileUploadService
             throw new Exception('فرمت فایل انتخاب شده مجاز نیست.');
         }
 
-        // ذخیره فیزیکی موقت چانک باینری
+        // ذخیره فیزیکی موقت چانک باینری روی سرور محلی
         FileManager::storeChunkTemp($file, $fileUuid, $chunkIndex);
 
-        // اگر هنوز چانک‌های بعدی مانده است، به کار خود ادامه بده
+        // اگر هنوز چانک‌های بعدی باقی مانده است، سیگنال موفقیت پارت را بفرست
         if ($chunkIndex + 1 < $totalChunks) {
-            return null;
+            return false;
         }
 
-        // چسباندن و اعتبارسنجی در گام پایانی آپلود چانک‌ها
-        return DB::transaction(function () use ($fileUuid, $totalChunks, $originalName, $extension, $product, $title) {
+        // کامباین کردن سریع چانک‌ها روی دیسک لوکال در آخرین پارت رسیده
+        $tempName = FileManager::combineChunks($fileUuid, $totalChunks, $extension);
 
-            $tempName = FileManager::combineChunks($fileUuid, $totalChunks, $extension);
-            $tempPath = FileManager::tempPath($tempName);
+        // 🚀 شلیک رویداد معماری رویدادمحور جهت پردازش ناهمگام در صف و آزادسازی فوری کلاینت
+        // خط زیر در آخرین متد کامباین آپلود بدین شکل بهینه‌سازی شد:
+        event(new ProductFileUploaded($product->id, $tempName, $originalName, $title, $fileUuid));
 
-            try {
-                // 🔒 بررسی حجم واقعی فایل سرهم شده روی دیسک
-                $actualFileSize = filesize($tempPath);
-                $maxFourGigabytes = 4294967296;
-
-                if ($actualFileSize > $maxFourGigabytes) {
-                    throw new Exception('حجم فایل نهایی فراتر از حد مجاز (۴ گیگابایت) است. لطفاً فایل را فشرده‌تر کنید.');
-                }
-
-                // ۱. بررسی هویت واقعی فایل بر اساس ساختار داخلی آن
-                $realMime = FileManager::realMime($tempPath);
-
-                if (!$this->isValidMimeForExtension($extension, $realMime)) {
-                    throw new Exception('محتوای داخلی فایل با پسوند ظاهری آن مطابقت ندارد!');
-                }
-
-                // ۲. اسکن امنیتی فایل‌های زیپ
-                if ($extension === 'zip') {
-                    $this->zipScanner->scan($tempPath);
-                }
-
-                // ۳. هش فایل نهایی جهت اصالت‌سنجی
-                $hash = hash_file('sha256', $tempPath);
-
-                // ۴. بررسی تکراری نبودن فایل برای این محصول
-                $exists = ProductFile::where([
-                    'product_id' => $product->id,
-                    'sha256' => $hash,
-                ])->exists();
-
-                if ($exists) {
-                    throw new Exception('این فایل دقیقاً با همین محتویات قبلاً برای این محصول آپلود شده است.');
-                }
-
-                // ۵. استخراج متاداتا و مشخصات ساختاری فایل
-                $metadata = FileManager::metadata($tempPath, $originalName, $extension, $hash);
-
-                // ۶. انتقال به دایرکتوری نهایی و دائمی
-                $storedName = FileManager::moveFromTemp($tempName, $product->id);
-
-                // ۷. ثبت مشخصات در دیتابیس
-                return ProductFile::create([
-                    'product_id' => $product->id,
-                    'title' => $title,
-                    'stored_name' => $storedName,
-                    'is_default' => !$product->files()->exists(),
-                    ...$metadata,
-                ]);
-
-            } catch (\Throwable $e) {
-                if (Storage::disk('digital_files')->exists("tmp/products/{$tempName}")) {
-                    Storage::disk('digital_files')->delete("tmp/products/{$tempName}");
-                }
-                throw $e;
-            } finally {
-                FileManager::cleanTrackedChunks($fileUuid);
-            }
-        });
+        return true; // نشان‌دهنده اتمام دریافت کل چانک‌ها است
     }
 
-    protected function isValidMimeForExtension(string $extension, string $mime): bool
+    public function isValidMimeForExtension(string $extension, string $mime): bool
     {
         $validMimes = [
             'jpg'  => ['image/jpeg', 'image/pjpeg', 'application/octet-stream'],
@@ -145,41 +74,12 @@ class ProductFileUploadService
             'otf'  => ['font/otf', 'font/sfnt', 'application/x-font-opentype', 'application/octet-stream'],
         ];
 
-        if (!array_key_exists($extension, $validMimes)) {
-            return false;
-        }
-
-        return in_array($mime, $validMimes[$extension], true);
+        return isset($validMimes[$extension]) && in_array($mime, $validMimes[$extension], true);
     }
 
     public function delete(ProductFile $file)
     {
-        $productId = $file->product_id;
-
-        // حذف فایل اصلی
-        FileManager::deleteDigitalFile($productId, $file->stored_name);
+        FileManager::deleteDigitalFile($file->product_id, $file->stored_name);
         $file->delete();
-
-        $hasAnyFiles = ProductFile::query()->where('product_id', $productId)->exists();
-
-        if (!$hasAnyFiles) {
-            $disk = Storage::disk('digital_files');
-
-            // ایمن‌سازی حذف دایرکتوری‌ها با try-catch
-            try {
-                $productDirectory = "products/{$productId}";
-                if ($disk->exists($productDirectory)) {
-                    $disk->deleteDirectory($productDirectory);
-                }
-
-                // هماهنگی با مسیرهای موقت (مطمئن شوید FileManager هم از همین مسیر استفاده می‌کند)
-                $tmpDirectory = "tmp/products/{$productId}";
-                if ($disk->exists($tmpDirectory)) {
-                    $disk->deleteDirectory($tmpDirectory);
-                }
-            } catch (\Throwable $e) {
-                Log::error("خطا در حذف دایرکتوری‌های محصول پس از حذف آخرین فایل: " . $e->getMessage());
-            }
-        }
     }
 }

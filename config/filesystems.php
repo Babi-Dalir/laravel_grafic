@@ -30,12 +30,19 @@ return [
 
     'disks' => [
 
-        'digital_files' => [
+        'digital_files_tmp' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
-            'throw' => false,
-            'report' => false,
+            'root' => storage_path('app/private/tmp'), // محل تجمع چانک‌ها با سرعت بالا
+        ],
+        'digital_files' => [
+            'driver' => env('DIGITAL_FILES_DRIVER', 'local'), // سوییچ خودکار بین local و s3 از طریق env
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'root' => env('DIGITAL_FILES_DRIVER') === 'local' ? storage_path('app/private') : '',
         ],
         'public' => [
             'driver' => 'local',

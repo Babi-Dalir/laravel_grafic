@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('original_name');
 
             // نام ذخیره شده روی سرور
-            $table->string('stored_name',100)->index();
+            $table->string('stored_name')->unique();
 
             // zip, rar, psd ...
             $table->string('extension', 20);
@@ -42,6 +42,11 @@ return new class extends Migration
 
             // فایل اصلی محصول
             $table->boolean('is_default')->default(false);
+
+            $table->string('status', 20)->default(\App\Enums\UploadFileStatus::Uploading->value)->index();
+
+            // ذخیره متن خطا در صورت شکست خوردن جاب در پس‌زمینه سرور
+            $table->text('failure_reason')->nullable();
 
             $table->timestamps();
         });

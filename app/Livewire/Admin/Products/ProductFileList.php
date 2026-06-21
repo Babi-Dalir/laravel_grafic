@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Products;
 
+use App\Enums\UploadFileStatus;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Services\ProductFileUploadService;
@@ -19,34 +20,33 @@ class ProductFileList extends Component
     public $productId;
     public $title;
 
-    // مشخص کردن قالب پجینیشن متناسب با بوت‌استرپ
     protected $paginationTheme = 'bootstrap';
+
+    public bool $isProcessing = false; // 👈 پرچم هوشمند کنترل پولینگ
 
     public function mount(Product $product)
     {
         $this->productId = $product->id;
     }
 
-    protected ?Product $cachedProduct = null;
-
     public function getProductProperty()
     {
-        return $this->cachedProduct ??= Product::with('files')->findOrFail($this->productId);
+        return Product::findOrFail($this->productId);
     }
 
     #[On('refresh-file-list')]
     public function refreshFileList()
     {
         $this->reset(['title']);
-        // ریفرش کردن پجینیشن به صفحه اول برای دیدن فایل جدید الزامی است
         $this->resetPage();
-        session()->flash('message', 'فایل با موفقیت آپلود و ذخیره شد.');
+        $this->isProcessing = true; // فعال‌سازی موقت پولینگ UI
+        session()->flash('message', 'فایل با موفقیت ارسال شد و در حال پردازش امنیتی است...');
     }
 
     public function deleteFile($id)
     {
         try {
-            $file = $this->product->files()->findOrFail($id);
+            $file = ProductFile::where('product_id', $this->productId)->findOrFail($id);
             $wasDefault = $file->is_default;
 
             DB::transaction(function () use ($file, $wasDefault) {
@@ -54,7 +54,7 @@ class ProductFileList extends Component
                 $service->delete($file);
 
                 if ($wasDefault) {
-                    $nextDefault = $this->product->files()->where('id', '!=', $file->id)->first();
+                    $nextDefault = ProductFile::where('product_id', $this->productId)->first();
                     if ($nextDefault) {
                         $nextDefault->update(['is_default' => true]);
                     }
@@ -69,7 +69,6 @@ class ProductFileList extends Component
         }
     }
 
-    // اصلاح ساختار ورودی برای هماهنگی کامل با Livewire 3 dispatch
     #[On('destroy_product_file')]
     public function destroyProductFile($fileId)
     {
@@ -78,9 +77,9 @@ class ProductFileList extends Component
 
     public function setDefault($id)
     {
-        $file = $this->product->files()->findOrFail($id);
+        $file = ProductFile::where('product_id', $this->productId)->findOrFail($id);
         DB::transaction(function () use ($file) {
-            $this->product->files()->lockForUpdate()->update(['is_default' => false]);
+            ProductFile::where('product_id', $this->productId)->update(['is_default' => false]);
             $file->update(['is_default' => true]);
         });
 
@@ -89,7 +88,8 @@ class ProductFileList extends Component
 
     public function submitForReview()
     {
-        $result = $this->product->submitForReview();
+        $product = $this->product;
+        $result = $product->submitForReview();
 
         if ($result !== true) {
             foreach ($result as $field => $message) {
@@ -107,9 +107,25 @@ class ProductFileList extends Component
         return $this->redirect(route('seller.product.list'));
     }
 
+    public function checkProcessingStatus()
+    {
+        if (!$this->isProcessing) {
+            return;
+        }
+
+        $hasPending = ProductFile::where('product_id', $this->productId)
+            ->whereIn('status', [UploadFileStatus::Uploading->value, UploadFileStatus::Processing->value])
+            ->exists();
+
+        // به محض تمام شدن پردازش‌ها، پرچم را خاموش کن تا پولینگ در قالب بلید متوقف شود
+        if (!$hasPending) {
+            $this->isProcessing = false;
+        }
+    }
+
     public function render()
     {
-        $files = $this->product->files()->latest()->paginate(10);
+        $files = ProductFile::where('product_id', $this->productId)->latest()->paginate(10);
 
         return view('livewire.admin.products.product-file-list', [
             'files' => $files,

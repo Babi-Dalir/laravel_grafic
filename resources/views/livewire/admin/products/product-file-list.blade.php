@@ -70,8 +70,9 @@
             </div>
         </div>
 
-        {{-- لیست فایل‌های آپلود شده --}}
-        <div class="table-container">
+        {{-- لیست فایل‌های آپلود شده (دارای Polling هوشمند ۵ ثانیه‌ای در زمان پردازش صف) --}}
+        {{-- فعال‌سازی مشروط پولینگ؛ فقط در زمان لزوم سرور صدا زده می‌شود --}}
+        <div class="table-container" @if($isProcessing) wire:poll.3s="checkProcessingStatus" @endif>
             <div class="table-responsive">
                 <table class="table table-modern mb-0 align-middle responsive-table">
                     <thead>
@@ -80,7 +81,7 @@
                         <th>مشخصات و عنوان فایل</th>
                         <th style="width: 120px;">پسوند</th>
                         <th style="width: 140px;">حجم دقیق</th>
-                        <th style="width: 180px;" class="text-center">وضعیت سند</th>
+                        <th style="width: 200px;" class="text-center">وضعیت سند</th>
                         <th style="width: 100px;" class="text-center">حذف</th>
                     </tr>
                     </thead>
@@ -103,19 +104,38 @@
                                 <span class="badge-extension">{{ $file->extension }}</span>
                             </td>
                             <td data-label="حجم دقیق" class="file-size-text">{{ number_format($file->size / 1024 / 1024, 2) }} MB</td>
+
+                            {{-- 🔄 ستون وضعیت سند متصل به State Machine دیتابیس --}}
                             <td data-label="وضعیت سند" class="text-center">
-                                @if($file->is_default)
-                                    <span class="badge-status-active">
-                                        <i class="fa fa-star ml-1"></i> فایل اصلی محصول
-                                    </span>
+                                @if($file->status === 'ready')
+                                    @if($file->is_default)
+                                        <span class="badge-status-active">
+                                    <i class="fa fa-star ml-1"></i> فایل اصلی محصول
+                                </span>
+                                    @else
+                                        <button wire:click="setDefault({{ $file->id }})" class="btn-set-default">
+                                            انتخاب به عنوان اصلی
+                                        </button>
+                                    @endif
+                                @elseif($file->status === 'failed')
+                                    <span class="badge-status-failed text-danger" title="{{ $file->failure_reason }}" style="cursor: help;">
+                                <i class="fa fa-times-circle ml-1"></i> خطای پردازش امنیتی
+                            </span>
                                 @else
-                                    <button wire:click="setDefault({{ $file->id }})" class="btn-set-default">
-                                        انتخاب به عنوان اصلی
-                                    </button>
+                                    {{-- وضعیت‌های uploading یا processing --}}
+                                    <span class="badge-status-processing text-warning">
+                                <i class="fa fa-spinner fa-spin ml-1"></i> در حال پردازش سرور...
+                            </span>
                                 @endif
                             </td>
+
                             <td data-label="حذف" class="text-center">
-                                <button type="button" class="btn-delete-file" title="حذف" onclick="openDeleteModal({{ $file->id }}, '{{ $file->title ?? $file->original_name }}')">
+                                {{-- غیرفعال کردن دکمه حذف برای فایل‌هایی که در حال پردازش هستند --}}
+                                <button type="button"
+                                        class="btn-delete-file"
+                                        title="حذف"
+                                        @if(in_array($file->status, ['uploading', 'processing'])) disabled style="opacity: 0.5; cursor: not-allowed;" @endif
+                                        onclick="openDeleteModal({{ $file->id }}, '{{ $file->title ?? $file->original_name }}')">
                                     <i class="fa fa-trash-o"></i>
                                 </button>
                             </td>
@@ -124,7 +144,7 @@
                         <tr>
                             <td colspan="6" class="empty-state-row">
                                 <i class="fa fa-folder-open-o empty-icon"></i>
-                                <p class="empty-text">هنوز هیچ فایلی برای این محصول آپلود نشده است.</p>
+                                <p class="empty-text">هنوز هیچ فایلی برای این محصول آپلود نشده یا فایل‌های ارسالی در صف پردازش هستند...</p>
                             </td>
                         </tr>
                     @endforelse
@@ -134,7 +154,7 @@
 
             @if($files->hasPages())
                 <div class="pagination-wrapper">
-                    {{ $files->links() }}
+                    {{ $files->appends(Request::except('page'))->links() }}
                 </div>
             @endif
         </div>
@@ -199,7 +219,6 @@
 
     r.assignBrowse(uploadContainer);
 
-    // 🔒 اعمال لایه اعتبارسنجی حجم ۴ گیگابایت در فرانت‌اند
     r.on('fileAdded', function (file) {
         completed = false;
         const maxFourGigabytes = 4294967296;
@@ -219,7 +238,6 @@
             return false;
         }
 
-        // روال عادی و ریست کامل المان‌های گرافیکی خطای احتمالی قبلی
         fileInfo.innerHTML = '<i class="fa fa-file-text text-primary ml-2"></i> <span class="text-primary font-weight-bold">' + file.fileName + '</span> (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)';
         startBtn.removeAttribute('disabled');
 
@@ -259,7 +277,7 @@
             const data = JSON.parse(message);
             if(data.status === 'success' && data.completed && !completed){
                 completed = true;
-                statusText.innerText = 'فایل با موفقیت آپلود و سرهم‌بندی شد.';
+                statusText.innerText = 'فایل پارت آخر با موفقیت منتقل و به صف پردازش نهایی ارسال شد.';
                 r.removeFile(file);
                 fileInfo.innerText = 'فایل خود را به این‌جا بکشید یا کلیک کنید';
                 titleInput.value = '';
@@ -283,7 +301,6 @@
                 const response = JSON.parse(message);
                 errorMessage = response.message || errorMessage;
             } catch(e) {
-                // اگر ریسپانس JSON نبود ولی متنی از سرور آمد
                 if(typeof message === 'string' && message.length < 150) {
                     errorMessage = message;
                 }
