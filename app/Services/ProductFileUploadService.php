@@ -51,30 +51,80 @@ class ProductFileUploadService
     public function isValidMimeForExtension(string $extension, string $mime): bool
     {
         $validMimes = [
-            'jpg'  => ['image/jpeg', 'image/pjpeg', 'application/octet-stream'],
-            'jpeg' => ['image/jpeg', 'image/pjpeg', 'application/octet-stream'],
-            'png'  => ['image/png', 'image/x-png', 'application/octet-stream'],
-            'webp' => ['image/webp', 'image/x-webp', 'application/octet-stream'],
-            'tiff' => ['image/tiff', 'image/x-tiff', 'application/octet-stream'],
-            'svg'  => ['image/svg+xml', 'application/xml', 'text/xml', 'text/plain', 'application/octet-stream'],
-            'psd'  => ['image/vnd.adobe.photoshop', 'application/x-photoshop', 'image/psd', 'application/octet-stream'],
-            'ai'   => ['application/postscript', 'application/pdf', 'application/vnd.adobe.illustrator', 'application/octet-stream'],
-            'eps'  => ['application/postscript', 'image/x-eps', 'image/eps', 'application/octet-stream'],
-            'cdr'  => ['application/cdr', 'application/coreldraw', 'image/cdr', 'application/x-cdr', 'zz-application/zz-winassoc-cdr', 'application/octet-stream'],
-            'art'  => ['image/x-jg', 'application/octet-stream'],
-            'pdf'  => ['application/pdf', 'application/x-pdf', 'application/acrobat', 'text/pdf', 'application/octet-stream'],
-            'zip'  => ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/x-zip', 'application/octet-stream'],
-            'dxf'  => ['image/vnd.dxf', 'image/x-dxf', 'application/dxf', 'application/x-dxf', 'text/plain', 'application/octet-stream'],
-            'stl'  => ['application/sla', 'application/stl', 'application/x-navistyle', 'application/octet-stream', 'text/plain'],
-            'obj'  => ['text/plain', 'application/object', 'application/x-tgif', 'application/octet-stream'],
-            '3ds'  => ['image/x-3ds', 'application/x-3ds', 'application/octet-stream'],
-            'stp'  => ['application/step', 'application/octet-stream', 'text/plain'],
-            'step' => ['application/step', 'application/octet-stream', 'text/plain'],
-            'ttf'  => ['font/ttf', 'font/sfnt', 'application/x-font-ttf', 'application/x-font-truetype', 'application/octet-stream'],
-            'otf'  => ['font/otf', 'font/sfnt', 'application/x-font-opentype', 'application/octet-stream'],
+            'jpg'  => ['image/jpeg', 'image/pjpeg'],
+            'jpeg' => ['image/jpeg', 'image/pjpeg'],
+            'png'  => ['image/png', 'image/x-png'],
+            'webp' => ['image/webp', 'image/x-webp'],
+            'tiff' => ['image/tiff', 'image/x-tiff'],
+
+            'svg'  => ['image/svg+xml', 'application/xml', 'text/xml'],
+
+            'pdf'  => ['application/pdf', 'application/x-pdf'],
+
+            'zip'  => ['application/zip', 'application/x-zip-compressed'],
+
+            'psd'  => ['image/vnd.adobe.photoshop', 'application/x-photoshop'],
+            'ai'   => ['application/postscript', 'application/vnd.adobe.illustrator'],
+            'eps'  => ['application/postscript', 'image/x-eps'],
+
+            'cdr'  => [
+                'application/cdr',
+                'application/coreldraw',
+                'image/cdr',
+                'application/x-cdr',
+                'application/vnd.coreldraw',
+                'application/x-coreldraw',
+                'zz-application/zz-winassoc-cdr',
+                'application/x-riff', // مهم برای لینوکس / فایل‌های واقعی Corel
+            ],
+
+            'art'  => ['image/x-jg'],
+
+            'dxf'  => ['image/vnd.dxf', 'image/x-dxf', 'application/dxf', 'text/plain'],
+
+            'stl'  => ['application/sla', 'application/stl', 'text/plain'],
+
+            'obj'  => ['text/plain', 'application/object'],
+
+            '3ds'  => ['image/x-3ds', 'application/x-3ds'],
+
+            'stp'  => ['application/step', 'text/plain'],
+            'step' => ['application/step', 'text/plain'],
+
+            'ttf'  => ['font/ttf', 'font/sfnt', 'application/x-font-ttf'],
+            'otf'  => ['font/otf', 'font/sfnt', 'application/x-font-opentype'],
         ];
 
-        return isset($validMimes[$extension]) && in_array($mime, $validMimes[$extension], true);
+        if (!isset($validMimes[$extension])) {
+            return false;
+        }
+
+        // 1. تطابق دقیق (اصلی و امن)
+        if (in_array($mime, $validMimes[$extension], true)) {
+            return true;
+        }
+
+        /**
+         * 2. fallback محدود فقط برای فایل‌های مهندسی/گرافیکی سنگین
+         * (نه تصاویر، نه zip، نه pdf)
+         */
+        $binaryFallbackAllowed = [
+            'cdr', 'ai', 'psd', 'eps', 'obj', 'stl', '3ds', 'stp', 'step'
+        ];
+
+        $genericBinaryMimes = [
+            'application/octet-stream',
+            'application/x-riff'
+        ];
+
+        if (
+            in_array($mime, $genericBinaryMimes, true) &&
+            in_array($extension, $binaryFallbackAllowed, true)
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
     public function delete(ProductFile $file)
