@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class EditUserRequest extends FormRequest
 {
@@ -16,15 +17,47 @@ class EditUserRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
+        // گرفتن آیدی کاربر از روی روت (با هر دو نام احتمالی id یا user)
+        $userId = $this->route('user') ?? $this->route('id');
+
         return [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,' . $this->user,
-            'mobile'=>'required|unique:users,mobile,' . $this->user,
+            'name' => ['required', 'string', 'min:3', 'max:150'],
+
+            // استفاده از Rule برای نادیده گرفتن کاربر فعلی هنگام ویرایش
+            'email' => [
+                'required',
+                'email',
+                'max:191',
+                Rule::unique('users', 'email')->ignore($userId)
+            ],
+
+            'mobile' => [
+                'required',
+                'regex:/^09[0-9]{9}$/',
+                Rule::unique('users', 'mobile')->ignore($userId)
+            ],
+
+            // پسورد در ویرایش اختیاری است، اما اگر پر شود باید حداقل ۸ کاراکتر باشد
+            'password' => ['nullable', 'string', 'min:8'],
+
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ];
+    }
+
+    /**
+     * سفارشی‌سازی نام فیلدها برای پیام‌های خطا
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'نام و نام خانوادگی',
+            'email' => 'ایمیل',
+            'mobile' => 'شماره موبایل',
+            'password' => 'کلمه عبور',
+            'image' => 'تصویر پروفایل',
         ];
     }
 }

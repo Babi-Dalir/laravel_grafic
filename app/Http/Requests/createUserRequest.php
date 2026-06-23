@@ -16,16 +16,31 @@ class createUserRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-           'name'=>'required|min:3',
-           'email'=>'required|email|unique:users,email',
-           'mobile'=>'required|unique:users,mobile',
-            'password'=>'required|min:6',
+            'name' => ['required', 'string', 'min:3', 'max:150'],
+            'email' => ['required', 'email', 'max:191', 'unique:users,email'],
+            // ولیدیشن برای شماره موبایل‌های استاندارد ایران
+            'mobile' => ['required', 'regex:/^09[0-9]{9}$/', 'unique:users,mobile'],
+            'password' => ['required', 'string', 'min:8'],
+            // اضافه شدن ولیدیشن تصویر برای امنیت پروژه گرافیکی شما
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ];
+    }
+
+    /**
+     * سفارشی‌سازی نام فیلدها برای پیام‌های خطا
+     */
+    public function attributes(): array
+    {
+        return [
+            'name' => 'نام و نام خانوادگی',
+            'email' => 'ایمیل',
+            'mobile' => 'شماره موبایل',
+            'password' => 'کلمه عبور',
+            'image' => 'تصویر پروفایل',
         ];
     }
 }

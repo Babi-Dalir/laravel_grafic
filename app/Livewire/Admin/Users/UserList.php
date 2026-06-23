@@ -37,6 +37,7 @@ class UserList extends Component
     public function render()
     {
         $users = User::query()
+            ->with('seller')
             ->where('name','like','%'.$this->search.'%')
             ->orWhere('mobile','like','%'.$this->search.'%')
             ->orWhere('email','like','%'.$this->search.'%')
