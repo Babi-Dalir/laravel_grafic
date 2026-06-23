@@ -20,61 +20,65 @@ class OrderDetail extends Model
         'site_share'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'status' => OrderDetailStatus::class, // فعال‌سازی قابلیت اکشن‌محور انوم
+        ];
+    }
+
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * واکسینه کردن رابطه محصول در برابر حذف‌های موقت دیتابیس
+     */
     public function product()
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
+
+    /**
+     * اصلاح نام کلاس مدل از جمع به مفرد
+     */
     public function download()
     {
-        return $this->hasOne(Downloads::class);
+        return $this->hasOne(Downloads::class, 'order_detail_id');
     }
 
-    public static function createOrderDetail($order, $cart, $product)
+    /**
+     * ساخت اتمیک جزئیات سفارش با هندل کردن محصولات سافت‌دیلیت شده
+     */
+    public static function createOrderDetail($order, $cart, Product $product)
     {
         $price = $product->final_price;
         $discount = $product->main_price - $product->final_price;
 
-        // محصول متعلق به مدیر سایت
-        if ($product->user->hasRole('مدیر')) {
+        // دریافت مستقیم یوزر صاحب محصول (حتی اگر محصول حذف موقت شده باشد)
+        $seller = $product->user;
 
+        if ($seller && $seller->hasRole('مدیر')) {
             $siteShare = $price;
             $sellerShare = 0;
-
         } else {
-
+            // استفاده از آپشنال برای جلوگیری از کرش در صورت نبود کمیسیون دسته بندی
             $commissionPercent = $product->category?->commission?->commission_percent ?? 20;
-
             $siteShare = ($price * $commissionPercent) / 100;
             $sellerShare = $price - $siteShare;
         }
 
-        return self::create([
+        return self::query()->create([
             'seller_id' => $product->user_id,
             'order_id' => $order->id,
             'product_id' => $cart->product_id,
-
             'main_price' => $product->main_price,
             'price' => $price,
             'discount' => $discount,
-
-            'status' => OrderDetailStatus::Waiting->value,
-
+            'status' => OrderDetailStatus::Waiting, // استفاده مستقیم از شیء انوم
             'seller_share' => $sellerShare,
             'site_share' => $siteShare,
         ]);
-    }
-
-    public static function calculateMoneyForCommission($order_detail)
-    {
-        if ($order_detail->product->category->commission) {
-            return $order_detail->price - ((($order_detail->product->category->commission->commission_percent) * $order_detail->price) / 100);
-        } else {
-            return $order_detail->price;
-        }
     }
 }
