@@ -2,35 +2,37 @@
 
 namespace App\Livewire\Admin\Categories;
 
-use App\Enums\UserStatus;
 use App\Models\Category;
-use App\Models\User;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Spatie\Permission\Models\Role;
 
 class CategoryList extends Component
 {
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
-    public $search;
+    public $search = '';
     public $categories;
-    public $search_categories;
+    public $search_categories = null;
 
     public function mount()
     {
         $this->categories = Category::query()
+            ->with('childCategory.childCategory')
             ->where('parent_id', 0)
             ->get();
     }
 
-    public function updatingSearch($value)
+    public function updatedSearch($value)
     {
-        $this->search_categories = Category::query()
-            ->where('name', 'like', '%' . $value . '%')
-            ->get();
+        if (!empty($value)) {
+            $this->search_categories = Category::query()
+                ->where('name', 'like', '%' . $value . '%')
+                ->get();
+        } else {
+            $this->search_categories = null;
+        }
     }
 
     #[On('destroy_category')]
@@ -38,7 +40,7 @@ class CategoryList extends Component
     {
         $category = Category::findOrFail($id);
         $category->delete();
-        $this->mount();
+        $this->mount(); // بروزرسانی لیست
     }
 
     public function searchData()

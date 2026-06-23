@@ -27,13 +27,14 @@ class Category extends Model
 
     public function childCategory()
     {
-        return $this->hasMany(self::class, 'parent_id', 'id');
+        return $this->hasMany(self::class, 'parent_id', 'id')->with('childCategory');
     }
 
     public function products()
     {
         return $this->hasMany(Product::class);
     }
+
     public function commission()
     {
         return $this->hasOne(Commission::class);
@@ -46,18 +47,18 @@ class Category extends Model
 
     public static function createCategory($request)
     {
-        Category::query()->create([
+        self::query()->create([
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
             'slug' => str()->slug($request->input('e_name')),
-            'image' => ImageManager::saveImage('categories', $request->image),
-            'parent_id' => $request->input('parent_id'),
-
+            'image' => $request->hasFile('image') ? ImageManager::saveImage('categories', $request->image) : null,
+            'parent_id' => $request->input('parent_id') ?? 0,
         ]);
     }
 
     public static function updateCategory($request, $category)
     {
+        $imageName = $category->image;
         if ($request->hasFile('image')) {
             ImageManager::unlinkImage('categories', $category); // حذف عکس قبلی
             $imageName = ImageManager::saveImage('categories', $request->image);
@@ -66,16 +67,16 @@ class Category extends Model
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
             'slug' => str()->slug($request->input('e_name')),
-            'image' => $request->image ? $imageName : $category->image,
-            'parent_id' => $request->input('parent_id'),
-
+            'image' => $request->hasFile('image') ? $imageName : $category->image,
+            'parent_id' => $request->input('parent_id') ?? 0,
         ]);
     }
 
     public static function getCategories()
     {
         $array = [];
-        $categories = self::query()->with('childCategory')->where('parent_id', 0)->get();
+        // اضافه شدن با تو در تو برای حل مشکل سرعت و تعداد کوئری‌ها
+        $categories = self::query()->with('childCategory.childCategory')->where('parent_id', 0)->get();
         foreach ($categories as $category1) {
             $array[$category1->id] = $category1->name;
             foreach ($category1->childCategory as $category2) {
@@ -91,7 +92,7 @@ class Category extends Model
     public static function getLayer3Categories()
     {
         $array = [];
-        $categories = self::query()->with('childCategory')->where('parent_id', 0)->get();
+        $categories = self::query()->with('childCategory.childCategory')->where('parent_id', 0)->get();
         foreach ($categories as $category1) {
             foreach ($category1->childCategory as $category2) {
                 foreach ($category2->childCategory as $category3) {
@@ -101,6 +102,7 @@ class Category extends Model
         }
         return $array;
     }
+
     public static function getLeafCategories()
     {
         return self::query()
@@ -112,10 +114,10 @@ class Category extends Model
     public static function getProductCategoryCount($id)
     {
         $sum = 0;
-        $categories = self::query()->with('childCategory')->where('parent_id', $id)->get();
+        $categories = self::query()->with('childCategory.products')->where('parent_id', $id)->get();
         foreach ($categories as $category1) {
             foreach ($category1->childCategory as $category2) {
-                $sum += $category2->products()->count();
+                $sum += $category2->products->count(); // استفاده از کالکشن به جای کوئری مجدد
             }
         }
         return $sum;
@@ -126,26 +128,27 @@ class Category extends Model
         parent::boot();
 
         self::deleting(function ($category) {
-            // ۱. مدیریت زیرمجموعه‌ها (فرزندان)
-            foreach ($category->childCategory()->withTrashed()->get() as $cat) {
+            // واکشی همه فرزندان مستقیم و غیر مستقیم برای جلوگیری از جا ماندن لایه‌ها
+            $children = $category->childCategory()->withTrashed()->get();
+            foreach ($children as $cat) {
                 if ($category->isForceDeleting()) {
                     $cat->forceDelete();
                 } else {
                     $cat->delete();
                 }
             }
-            // ۲. مدیریت حذف فیزیکی عکس (فقط در حذف دائمی)
             if ($category->isForceDeleting()) {
                 ImageManager::unlinkImage('categories', $category);
             }
         });
+
         self::restoring(function ($category) {
-            // بازگردانی زیرمجموعه‌ها
             foreach ($category->childCategory()->withTrashed()->get() as $cat) {
                 $cat->restore();
             }
         });
     }
+
     public static function getCategoryBySlug($main_slug, $sub_slug, $child_slug)
     {
         if ($main_slug) {
@@ -162,24 +165,22 @@ class Category extends Model
     public static function getProductByCategory($main_slug, $sub_slug, $child_slug, $column, $orderBy, $page)
     {
         if ($main_slug != null && $sub_slug == null && $child_slug == null) {
-            return Category::getProductListByMainCategory($main_slug, $column, $orderBy, $page);
+            return self::getProductListByMainCategory($main_slug, $column, $orderBy, $page);
         } elseif ($main_slug == null && $sub_slug != null && $child_slug == null) {
-            return Category::getProductListBySubCategory($sub_slug, $column, $orderBy, $page);
+            return self::getProductListBySubCategory($sub_slug, $column, $orderBy, $page);
         } elseif ($main_slug == null && $sub_slug != null && $child_slug != null) {
-            return Category::getProductListByChildCategory($child_slug, $column, $orderBy, $page);
+            return self::getProductListByChildCategory($child_slug, $column, $orderBy, $page);
         }
     }
 
     public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();
+        $category = self::with('childCategory.childCategory')->where('slug', $slug)->firstOrFail();
 
         $categoryIds = [$category->id];
 
         foreach ($category->childCategory as $child) {
-
             $categoryIds[] = $child->id;
-
             foreach ($child->childCategory as $grandChild) {
                 $categoryIds[] = $grandChild->id;
             }
@@ -196,7 +197,7 @@ class Category extends Model
 
     public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null)
     {
-        $category = Category::where('slug', $slug)->firstOrFail();
+        $category = self::with('childCategory')->where('slug', $slug)->firstOrFail();
 
         $categoryIds = [$category->id];
 
@@ -215,13 +216,13 @@ class Category extends Model
 
     public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null)
     {
-        $category = Category::query()->where('slug', $slug)->first();
-        if ($page) {
-            return Product::query()->where('category_id', $category->id)
-                ->orderBy($column, $orderBy)->paginate(2, ['*'], 'page', $page);
-        } else {
-            return Product::query()->where('category_id', $category->id)
-                ->orderBy($column, $orderBy)->get();
-        }
+        $category = self::where('slug', $slug)->firstOrFail();
+
+        $query = Product::query()->where('category_id', $category->id)
+            ->orderBy($column, $orderBy);
+
+        return $page
+            ? $query->paginate(2, ['*'], 'page', $page)
+            : $query->get();
     }
 }

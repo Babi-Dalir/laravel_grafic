@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Models; // در صورت نیاز به ایمپورت متدهای مدل
+
 namespace App\Livewire\Admin\Categories;
 
 use App\Models\Category;
@@ -10,30 +12,47 @@ use Livewire\WithPagination;
 class TrashedCategory extends Component
 {
     use WithPagination;
+
     protected $paginationTheme = 'bootstrap';
-    public $search;
+    public $search = '';
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
     #[On('destroy_trash_category')]
     public function destroyCategory($id)
     {
-        Category::query()->withTrashed()->find($id)->forceDelete();
+        $category = Category::query()->withTrashed()->find($id);
+        if ($category) {
+            $category->forceDelete();
+        }
     }
 
     public function restoreCategory($id)
     {
-        Category::query()->withTrashed()->find($id)->restore();
+        $category = Category::query()->withTrashed()->find($id);
+        if ($category) {
+            $category->restore();
+        }
     }
 
     public function searchData()
     {
         $this->resetPage();
     }
+
     public function render()
     {
-        $categories = Category::query()->onlyTrashed()
-            ->where('name','like','%'.$this->search.'%')
-            ->orWhere('e_name','like','%'.$this->search.'%')
-            ->where('deleted_at','!=',null)
+        $categories = Category::query()
+            ->onlyTrashed()
+            ->where(function ($query) {
+                $query->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('e_name', 'like', '%' . $this->search . '%');
+            })
             ->paginate(10);
-        return view('livewire.admin.categories.trashed-category',compact('categories'));
+
+        return view('livewire.admin.categories.trashed-category', compact('categories'));
     }
 }

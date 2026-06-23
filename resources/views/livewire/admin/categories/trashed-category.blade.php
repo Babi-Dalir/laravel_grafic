@@ -18,6 +18,7 @@
             </div>
         </div>
     </div>
+
     <table class="table table-striped table-hover">
         <thead class="thead-light">
         <tr>
@@ -28,80 +29,90 @@
             <th class="text-center align-middle text-primary">نام انگلیسی</th>
             <th class="text-center align-middle text-primary">اسلاگ</th>
             <th class="text-center align-middle text-primary">بازگردانی</th>
-            <th class="text-center align-middle text-primary">حذف</th>
+            <th class="text-center align-middle text-primary">حذف قطعی</th>
             <th class="text-center align-middle text-primary">تاریخ ایجاد</th>
         </tr>
         </thead>
         <tbody>
-        @forelse($categories as $index=>$category)
+        @forelse($categories as $index => $category)
             <tr>
-                <td class="text-center align-middle">{{$categories->firstItem()+$index}}</td>
+                <td class="text-center align-middle">{{ $categories->firstItem() + $index }}</td>
                 <td class="text-center align-middle">
-                    <figure class="avatar avatar">
-                        <img src="{{url('images/categories/small/'.$category->image)}}" class="rounded-circle" alt="image">
+                    <figure class="avatar">
+                        <img src="{{ $category->image ? url('images/categories/small/'.$category->image) : url('images/categories/default.png') }}" class="rounded-circle" alt="image">
                     </figure>
                 </td>
-                <td class="text-center align-middle">{{$category->name}}</td>
-                <td class="text-center align-middle">{{$category->parentCategory->name}}</td>
-                <td class="text-center align-middle">{{$category->e_name}}</td>
-                <td class="text-center align-middle">{{$category->slug}}</td>
+                <td class="text-center align-middle">{{ $category->name }}</td>
+                <td class="text-center align-middle">{{ $category->parentCategory->name }}</td>
+                <td class="text-center align-middle">{{ $category->e_name }}</td>
+                <td class="text-center align-middle">{{ $category->slug }}</td>
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-info" wire:click="restoreCategory({{$category->id}})">
+                    <button class="btn btn-outline-info btn-sm" wire:click="restoreCategory({{ $category->id }})">
                         بازگردانی
-                    </a>
+                    </button>
                 </td>
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-danger" wire:click="$dispatch('forceDeleteCategory',{'id':{{$category->id}}})">
+                    <button class="btn btn-outline-danger btn-sm" wire:click="$dispatch('forceDeleteCategory', { id: {{ $category->id }} })">
                         حذف
-                    </a>
+                    </button>
                 </td>
-                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($category->created_at)->format('%d%B، %Y')}}</td>
+                <td class="text-center align-middle">{{ \Hekmatinasser\Verta\Verta::instance($category->created_at)->format('%d %B، %Y') }}</td>
             </tr>
         @empty
-            <div class="text-center py-5 w-100 shadow-sm border rounded bg-light">
-                <div class="empty-state">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
-                         stroke-linecap="round" stroke-linejoin="round" class="mb-3">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                    <p class="text-muted">دسته بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در
-                        سیستم ثبت نشده است.</p>
-                    <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
-                        <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
-                    </button>
-                </div>
-            </div>
+            <tr>
+                <td colspan="9" class="p-0">
+                    <div class="text-center py-5 w-100 bg-light border-0">
+                        <div class="empty-state">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" class="mb-3">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
+                            <p class="text-muted">دسته‌بندی با عبارت <strong class="text-danger">"{{ $search }}"</strong> در بخش حذف شده‌ها یافت نشد.</p>
+                            <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                                <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                            </button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
         @endforelse
+        </tbody>
     </table>
-    <div style="margin: 40px !important;"
-         class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
-        {{$categories->appends(Request::except('page'))->links()}}
+
+    <div style="margin: 40px !important;" class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
+        {{ $categories->links() }}
     </div>
 </div>
+
 @section('scripts')
     <script>
-        Livewire.on('forceDeleteCategory', (event) => {
-            Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "بله",
-                cancelButtonText: "خیر",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_trash_category',{id : event.id})
-                    Swal.fire({
-                        title: "حذف با موفقیت انجام شد!",
-                        icon: "success"
-                    });
-                }
+        // مهار ساختار رویداد لایووایر بدون به هم ریختن منطق SweetAlert شما
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('forceDeleteCategory', (event) => {
+                // دریافت آیدی به هر دو فرمت آرایه‌ای لایووایر ۳
+                const id = event.id ? event.id : (event[0] ? event[0].id : null);
+
+                Swal.fire({
+                    title: "آیا از حذف دائمی و قطعی مطمئن هستید؟",
+                    text: "این عملیات غیرقابل بازگشت است و زیرمجموعه‌ها نیز حذف خواهند شد!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "بله، کاملاً حذف شود",
+                    cancelButtonText: "خیر"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Livewire.dispatch('destroy_trash_category', { id: id });
+                        Swal.fire({
+                            title: "دسته‌بندی برای همیشه حذف شد!",
+                            icon: "success"
+                        });
+                    }
+                });
             });
-        })
+        });
     </script>
 @endsection
-
-
