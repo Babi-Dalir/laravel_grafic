@@ -211,7 +211,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="11" class="text-center py-5" style="background-color: #f9f9f966;">
+                <td colspan="14" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
                         {{-- یک SVG ساده و شیک برای حالت جستجو --}}
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"

@@ -13,100 +13,87 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $title = "لیست محصولات";
         return view('admin.products.list', compact('title'));
     }
 
-    /**\
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $title = "ایجاد محصول";
         $categories = Category::getCategories();
-        $tags = Tag::query()->pluck('name','id');
-        return view('admin.products.create',compact('title','categories','tags'));
+        $tags = Tag::query()->pluck('name', 'id');
+        return view('admin.products.create', compact('title', 'categories', 'tags'));
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(ProductRequest $request)
     {
         $product = Product::createProduct($request);
 
         return redirect()
             ->route('add.product.gallery', $product->id)
-            ->with('message', 'محصول ایجاد شد. حالا تصاویر گالری را ثبت کنید.');
+            ->with('message', 'محصول با موفقیت ایجاد شد. اکنون تصاویر گالری آن را آپلود کنید.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        //
+        abort(404);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        $title ="ویرایش محصول";
+        $title = "ویرایش محصول";
         $categories = Category::getCategories();
-        $tags = Tag::query()->pluck('name','id');
-        $product = Product::findOrfail($id);
-        return view('admin.products.edit',compact('title','categories','tags','product'));
+        $tags = Tag::query()->pluck('name', 'id');
+        $product = Product::findOrFail($id);
+
+        return view('admin.products.edit', compact('title', 'categories', 'tags', 'product'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(ProductRequest $request, string $id)
     {
-        Product::updateProduct($request,$id);
-        return redirect()->route('products.index')->with('message', 'محصول با موفقیت ویرایش شد');
+        Product::updateProduct($request, $id);
+
+        return redirect()
+            ->route('products.index')
+            ->with('message', 'محصول با موفقیت ویرایش و بروزرسانی شد.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+
     }
 
     public function trashed()
     {
         $title = "لیست محصولات حذف شده";
-        return view('admin.products.trashed_list',compact('title'));
+        return view('admin.products.trashed_list', compact('title'));
     }
 
     public function addGallery($id)
     {
-        $product = Product::query()->find($id);
-        return view('admin.products.add_gallery',compact('product'));
+        $product = Product::findOrFail($id);
+        return view('admin.products.add_gallery', compact('product'));
     }
 
-    public function storeGallery(Request $request,$id)
+    public function storeGallery(Request $request, $id)
     {
-        Gallery::query()->create([
-            'product_id'=>$id,
-            'image'=>ImageManager::saveProductImage('products',$request->file),
-            'position'=>Gallery::query()->where('product_id',$id)->count()
+        $request->validate([
+            'file' => 'required|image|mimes:jpeg,jpg,png,webp|max:2048'
         ]);
-        return redirect()->back();
+
+        Gallery::query()->create([
+            'product_id' => $id,
+            'image' => ImageManager::saveProductImage('products', $request->file('file')),
+            'position' => Gallery::query()->where('product_id', $id)->count()
+        ]);
+
+        return redirect()->back()->with('message', 'تصویر به گالری اضافه شد.');
     }
 
     public function createProductProperty(Product $product)
     {
-        return view('admin.products.product_properties',compact('product'));
+        return view('admin.products.product_properties', compact('product'));
     }
 }

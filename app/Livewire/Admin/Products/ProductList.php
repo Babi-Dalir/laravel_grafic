@@ -12,24 +12,24 @@ class ProductList extends Component
 {
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
-    public $search;
+
+    public $search = '';
     public $productRequestId;
     public $review_note;
+
+    protected $queryString = ['search' => ['except' => '']];
 
     public function approveProductRequest($id)
     {
         if (auth()->user()->hasRole('مدیر')) {
-            $productRequest = Product::with('user')->findOrFail($id);
+            $productRequest = Product::findOrFail($id);
 
             $productRequest->update([
                 'status' => ProductStatus::Approved->value,
                 'review_note' => null,
             ]);
 
-            session()->flash(
-                'message',
-                'محصول با موفقیت تایید شد.'
-            );
+            session()->flash('message', 'محصول با موفقیت تایید شد.');
         }
     }
 
@@ -43,74 +43,61 @@ class ProductList extends Component
                 'review_note' => $this->review_note,
             ]);
 
-            $this->reset([
-                'productRequestId',
-                'review_note'
-            ]);
-
+            $this->reset(['productRequestId', 'review_note']);
             $this->dispatch('closeRejectModal');
 
-            session()->flash(
-                'message',
-                'درخواست با موفقیت رد شد.'
-            );
+            session()->flash('message', 'درخواست رد محصول با موفقیت ثبت شد.');
         }
     }
+
     #[On('destroy_product')]
     public function destroyProduct($id)
     {
         $product = Product::findOrFail($id);
-
         $user = auth()->user();
 
-        if (
-            !$user->hasAnyRole(['مدیر', 'مدیر فروش']) &&
-            $product->user_id !== $user->id
-        ) {
+        if (!$user->hasAnyRole(['مدیر', 'مدیر فروش']) && $product->user_id !== $user->id) {
             abort(403);
         }
 
-        // اگر محصول فروش داشته باشد حذف نشود
+        // اگر محصول فروخته شده باشد آرشیو می‌شود
         if ($product->orderDetails()->exists()) {
-
             $product->update([
                 'status' => ProductStatus::Archived->value
             ]);
-
-            $this->dispatch('productArchived');
-
+            $this->dispatch('productArchived', ['message' => 'محصول به دلیل داشتن تاریخچه فروش آرشیو شد.']);
             return;
         }
 
         $product->delete();
-
-        $this->dispatch('productDeleted');
+        $this->dispatch('productDeleted', ['message' => 'محصول با موفقیت به زباله‌دان منتقل شد.']);
     }
+
     public function changeStatus($id)
     {
         if (auth()->user()->hasRole('مدیر')) {
-            $product = Product::query()->find($id);
-            if ($product->status == ProductStatus::Draft->value){
-                $product->update([
-                    'status'=>ProductStatus::PendingReview->value
-                ]);
-            }elseif ($product->status == ProductStatus::PendingReview->value){
-                $product->update([
-                    'status'=>ProductStatus::Approved->value
-                ]);
-            }elseif ($product->status == ProductStatus::Approved->value){
-                $product->update([
-                    'status'=>ProductStatus::Rejected->value
-                ]);
-            }elseif ($product->status == ProductStatus::Rejected->value){
-                $product->update([
-                    'status'=>ProductStatus::Archived->value
-                ]);
-            }elseif ($product->status == ProductStatus::Archived->value){
-                $product->update([
-                    'status'=>ProductStatus::Draft->value
-                ]);
+            $product = Product::findOrFail($id);
+
+            // بازنویسی ایمن و تمیز سوییچ وضعیت‌ها بر اساس متد شما
+            switch ($product->status) {
+                case ProductStatus::Draft->value:
+                    $product->update(['status' => ProductStatus::PendingReview->value]);
+                    break;
+                case ProductStatus::PendingReview->value:
+                    $product->update(['status' => ProductStatus::Approved->value]);
+                    break;
+                case ProductStatus::Approved->value:
+                    $product->update(['status' => ProductStatus::Rejected->value]);
+                    break;
+                case ProductStatus::Rejected->value:
+                    $product->update(['status' => ProductStatus::Archived->value]);
+                    break;
+                case ProductStatus::Archived->value:
+                    $product->update(['status' => ProductStatus::Draft->value]);
+                    break;
             }
+
+            session()->flash('message', 'وضعیت محصول با موفقیت تغییر کرد.');
         }
     }
 
@@ -118,16 +105,17 @@ class ProductList extends Component
     {
         $this->resetPage();
     }
+
     public function render()
     {
-        $query = Product::query()->with('files')
+        $query = Product::query()->with(['files', 'user'])
             ->where('name', 'like', '%' . $this->search . '%');
 
         if (!auth()->user()->hasRole('مدیر')) {
             $query->where('user_id', auth()->id());
         }
 
-        $products = $query->paginate(10);
+        $products = $query->latest()->paginate(10);
 
         return view('livewire.admin.products.product-list', compact('products'));
     }
