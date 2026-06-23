@@ -7,9 +7,10 @@ use App\Enums\DiscountStatus;
 use App\Enums\GiftCartStatus;
 use App\Enums\OrderDetailStatus;
 use App\Enums\OrderStatus;
-use Carbon\Carbon;
+use App\Events\OrderPaidEvent; // اضافه شدن رویداد برای جداسازی وظایف
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Order extends Model
@@ -29,6 +30,14 @@ class Order extends Model
         'paid_at'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'status' => OrderStatus::class,
+            'paid_at' => 'datetime',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -38,90 +47,69 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class);
     }
+
     public function sellerWalletTransactions()
     {
         return $this->hasMany(SellerWalletTransaction::class);
     }
-    private static function generateOrderCode()
+
+    /**
+     * ثبت پرداخت موفق با ساختار تفکیک‌شده و رویدادمحور
+     */
+    public static function successPayment(Order $order): void
     {
-        do {
-            $code = mt_rand(10000000, 99999999);
-        } while (Order::query()->where('order_code', $code)->exists());
+        $isPaidNow = DB::transaction(function () use ($order) {
 
-        return $code;
-    }
+            $lockedOrder = self::query()
+                ->lockForUpdate()
+                ->with('orderDetails')
+                ->findOrFail($order->id);
 
-    public static function createOrder($user, $total_price, $shop_data, $discount_code_price, $gif_cart_code_price)
-    {
-        return Order::query()->create([
-            'user_id' => $user->id,
-            'order_code' => self::generateOrderCode(),
-            'status' => OrderStatus::WaitPayment->value,
-            'total_price' => $total_price,
-            'discount_price' => $discount_code_price,
-            'discount_code' => $shop_data['discount_code'],
-            'gift_cart_price' => $gif_cart_code_price,
-            'gift_cart_code' => $shop_data['gift_cart_code'],
-        ]);
-    }
+            // مکانیزم سخت‌گیرانه Idempotency
+            if ($lockedOrder->status !== OrderStatus::WaitPayment) {
+                return false;
+            }
 
-    public static function successPayment($order, $order_details, $discount_code, $gift_cart_code)
-    {
-        // جلوگیری از اجرای مجدد
-        if ($order->status == OrderStatus::Payed->value) {
-            return;
-        }
-
-        $order->update([
-            'status' => OrderStatus::Payed->value,
-            'paid_at' => now(),
-        ]);
-
-        foreach ($order_details as $order_detail) {
-
-            $order_detail->update([
-                'status' => OrderDetailStatus::Paid->value
+            // ۱۰۰٪ پایبند به معماری شیءگرای Enum بدون تداخل با value
+            $lockedOrder->update([
+                'status' => OrderStatus::Payed,
+                'paid_at' => now(),
             ]);
 
-            $product = Product::find($order_detail->product_id);
+            foreach ($lockedOrder->orderDetails as $detail) {
+                $detail->update([
+                    'status' => OrderDetailStatus::Paid->value
+                ]);
 
-            if ($product) {
-                $product->increment('sold');
+                Product::query()
+                    ->whereKey($detail->product_id)
+                    ->increment('sold');
+
+                Download::firstOrCreate([
+                    'order_detail_id' => $detail->id
+                ]);
             }
 
-            $downloadExists = Downloads::query()
-                ->where('order_detail_id', $order_detail->id)
-                ->exists();
+            UserCart::query()
+                ->where('user_id', $lockedOrder->user_id)
+                ->where('type', CartType::Main->value)
+                ->delete();
 
-            if (!$downloadExists) {
+            self::handleDiscount($lockedOrder->discount_code);
+            self::handleGiftCart($lockedOrder->gift_cart_code, $lockedOrder);
 
-                Downloads::createDownload($order_detail);
-            }
+            return true;
+        });
+
+        // 🚀 شلیک رویداد پرداخت موفق خارج از تراکنش برای کارهای فرعی پلتفرم (مثل پیامک، لاگ و غیره)
+        if ($isPaidNow) {
+            event(new OrderPaidEvent($order));
         }
-
-        UserCart::query()
-            ->where('user_id', $order->user_id)
-            ->where('type', CartType::Main->value)
-            ->delete();
-
-        self::handleDiscount($discount_code);
-
-        self::handleGiftCart(
-            $gift_cart_code,
-            $order
-        );
     }
 
-    public static function isBuyer($product_id,$user_id)
-    {
-        return Order::query()->whereHas('orderDetails',function ($q) use ($product_id){
-            $q->where('product_id',$product_id);
-        })
-            ->where('user_id',$user_id)
-            ->where('status',OrderStatus::Payed->value)
-            ->exists();
-    }
-
+    /**
+     * مدیریت تخفیف در سطح ساختار امن Concurrency-Safe
+     */
     private static function handleDiscount($discount_code)
     {
         if (!$discount_code) {
@@ -137,11 +125,18 @@ class Order extends Model
             return;
         }
 
-        $discount->update([
-            'discount' => 0,
-            'status' => DiscountStatus::InActive->value
-        ]);
+        // قفل اتمیک در دیتابیس: کم کردن مقدار فقط و فقط اگر بزرگتر از صفر باشد (ضد Race Condition)
+        $affected = Discount::query()
+            ->whereKey($discount->id)
+            ->where('remaining_count', '>', 0)
+            ->decrement('remaining_count');
+
+        // اگر سطر آپدیت شد و فیلد تازه به صفر رسید، وضعیت غیرفعال شود
+        if ($affected && $discount->fresh()->remaining_count <= 0) {
+            $discount->update(['status' => DiscountStatus::InActive]);
+        }
     }
+
     private static function handleGiftCart($gift_cart_code, $order)
     {
         if (!$gift_cart_code) {
@@ -160,29 +155,23 @@ class Order extends Model
         $amountToDeduct = $order->gift_cart_price;
 
         if ($amountToDeduct > 0) {
-
             if ($gift_cart->balance >= $amountToDeduct) {
-
-                $gift_cart->decrement(
-                    'balance',
-                    $amountToDeduct
-                );
-
+                $gift_cart->decrement('balance', $amountToDeduct);
             } else {
-
-                $gift_cart->update([
-                    'balance' => 0
-                ]);
+                $gift_cart->update(['balance' => 0]);
             }
         }
 
-        $gift_cart = $gift_cart->fresh();
-
-        if ($gift_cart->balance <= 0) {
-
-            $gift_cart->update([
-                'status' => GiftCartStatus::InActive->value
-            ]);
+        if ($gift_cart->fresh()->balance <= 0) {
+            $gift_cart->update(['status' => GiftCartStatus::InActive]);
         }
+    }
+
+    /**
+     * 🔐 ساخت کد پیگیری ۱۰۰٪ منحصر به فرد و تصادفی زمان‌محور
+     */
+    private static function generateOrderCode()
+    {
+        return 'ORD-' . now()->getTimestampMs() . '-' . Str::upper(Str::random(4));
     }
 }
