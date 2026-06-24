@@ -85,7 +85,7 @@ class Order extends Model
                     ->whereKey($detail->product_id)
                     ->increment('sold');
 
-                Download::firstOrCreate([
+                Downloads::firstOrCreate([
                     'order_detail_id' => $detail->id
                 ]);
             }
@@ -133,7 +133,7 @@ class Order extends Model
 
         // اگر سطر آپدیت شد و فیلد تازه به صفر رسید، وضعیت غیرفعال شود
         if ($affected && $discount->fresh()->remaining_count <= 0) {
-            $discount->update(['status' => DiscountStatus::InActive]);
+            $discount->update(['status' => DiscountStatus::InActive->value]);
         }
     }
 
@@ -163,7 +163,7 @@ class Order extends Model
         }
 
         if ($gift_cart->fresh()->balance <= 0) {
-            $gift_cart->update(['status' => GiftCartStatus::InActive]);
+            $gift_cart->update(['status' => GiftCartStatus::InActive->value]);
         }
     }
 
