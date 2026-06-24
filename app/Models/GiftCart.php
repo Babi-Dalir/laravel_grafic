@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\GiftCartStatus;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class GiftCart extends Model
@@ -16,8 +15,16 @@ class GiftCart extends Model
         'status',
         'user_id',
         'expiration_date',
-
     ];
+
+    // 🟢 تضمین یکپارچگی کستینگ برای دیتابیس سرور لینوکس
+    protected function casts(): array
+    {
+        return [
+            'status' => GiftCartStatus::class,
+            'expiration_date' => 'datetime',
+        ];
+    }
 
     public function user()
     {
@@ -26,29 +33,28 @@ class GiftCart extends Model
 
     public static function calculateGiftCart($shop_data, $total_price, $gif_cart_code_price)
     {
-        $gift_cart = GiftCart::query()
+        // 🟢 بهینه‌سازی سرور: استفاده از now() مرکزی لاراول برای جلوگیری از باگ چند ساعت اختلاف زمان سرور میزبان
+        $gift_cart = self::query()
             ->where('code', $shop_data['gift_cart_code'])
-            ->where('user_id', auth()->user()->id)
-            ->where('balance', '>', 0) // استفاده از مانده اعتبار جدید
+            ->where('user_id', auth()->id())
+            ->where('balance', '>', 0)
             ->where('status', GiftCartStatus::Active->value)
-            ->where('expiration_date', '>=', Carbon::now())
+            ->where('expiration_date', '>=', now())
             ->first();
 
         if ($gift_cart) {
             if ($gift_cart->balance >= $total_price) {
-                // اعتبار کارت بیشتر از خرید است
-                $gif_cart_code_price = $total_price; // مقدار کسر شده
+                $gif_cart_code_price = $total_price;
                 $total_price = 0;
             } else {
-                // اعتبار کارت بخشی از مبلغ را پوشش می‌دهد
-                $gif_cart_code_price = $gift_cart->balance; // مقدار کسر شده
+                $gif_cart_code_price = $gift_cart->balance;
                 $total_price -= $gift_cart->balance;
             }
         }
 
         return [
             'total_price' => $total_price,
-            'gif_cart_code_price' => $gif_cart_code_price, // برگرداندن همان متغیر
+            'gif_cart_code_price' => $gif_cart_code_price,
             'gift_cart_id' => $gift_cart ? $gift_cart->id : null
         ];
     }

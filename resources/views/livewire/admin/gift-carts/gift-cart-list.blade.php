@@ -30,60 +30,56 @@
                 <td class="text-center align-middle">{{number_format($gift_cart->gift_price)}} تومان</td>
                 <td class="text-center align-middle">{{number_format($gift_cart->balance)}} تومان</td>
                 <td class="text-center align-middle">{{$gift_cart->gift_title}}</td>
-                <td class="text-center align-middle">{{$gift_cart->user->name}}</td>
+                <td class="text-center align-middle">{{$gift_cart->user?->name ?? 'کاربر حذف شده'}}</td>
 
                 <td class="text-center align-middle">
-                    <div class="status-interactive-wrapper" wire:click="changeStatus({{$gift_cart->id}})">
-                        @if($gift_cart->status === \App\Enums\GiftCartStatus::Active->value)
+                    <div class="status-interactive-wrapper" wire:click="changeStatus({{$gift_cart->id}})" style="cursor: pointer;">
+                        @if($gift_cart->status === \App\Enums\GiftCartStatus::Active)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
                                 <span>فعال</span>
                             </div>
-                        @elseif($gift_cart->status === \App\Enums\GiftCartStatus::InActive->value)
+                        @else
                             <div class="modern-status-btn inactive">
                                 <i class="ti-power-off mr-1"></i>
                                 <span>غیرفعال</span>
                             </div>
                         @endif
-
                     </div>
                 </td>
-                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gift_cart->expiration_date)->format('%d%B، %Y')}}</td>
+                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gift_cart->expiration_date)->format('%d %B، %Y')}}</td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-danger"
                        wire:click="$dispatch('deleteGiftCart',{'id':{{$gift_cart->id}}})">
                         حذف
                     </a>
                 </td>
-                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gift_cart->created_at)->format('%d%B، %Y')}}</td>
+                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gift_cart->created_at)->format('%d %B، %Y')}}</td>
             </tr>
         @empty
             <tr>
                 <td colspan="10" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
-                        {{-- یک SVG ساده و شیک برای حالت جستجو --}}
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
                              stroke-linecap="round" stroke-linejoin="round" class="mb-3">
-                            <small>
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </small>
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
 
-                            <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                            <p class="text-muted">کارت هدیه ای با عبارت <strong class="text-danger">"{{ $search }}
-                                    "</strong>
-                                در سیستم ثبت نشده است.</p>
+                        <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
+                        <p class="text-muted">کارت هدیه ای با عبارت <strong class="text-danger">"{{ $search }}"</strong> در سیستم ثبت نشده است.</p>
 
-                            @if($search)
-                                <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
-                                    <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
-                                </button>
+                        @if($search)
+                            <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                                <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                            </button>
                         @endif
                     </div>
                 </td>
             </tr>
         @endforelse
+        </tbody>
     </table>
     <div style="margin: 40px !important;"
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
@@ -114,5 +110,3 @@
         })
     </script>
 @endsection
-
-
