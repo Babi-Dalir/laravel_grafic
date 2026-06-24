@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SliderStatus;
 use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -14,28 +15,46 @@ class Slider extends Model
         'status'
     ];
 
-    public static function createSlider($request)
+    protected function casts(): array
+    {
+        return [
+            'status' => SliderStatus::class,
+        ];
+    }
+
+    /**
+     * متد متمرکز پاکسازی کش اسلایدرها
+     */
+    public static function clearCache(): void
     {
         Cache::forget('sliders');
-        Slider::query()->create([
-            'link' => $request->input('link'),
+    }
+
+    public static function createSlider($request)
+    {
+        self::clearCache();
+
+        self::query()->create([
+            'link'  => $request->input('link'),
             'image' => ImageManager::saveImage('sliders', $request->image)
         ]);
     }
 
     public static function updateSlider($request, $id)
     {
-        Cache::forget('sliders');
+        self::clearCache();
 
-        $slider = Slider::query()->find($id);
+        $slider = Slider::findOrFail($id);
+        $imageName = $slider->image; // مقدار پیش‌فرض
 
         if ($request->hasFile('image')) {
-            ImageManager::unlinkImage('sliders', $slider); // حذف عکس قبلی
+            ImageManager::unlinkImage('sliders', $slider);
             $imageName = ImageManager::saveImage('sliders', $request->image);
         }
+
         $slider->update([
-            'link' => $request->input('link'),
-            'image' => $request->image ? $imageName : $slider->image
+            'link'  => $request->input('link'),
+            'image' => $imageName
         ]);
     }
 }
