@@ -19,23 +19,38 @@ class ProductPropertyList extends Component
         $this->validate([
             'name' => 'required|min:2',
             'property_group_id' => 'required|exists:property_groups,id',
-        ]
-            , [
+        ], [
             'name.required' => 'نام ویژگی الزامی است',
             'property_group_id.required' => 'انتخاب گروه ویژگی الزامی است',
         ]);
 
-        $exist = $this->product->whereHas('propertyGroups', function ($q) {
-            $q->where('property_group_id', $this->property_group_id)->where('product_id', $this->product->id);
-        })->exists();
+        $propertyExists = Property::query()
+            ->where('product_id', $this->product->id)
+            ->where('property_group_id', $this->property_group_id)
+            ->where('name', $this->name)
+            ->exists();
+
+        if ($propertyExists) {
+            // ارسال پیام خطای اتمیک به ادمین پلتفرم
+            session()->flash('error', 'این ویژگی با همین مقدار قبلاً برای این محصول ثبت شده است.');
+            return;
+        }
+
+        // ادامه کدهای اصلی شما بدون هیچ تغییری:
+        $exist = $this->product->propertyGroups()
+            ->where('property_group_id', $this->property_group_id)
+            ->exists();
+
         if (!$exist) {
             $this->product->propertyGroups()->attach($this->property_group_id);
         }
+
         Property::query()->create([
             'name' => $this->name,
             'property_group_id' => $this->property_group_id,
             'product_id' => $this->product->id
         ]);
+
         $this->reset(['name', 'property_group_id']);
         session()->flash('message', 'ویژگی با موفقیت اضافه شد.');
     }
@@ -43,24 +58,32 @@ class ProductPropertyList extends Component
     #[On('destroy_product_property_group')]
     public function destroyProductPropertyGroup($property_group_id)
     {
-        $exist = $this->product->whereHas('propertyGroups', function ($q) use ($property_group_id) {
-            $q->where('property_group_id', $property_group_id)->where('product_id', $this->product->id);
-        })->exists();
+        $exist = $this->product->propertyGroups()
+            ->where('property_group_id', $property_group_id)
+            ->exists();
+
         if ($exist) {
-            $properties = PropertyGroup::query()->find($property_group_id)->properties;
-            foreach ($properties as $property) {
-                $property->delete();
-            }
+            // 🟢 بهینه‌سازی آنلاین و امنیتی: فقط ویژگی‌های مربوط به همین محصول حذف شوند، نه بقیه محصولات!
+            Property::query()
+                ->where('property_group_id', $property_group_id)
+                ->where('product_id', $this->product->id)
+                ->delete();
+
             $this->product->propertyGroups()->detach($property_group_id);
         }
     }
 
     #[On('destroy_product_property')]
-    public function destroyProductProperty($property_group_id,$property_id)
+    public function destroyProductProperty($property_group_id, $property_id)
     {
         Property::destroy($property_id);
-        $exist = Property::query()->where('property_group_id',$property_group_id)->where('product_id',$this->product->id)->first();
-        if (!$exist){
+
+        $exist = Property::query()
+            ->where('property_group_id', $property_group_id)
+            ->where('product_id', $this->product->id)
+            ->exists();
+
+        if (!$exist) {
             $this->product->propertyGroups()->detach($property_group_id);
         }
     }
@@ -68,16 +91,10 @@ class ProductPropertyList extends Component
     public function render()
     {
         $category = $this->product->category;
-
-        // پیدا کردن ID دسته‌بندی‌های مجاز (لایه ۲ و ۳)
         $validCategoryIds = [];
 
-        if ($category->parent_id != 0) {
-            // اگر محصول در لایه ۲ یا ۳ باشد، خودش حتماً مجاز است
+        if ($category && $category->parent_id != 0) {
             $validCategoryIds[] = $category->id;
-
-            // حالا چک می‌کنیم پدرش هم لایه ۲ هست یا نه
-            // اگر پدرِ پدرش صفر نباشد، یعنی پدرش لایه ۲ است
             $parent = $category->parentCategory;
             if ($parent && $parent->parent_id != 0) {
                 $validCategoryIds[] = $parent->id;
@@ -88,7 +105,12 @@ class ProductPropertyList extends Component
             ->whereIn('category_id', $validCategoryIds)
             ->get();
 
-        $product_property_groups = $this->product->propertyGroups;
+        // 🟢 بهینه‌سازی آنلاین: لود کردن ویژگی‌های مرتبط با همین محصول به صورت کاملاً Eager Load جهت حل باگ N+1
+        $product_property_groups = $this->product->propertyGroups()
+            ->with(['properties' => function($query) {
+                $query->where('product_id', $this->product->id);
+            }])
+            ->get();
 
         return view('livewire.admin.products.product-property-list', compact('property_groups', 'product_property_groups'));
     }

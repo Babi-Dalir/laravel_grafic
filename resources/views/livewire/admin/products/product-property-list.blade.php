@@ -1,5 +1,20 @@
 <div class="container">
     <h6 class="card-title"> ایجاد ویژگی های محصول {{$product->name}}</h6>
+
+    {{-- پیام موفقیت --}}
+    @if(session()->has('message'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('message') }}
+        </div>
+    @endif
+
+    {{-- 🟢 نمایش پیام خطا برای جلوگیری از مقدار تکراری --}}
+    @if(session()->has('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <form wire:submit.prevent="submit">
         <div class="form-group row">
             <div class="col-sm-3">
@@ -32,6 +47,7 @@
             </div>
         </div>
     </form>
+
     <table class="table table-striped table-hover">
         <thead class="thead-light">
         <tr>
@@ -46,25 +62,29 @@
                 <td class="text-center align-middle">{{$property_group->name}}</td>
                 <td class="text-center align-middle">
                     <ul class="list-group">
-                        @foreach($property_group->properties()->where('product_id',$product->id)->get() as $property)
-                            <div class="row flex justify-content-center align-item-center">
-                                <li class="list-group-item col-9">{{$property->name}}</li>
-                                <i style="cursor: pointer;" class="ti-trash m-r-5 col-2" wire:click="$dispatch('deleteProductProperty',{'property_group_id':{{$property_group->id}},
-                                'property_id':{{$property->id}}})"></i>
+                        {{-- 🟢 بهینه‌سازی آنلاین: استفاده از ریلیشن لود شده در کامپوننت بدون صدا زدن پرانتز متد یا اجرای کدهای دیتابیس در نمایش --}}
+                        @foreach($property_group->properties as $property)
+                            <div class="row flex justify-content-center align-items-center mb-1">
+                                <li class="list-group-item col-9 text-right">{{$property->name}}</li>
+                                <div class="col-2 text-center">
+                                    <i style="cursor: pointer;" class="ti-trash text-danger" wire:click="$dispatch('deleteProductProperty',{'property_group_id':{{$property_group->id}}, 'property_id':{{$property->id}}})"></i>
+                                </div>
                             </div>
                         @endforeach
                     </ul>
                 </td>
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-danger" wire:click="$dispatch('deleteProductPropertyGroup',{'property_group_id':{{$property_group->id}}})">
-                        حذف
+                        حذف فله‌ای
                     </a>
                 </td>
             </tr>
         @endforeach
+        </tbody>
     </table>
 
-    @if($product->properties()->exists() && $product->propertyGroups()->exists())
+    {{-- 🟢 بهینه‌سازی آنلاین: استفاده از دیتای لود شده برای دکمه فلو کنترل به جای زدن چند کوئری exists مجزا به دیتابیس سرور --}}
+    @if($product_property_groups->isNotEmpty())
         <div class="text-center mt-4">
             <a href="{{ route('product.file.list', $product->id) }}"
                class="btn btn-primary btn-lg">
@@ -73,11 +93,12 @@
         </div>
     @endif
 </div>
+
 @section('scripts')
     <script>
         Livewire.on('deleteProductPropertyGroup', (event) => {
             Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
+                title: "آیا از حذف گروه و تمام ویژگی‌های آن مطمئن هستید؟",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
@@ -98,7 +119,7 @@
     <script>
         Livewire.on('deleteProductProperty', (event) => {
             Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
+                title: "آیا از حذف این ویژگی مطمئن هستید؟",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#3085d6",
