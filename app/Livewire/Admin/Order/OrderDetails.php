@@ -47,7 +47,7 @@ class OrderDetails extends Component
         }
 
         $orderDetail->update([
-            'status' => $nextStatus
+            'status' => $nextStatus instanceof \Illuminate\Database\Eloquent\Casts\AsEnumCollection ? $nextStatus : $nextStatus->value
         ]);
 
         $this->dispatch('order-detail-updated', message: 'وضعیت آیتم با موفقیت تغییر کرد.');
@@ -55,7 +55,6 @@ class OrderDetails extends Component
 
     public function render()
     {
-        // لود اتمیک و یکجای تمام ریلیشن‌ها جهت حل کامل باگ N+1 در بدنه جدول
         $order_details = OrderDetail::query()
             ->with([
                 'download',

@@ -15,7 +15,7 @@ return new class extends Migration {
 
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('order_detail_id')->constrained('order_details')->cascadeOnDelete();
+            $table->foreignId('order_detail_id')->unique()->constrained('order_details')->cascadeOnDelete();
 
             $table->string('token', 120)->unique();
 

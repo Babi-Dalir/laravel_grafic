@@ -65,11 +65,17 @@ class Orders extends Component
 
         $order->update($data);
 
+        // 🟢 بهینه‌سازی سرور: اگر وضعیت به پرداخت شده تغییر کرد، متد پردازش تراکنش موفق خودت را صدا می‌زنیم
+        if ($nextStatus === OrderStatus::Payed) {
+            Order::successPayment($order);
+        }
+
         $this->dispatch('order-status-updated', message: 'وضعیت سفارش با موفقیت به روز رسانی شد.');
     }
 
     public function render()
     {
+        // 🟢 بهینه‌سازی آنلاین: جلوگیری از قفل شدن دیتابیس با لود بهینه ریلیشن‌ها
         $orders = Order::query()
             ->with(['user', 'orderDetails', 'sellerWalletTransactions'])
             ->when($this->search, function ($query) {

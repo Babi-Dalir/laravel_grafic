@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Enums\CartType;
 use App\Enums\DiscountStatus;
+use App\Enums\DownloadStatus;
 use App\Enums\GiftCartStatus;
 use App\Enums\OrderDetailStatus;
 use App\Enums\OrderStatus;
-use App\Events\OrderPaidEvent; // اضافه شدن رویداد برای جداسازی وظایف
+use App\Events\OrderPaidEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -54,7 +55,7 @@ class Order extends Model
     }
 
     /**
-     * ثبت پرداخت موفق با ساختار تفکیک‌شده و رویدادمحور
+     * ثبت پرداخت موفق با ساختار تفکیک‌شده، رویدادمحور و هماهنگ با انوم کستینگ دانلودها
      */
     public static function successPayment(Order $order): void
     {
@@ -66,17 +67,18 @@ class Order extends Model
                 ->findOrFail($order->id);
 
             // مکانیزم سخت‌گیرانه Idempotency
-            if ($lockedOrder->status !== OrderStatus::WaitPayment) {
+            if ($lockedOrder->status !== OrderStatus::Payed) {
+                // پایبندی کامل به شیءگرایی انوم بدون تداخل با مقدار خام
+                $lockedOrder->update([
+                    'status' => OrderStatus::Payed,
+                    'paid_at' => now(),
+                ]);
+            } else {
                 return false;
             }
 
-            // ۱۰۰٪ پایبند به معماری شیءگرای Enum بدون تداخل با value
-            $lockedOrder->update([
-                'status' => OrderStatus::Payed,
-                'paid_at' => now(),
-            ]);
-
             foreach ($lockedOrder->orderDetails as $detail) {
+                // آپدیت وضعیت جزئیات سفارش با مقدار رشته‌ای انوم ارسالی شما
                 $detail->update([
                     'status' => OrderDetailStatus::Paid->value
                 ]);
@@ -87,6 +89,13 @@ class Order extends Model
 
                 Downloads::firstOrCreate([
                     'order_detail_id' => $detail->id
+                ], [
+                    'user_id' => $lockedOrder->user_id,
+                    'product_id' => $detail->product_id,
+                    'token' => Str::random(100),
+                    'max_download' => 5,
+                    'expire_at' => now()->addYear(),
+                    'status' => DownloadStatus::Active->value // استفاده از ->value برای جلوگیری از خطای همخوانی رشتۀ انوم
                 ]);
             }
 
@@ -101,14 +110,14 @@ class Order extends Model
             return true;
         });
 
-        // 🚀 شلیک رویداد پرداخت موفق خارج از تراکنش برای کارهای فرعی پلتفرم (مثل پیامک، لاگ و غیره)
+        // شلیک رویداد ناهمزمان برای صف پیامک ملی‌پایامک
         if ($isPaidNow) {
             event(new OrderPaidEvent($order));
         }
     }
 
     /**
-     * مدیریت تخفیف در سطح ساختار امن Concurrency-Safe
+     * مدیریت تخفیف موازی (Concurrency-Safe)
      */
     private static function handleDiscount($discount_code)
     {
@@ -125,18 +134,19 @@ class Order extends Model
             return;
         }
 
-        // قفل اتمیک در دیتابیس: کم کردن مقدار فقط و فقط اگر بزرگتر از صفر باشد (ضد Race Condition)
         $affected = Discount::query()
             ->whereKey($discount->id)
             ->where('remaining_count', '>', 0)
             ->decrement('remaining_count');
 
-        // اگر سطر آپدیت شد و فیلد تازه به صفر رسید، وضعیت غیرفعال شود
         if ($affected && $discount->fresh()->remaining_count <= 0) {
             $discount->update(['status' => DiscountStatus::InActive->value]);
         }
     }
 
+    /**
+     * مدیریت اتمیک کارت هدیه
+     */
     private static function handleGiftCart($gift_cart_code, $order)
     {
         if (!$gift_cart_code) {
@@ -168,7 +178,7 @@ class Order extends Model
     }
 
     /**
-     * 🔐 ساخت کد پیگیری ۱۰۰٪ منحصر به فرد و تصادفی زمان‌محور
+     * ساخت کد پیگیری منحصر به فرد
      */
     private static function generateOrderCode()
     {
