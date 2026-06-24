@@ -28,11 +28,10 @@
                 <td class="text-center align-middle">{{ $campaigns->firstItem() + $index }}</td>
                 <td class="text-center align-middle">{{ $campaign->name }}</td>
 
-                {{-- ستون نوع کمپین با Badge --}}
                 <td class="text-center align-middle">
-                    @if($campaign->type == \App\Enums\DiscountCampaignType::Product->value)
+                    @if($campaign->type === \App\Enums\DiscountCampaignType::Product->value)
                         <span class="badge badge-info-border">محصولی</span>
-                    @elseif($campaign->type == \App\Enums\DiscountCampaignType::Category->value)
+                    @elseif($campaign->type === \App\Enums\DiscountCampaignType::Category->value)
                         <span class="badge badge-warning-border">دسته‌بندی</span>
                     @else
                         <span class="badge badge-primary-border">کل سایت</span>
@@ -41,7 +40,6 @@
 
                 <td class="text-center align-middle text-success font-weight-bold">{{ $campaign->percent }}%</td>
 
-                {{-- تغییر وضعیت تعاملی --}}
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" style="cursor: pointer"
                          wire:click="changeStatus({{ $campaign->id }})">
@@ -71,17 +69,16 @@
                     @endif
                 </td>
 
-                {{-- دکمه ویرایش (چون ویرایش معمولاً در صفحه جداست، از لینک استفاده می‌کنیم) --}}
                 <td class="text-center align-middle">
                     <a href="{{ route('discount_campaigns.edit', $campaign->id) }}" class="btn btn-outline-info btn-sm">
                         <i class="ti-pencil"></i> ویرایش
                     </a>
                 </td>
 
-                {{-- دکمه حذف با دیسپچ لایووایری --}}
                 <td class="text-center align-middle">
+                    {{-- 🟢 اصلاح ۵: یکپارچه‌سازی دیسپچ به صورت snake_case جهت تطابق با هوک‌های اسکریپت پایین --}}
                     <button class="btn btn-outline-danger btn-sm"
-                            wire:click="$dispatch('DeleteCampaign', { id: {{ $campaign->id }} })">
+                            wire:click="$dispatch('trigger_delete_campaign', { id: {{ $campaign->id }} })">
                         حذف
                     </button>
                 </td>
@@ -90,9 +87,12 @@
             <tr>
                 <td colspan="8" class="text-center py-5">
                     <div class="empty-state">
-                        <h5 class="text-dark">کمپینی یافت نشد!</h5>
+                        <h5 class="text-dark" style="font-weight: 600;">کمپینی یافت نشد!</h5>
                         @if($search)
-                            <p class="text-muted">عبارت "{{ $search }}" نتیجه‌ای نداشت.</p>
+                            <p class="text-muted">عبارت "<strong class="text-danger">{{ $search }}</strong>" نتیجه‌ای نداشت.</p>
+                            <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">
+                                <i class="ti-eraser m-r-5"></i> پاکسازی جستجو
+                            </button>
                         @endif
                     </div>
                 </td>
@@ -108,10 +108,11 @@
 
 @section('scripts')
     <script>
-        // شنود برای تایید حذف با SweetAlert
-        Livewire.on('DeleteCampaign', (event) => {
+        // 🟢 اصلاح ۶: شنود استاندارد رویداد حذف برای جلوگیری از باگ عدم واکنش دکمه در لایووایر ۳
+        Livewire.on('trigger_delete_campaign', (event) => {
             Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
+                title: "آیا از حذف این کمپین مطمئن هستید؟",
+                text: "با حذف کمپین، تمام اهداف مرتبط با آن نیز حذف خواهند شد.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
@@ -120,9 +121,7 @@
                 cancelButtonText: "انصراف",
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // فراخوانی متد حذف در کامپوننت لایووایر
                     Livewire.dispatch('destroy_discount_campaign', {id: event.id});
-
                     Swal.fire({
                         title: "حذف شد!",
                         icon: "success"
