@@ -169,7 +169,6 @@ class Product extends Model
     {
         return DB::transaction(function () use ($request, $id) {
             $product = self::findOrFail($id);
-            // اصلاح نحوه تولید اسلاگ برای جلوگیری از خطا
             $slug = str()->slug($request->e_name, '-', null);
 
             $imageName = $product->image;
@@ -186,30 +185,33 @@ class Product extends Model
                 'category_id' => $request->input('category_id'),
                 'main_price' => $request->input('main_price', 0),
                 'image' => $imageName,
-                // هنگام ویرایش توسط فروشنده، وضعیت یادداشت ریست شده و به بررسی مجدد می‌رود
                 'review_note' => auth()->user()->hasRole('مدیر') ? $product->review_note : null,
                 'status' => auth()->user()->hasRole('مدیر')
                     ? ProductStatus::Approved->value
                     : ProductStatus::PendingReview->value,
             ]);
 
-            if ($request->filled('discount')) {
-                $existingCampaignTarget = DiscountCampaignTarget::where('target_id', $product->id)
-                    ->where('target_type', DiscountCampaignType::Product->value)
-                    ->whereHas('campaign', function ($query) {
-                        $query->where('type', DiscountCampaignType::Product->value);
-                    })
-                    ->first();
+            // ⚡ مدیریت دقیق و بدون نقص ویرایش تخفیف و تاریخ‌های شگفت‌انگیز کمپین محصول
+            $existingCampaignTarget = DiscountCampaignTarget::where('target_id', $product->id)
+                ->where('target_type', DiscountCampaignType::Product->value)
+                ->whereHas('campaign', function ($query) {
+                    $query->where('type', DiscountCampaignType::Product->value);
+                })
+                ->first();
 
-                $campaignData = [
-                    'percent' => $request->discount,
-                    'starts_at' => $request->filled('spacial_start') ? DateManager::shamsi_to_miladi($request->spacial_start) : now(),
-                    'expires_at' => $request->filled('spacial_expiration') ? DateManager::shamsi_to_miladi($request->spacial_expiration) : null,
-                ];
+            // آماده‌سازی آرایه داده‌ها با تبدیل به تاریخ میلادی
+            $campaignData = [
+                'percent' => $request->input('discount', 0),
+                'starts_at' => $request->filled('spacial_start') ? DateManager::shamsi_to_miladi($request->spacial_start) : now(),
+                'expires_at' => $request->filled('spacial_expiration') ? DateManager::shamsi_to_miladi($request->spacial_expiration) : null,
+            ];
 
-                if ($existingCampaignTarget) {
+            if ($request->filled('discount') && $request->input('discount') > 0) {
+                if ($existingCampaignTarget && $existingCampaignTarget->campaign) {
+                    // اگر کمپین از قبل وجود دارد، آن را بروزرسانی کن
                     $existingCampaignTarget->campaign->update($campaignData);
-                } elseif ($request->input('discount') > 0) {
+                } else {
+                    // اگر قبلاً تخفیف نداشت ولی الان مقدار وارد شده، کمپین جدید بساز
                     $newCampaign = DiscountCampaign::create(array_merge($campaignData, [
                         'name' => "تخفیف محصول: " . $product->name,
                         'type' => DiscountCampaignType::Product->value,
@@ -219,6 +221,13 @@ class Product extends Model
                         'target_id' => $product->id,
                         'target_type' => DiscountCampaignType::Product->value
                     ]);
+                }
+            } else {
+                // 💡 نکته طلایی: اگر کاربر درصد تخفیف را خالی یا صفر گذاشت، کمپین اختصاصی قبلی حذف شود
+                if ($existingCampaignTarget && $existingCampaignTarget->campaign) {
+                    $campaign = $existingCampaignTarget->campaign;
+                    $existingCampaignTarget->delete();
+                    $campaign->delete();
                 }
             }
 

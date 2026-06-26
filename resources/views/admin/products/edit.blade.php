@@ -94,17 +94,16 @@
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ شروع شگفت انگیز</label>
                             <div class="col-sm-10">
-                                <input type="text" id="spacial_start" class="text-left form-control" dir="rtl"
-                                       name="spacial_start"
-                                       value="{{$product->spacial_start==null ? null : \Hekmatinasser\Verta\Verta::instance($product->spacial_start)}}">
+                                <input type="text" id="spacial_start" class="text-left form-control" dir="rtl" name="spacial_start"
+                                       value="{{ ($productCampaign && $productCampaign->starts_at) ? \Hekmatinasser\Verta\Verta::instance($productCampaign->starts_at)->format('Y/m/d') : null }}">
                             </div>
                         </div>
+
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ انقضای شگفت انگیز</label>
                             <div class="col-sm-10">
-                                <input type="text" id="spacial_expiration" class="text-left form-control" dir="rtl"
-                                       name="spacial_expiration"
-                                       value="{{$product->spacial_start==null ? null : \Hekmatinasser\Verta\Verta::instance($product->spacial_expiration)}}">
+                                <input type="text" id="spacial_expiration" class="text-left form-control" dir="rtl" name="spacial_expiration"
+                                       value="{{ ($productCampaign && $productCampaign->expires_at) ? \Hekmatinasser\Verta\Verta::instance($productCampaign->expires_at)->format('Y/m/d') : null }}">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -126,6 +125,23 @@
             dropdownAutoWidth: true,
             $dropdownParent: $('#parent')
         })
+        $('.form-select').select2()
+
+        var customOptions = {
+            placeholder: "روز / ماه / سال"
+            , twodigit: false
+            , closeAfterSelect: true
+            , nextButtonIcon: "fa fa-arrow-circle-right"
+            , previousButtonIcon: "fa fa-arrow-circle-left"
+            , buttonsColor: "#5867dd"
+            , markToday: true
+            , markHolidays: true
+            , highlightSelectedDay: true
+            , sync: true
+            , gotoToday: true
+        }
+        kamaDatepicker('spacial_start', customOptions);
+        kamaDatepicker('spacial_expiration', customOptions);
         $('.form-select').select2()
     </script>
 @endsection

@@ -10678,3 +10678,144 @@ body.menu-open .btn-menu{
 .action-chip:active {
     transform: scale(0.96);
 }
+
+/* ==========================================================================
+   💜 استایل‌های اختصاصی و ملوکانه صفحه محصول بابی شاپ (بدون تکرار)
+   ========================================================================== */
+
+/* کلاس‌های عمومی هندسه و فواصل */
+.rounded-20 { border-radius: 20px !important; }
+.rounded-15 { border-radius: 15px !important; }
+.rounded-bottom-15 { border-radius: 0 0 15px 15px !important; }
+.rounded-12 { border-radius: 12px !important; }
+.rounded-10 { border-radius: 10px !important; }
+.rounded-8 { border-radius: 8px !important; }
+
+/* کلاس‌های سایز فونت و وزن کلمات */
+.font-11 { font-size: 11px !important; }
+.font-12 { font-size: 12px !important; }
+.font-13 { font-size: 13px !important; }
+.font-14 { font-size: 14px !important; }
+.font-15 { font-size: 15px !important; }
+.font-weight-black { font-weight: 900 !important; }
+.cursor-pointer { cursor: pointer; }
+
+/* ساختار کلی سایدبار باکس خرید */
+.bg-light-sidebar {
+    background-color: #f8f9fa;
+    border: 1px solid #edf2f7 !important;
+}
+
+.bg-gradient-special {
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0, 0, 0, 0.8) 100%) !important;
+}
+
+.price-section-box {
+    box-shadow: inset 0 0 0 1px #eef1f4;
+}
+
+.border-dashed {
+    border-top-style: dashed !important;
+}
+
+.style-toman {
+    font-size: 11px;
+    margin-right: 4px;
+    font-weight: bold;
+}
+
+/* ⚡ انیمیشن پالس فانتزی برای پیشنهاد شگفت‌انگیز */
+@keyframes pulse-special {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+}
+.animate-pulse {
+    animation: pulse-special 2s infinite;
+}
+
+/* 💜 دکمه خرید لوکس با رنگ ارغوانی دیجیتال */
+.call-to-action-btn-purple {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3) !important;
+    transition: all 0.25s ease-in-out;
+}
+.call-to-action-btn-purple:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(168, 85, 247, 0.45) !important;
+}
+.call-to-action-btn-purple:disabled {
+    background: #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+/* استایل‌های اختصاصی تب‌ها و جدول مشخصات پایین صفحه */
+.ah-tab-custom-wrapper {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eff2f5;
+    padding: 0 24px;
+}
+.ah-tab-item-custom {
+    color: #000 !important;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 16px 4px;
+    display: inline-block;
+    text-decoration: none;
+    position: relative;
+}
+.ah-tab-item-custom::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #ef4056;
+    border-radius: 3px 3px 0 0;
+}
+.params-list-item {
+    display: flex;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid #edf2f7;
+}
+.params-key-box {
+    width: 25%;
+    background-color: #f1f3f6;
+    padding: 16px;
+    font-weight: 700;
+    color: #4a5568;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+.params-value-box {
+    width: 75%;
+    padding: 16px;
+    color: #2d3748;
+    font-size: 13px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.property-badge-item {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    color: #1a202c;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* هماهنگ‌سازی واکنش‌گرا خطوط جداکننده برای قالب RTL */
+@media (min-width: 768px) {
+    .border-start-md {
+        border-right: 1px solid #eff2f5 !important;
+    }
+}
