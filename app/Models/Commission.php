@@ -9,27 +9,30 @@ class Commission extends Model
     protected $fillable = [
         'category_id',
         'commission_percent',
-
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
+
     public static function createCommission($request)
     {
-        Commission::query()->create([
-            'commission_percent'=>$request->input('commission_percent'),
-            'category_id'=>$request->input('category_id'),
+        return self::query()->create([
+            'commission_percent' => (int) $request->input('commission_percent'),
+            'category_id'        => (int) $request->input('category_id'),
         ]);
     }
 
-    public static function updateCommission($request,$id)
+    public static function updateCommission($request, $id)
     {
-        $commission = Commission::query()->findOrFail($id);
+        $commission = self::query()->findOrFail($id);
+
         $commission->update([
-            'commission_percent'=>$request->input('commission_percent'),
-            'category_id'=>$request->input('category_id'),
+            'commission_percent' => (int) $request->input('commission_percent'),
+            'category_id'        => (int) $request->input('category_id'),
         ]);
+
+        return $commission;
     }
 }
