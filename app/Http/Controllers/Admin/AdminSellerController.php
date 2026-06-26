@@ -29,12 +29,9 @@ class AdminSellerController extends Controller
 
     public function sellerRequestsList()
     {
-        $title = "لیست درخواست ها";
-        $requests = SellerRequest::with('user')
-            ->latest()
-            ->paginate(20);
+        $title = "لیست درخواست‌های فروشندگی";
 
-        return view('seller.seller_requests.list',compact('title','requests'));
+        return view('seller.seller_requests.list', compact('title'));
     }
 
 
