@@ -14,7 +14,9 @@ use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerRequest;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
@@ -28,32 +30,67 @@ class ProfileController extends Controller
         return view('frontend.profile.profile', compact('user','instant_offers'));
     }
 
+
     public function profileUpdate(ProfileUpdate $request)
     {
         $user = auth()->user();
-        if ($request->hasFile('image')) {
-            ImageManager::unlinkImage('users', $user); // حذف عکس قبلی
-            $imageName = ImageManager::saveImage('users', $request->image);
-        }
-        $user->update([
-            'name' => $request->input('name'),
-            'user_name' => $request->input('user_name'),
-            'mobile' => $user->mobile == null ? $request->input('mobile') : $user->mobile,
-            'email' => $user->email == null ? $request->input('email') : $user->email,
-            'image' => $request->image ? $imageName : $user->image
-        ]);
-        $user->userProfile()->updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'telegram' => $request->input('telegram'),
-                'eta' => $request->input('eta'),
-                'instagram' => $request->input('instagram'),
-                'website' => $request->input('website'),
-                'bio' => $request->input('bio'),
-            ]
-        );
+        $imageName = $user->image; // ۱. مقدار پیش‌فرض تصویر، همان تصویر قبلی است
+        $newImageSaved = false;
 
-        return redirect()->back()->with('message', "اطلاعات شما با موفقیت ثبت شد");
+        try {
+
+            DB::beginTransaction();
+
+            if ($request->hasFile('image')) {
+
+                $imageName = ImageManager::saveImage('users', $request->image);
+                $newImageSaved = true;
+            }
+
+            // ۴. بروزرسانی اطلاعات اصلی کاربر
+            $user->update([
+                'name'      => $request->input('name'),
+                'user_name' => $request->input('user_name'),
+                'mobile'    => $user->mobile ?? $request->input('mobile'),
+                'email'     => $user->email ?? $request->input('email'),
+                'image'     => $imageName
+            ]);
+
+            // ۵. بروزرسانی یا ایجاد اطلاعات پروفایل فرعی
+            $user->userProfile()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'telegram'  => $request->input('telegram'),
+                    'eta'       => $request->input('eta'),
+                    'instagram' => $request->input('instagram'),
+                    'website'   => $request->input('website'),
+                    'bio'       => $request->input('bio'),
+                ]
+            );
+
+            DB::commit();
+
+            // ۶. حذف عکس قبلی "تنها و تنها" پس از موفقیت کامل دیتابیس و ذخیره فایل جدید
+            if ($newImageSaved && $user->getOriginal('image')) {
+                // متد getOriginal تصویر قبلی را از کش مدل می‌آورد تا عکس جدید متولد شده پاک نشود!
+                ImageManager::unlinkImage(
+                    'users', (object)['image' => $user->getOriginal('image')]
+                );
+        }
+
+            return redirect()->back()->with('message', "اطلاعات شما با موفقیت ثبت شد");
+
+        } catch (Exception $e) {
+
+            DB::rollBack();
+
+            if ($newImageSaved && isset($imageName)) {
+                ImageManager::unlinkImage('users', (object)['image' => $imageName]);
+            }
+
+            report($e);
+            return redirect()->back()->with('error', "خطایی در ثبت اطلاعات رخ داد. لطفاً مجدداً تلاش کنید.");
+        }
     }
 
     public function profileOrders()

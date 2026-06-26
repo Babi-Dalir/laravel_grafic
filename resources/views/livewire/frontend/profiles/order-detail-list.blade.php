@@ -13,57 +13,57 @@
             </tr>
             </thead>
             <tbody>
-            @forelse($order_details as $index=>$order_detail)
+            @forelse($order_details as $index => $order_detail)
                 <tr>
-                    <td>{{$order_details->firstItem()+$index}}</td>
-                    <td>{{$order_detail->product->name}}</td>
-                    <td>{{number_format($order_detail->price)}} تومان</td>
-                    <td>{{number_format($order_detail->discount)}} تومان</td>
+                    <td>{{ $order_details->firstItem() + $index }}</td>
+                    <td>{{ $order_detail->product?->name ?? 'محصول حذف شده' }}</td>
+                    <td>{{ number_format($order_detail->price) }} تومان</td>
+                    <td>{{ number_format($order_detail->discount) }} تومان</td>
                     <td>
                         @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid->value)
-                            <span class="cursor-pointer badge badge-success">پرداخت شده</span>
+                            <span class="badge badge-success">پرداخت شده</span>
                         @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded->value)
-                            <span class="cursor-pointer badge badge-info">کاملا دانلود شده</span>
+                            <span class="badge badge-info">کاملا دانلود شده</span>
                         @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded->value)
-                            <span class="cursor-pointer badge badge-danger">مرجوع شده</span>
+                            <span class="badge badge-danger">مرجوع شده</span>
                         @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Waiting->value)
-                            <span class="cursor-pointer badge badge-warning">در حال انتظار</span>
+                            <span class="badge badge-warning">در حال انتظار</span>
                         @endif
-
                     </td>
+
                     <td class="text-center align-middle">
-                        {{ $order_detail->download?->download_count ?? 0 }}
-                        /
-                        {{ $order_detail->download?->max_download ?? 0 }}
-                    </td>
-                    <td>
-
-                        @if($order_detail->download->download_count < $order_detail->download->max_download)
-
-                            <a href="{{ route('download.file', $order_detail->download->token) }}"
-                               class="btn btn-success">
-                                دانلود فایل
-                            </a>
-
+                        {{-- 🟢 اصلاح باگ: جلوگیری از خطای کرش با بهره‌گیری از تمپلیت امن --}}
+                        @if($order_detail->download)
+                            {{ $order_detail->download->download_count }} / {{ $order_detail->download->max_download }}
                         @else
-
-                            <button class="btn btn-secondary btn-sm" disabled>
-                                سقف دانلود تکمیل شده
-                            </button>
-
+                            -
                         @endif
+                    </td>
 
+                    <td>
+                        @if($order_detail->download)
+                            @if($order_detail->download->download_count < $order_detail->download->max_download)
+                                <a href="{{ route('download.file', $order_detail->download->token) }}" class="btn btn-success">
+                                    دانلود فایل
+                                </a>
+                            @else
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    سقف دانلود تکمیل شده
+                                </button>
+                            @endif
+                        @else
+                            <span class="text-muted text-sm">فاقد فایل دانلود</span>
+                        @endif
                     </td>
                 </tr>
-                @empty
+            @empty
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="alert alert-warning mb-0">
-                            هنوز محصولی خریداری نکرده‌اید.
+                            آیتمی برای این سفارش یافت نشد.
                         </div>
                     </td>
                 </tr>
-
             @endforelse
             </tbody>
         </table>
