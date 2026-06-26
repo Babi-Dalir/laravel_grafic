@@ -4,36 +4,53 @@ namespace App\Livewire\Frontend\Carts;
 
 use App\Enums\CartType;
 use App\Enums\ProductStatus;
-use App\Models\ProductPrice;
 use App\Models\UserCart;
-use Illuminate\Support\Facades\Session;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class HeaderCarts extends Component
 {
-    public $total_price = 0;
-    public $discount_price = 0;
+    /**
+     * حذف محصول از سبد خرید کاربر با رعایت حریم امنیتی رکورد
+     */
     public function deleteCart($cart_id)
     {
         $user_cart = UserCart::query()
             ->where('id', $cart_id)
             ->where('user_id', auth()->id())
             ->first();
-        if(!$user_cart){
+
+        if (!$user_cart) {
             return;
         }
+
         $user_cart->delete();
+
+        // 🟢 دیسپچ رویداد برای رفرش همین کامپوننت و کامپوننت صفحه اصلی سبد خرید
         $this->dispatch('deleteProductCart');
     }
+
+    /**
+     * 🟢 حل باگ رفرش: این متد با دیسپچ بالا صدا زده می‌شود و استیت لایووایر را مجبور به رندر آنی می‌کند
+     */
     #[On('deleteProductCart')]
     public function refreshCarts()
     {
-        //برای رفرش شدن سبد خرید
+        // لایووایر ۳ به صورت خودکار با اجرای یک متد لیسنر، مقادیر Computed را بازخوانی و رندر می‌کند.
     }
-    public function render()
+
+    /**
+     * 🟢 تعریف ویژگی محاسباتی کش‌شونده (Computed Property) برای افزایش سرعت لود هدر
+     */
+    #[Computed]
+    public function carts()
     {
-        $carts = UserCart::query()
+        if (!auth()->check()) {
+            return collect();
+        }
+
+        return UserCart::query()
             ->with(['product' => function ($q) {
                 $q->where('status', ProductStatus::Approved->value);
             }])
@@ -41,27 +58,26 @@ class HeaderCarts extends Component
             ->where('type', CartType::Main->value)
             ->get()
             ->filter(fn($cart) => $cart->product);
+    }
 
-        $this->total_price = 0;
-        $this->discount_price = 0;
+    public function render()
+    {
+        // محاسبات بر پایه ویژگی‌های کش‌شده کپسوله‌سازی می‌شود
+        $carts = $this->carts;
 
-        foreach ($carts as $cart) {
+        $totalPrice = $carts->sum(fn($cart) => $cart->product->final_price);
 
-            $this->total_price += $cart->product->final_price;
+        $discountPrice = $carts->sum(function($cart) {
+            return max(0, $cart->product->main_price - $cart->product->final_price);
+        });
 
-            $this->discount_price += (
-                $cart->product->main_price -
-                $cart->product->final_price
-            );
-        }
-
-        $final_price = max($this->total_price, 0);
+        $finalPrice = max($totalPrice, 0);
 
         return view('livewire.frontend.carts.header-carts', [
-            'carts' => $carts,
-            'total_price' => $this->total_price,
-            'discount_price' => $this->discount_price,
-            'final_price' => $final_price,
+            'carts'         => $carts,
+            'total_price'   => $totalPrice,
+            'discount_price'=> $discountPrice,
+            'final_price'   => $finalPrice,
         ]);
     }
 }
