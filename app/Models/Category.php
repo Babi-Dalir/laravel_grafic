@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProductStatus;
 use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -151,29 +152,41 @@ class Category extends Model
 
     public static function getCategoryBySlug($main_slug, $sub_slug, $child_slug)
     {
-        if ($main_slug) {
-            return self::where('slug', $main_slug)->first();
-        }
-
         if ($child_slug) {
             return self::where('slug', $child_slug)->first();
         }
 
-        return self::where('slug', $sub_slug)->first();
+        if ($sub_slug) {
+            return self::where('slug', $sub_slug)->first();
+        }
+
+        if ($main_slug) {
+            return self::where('slug', $main_slug)->first();
+        }
+
+        return null;
     }
 
-    public static function getProductByCategory($main_slug, $sub_slug, $child_slug, $column, $orderBy, $page)
+    /**
+     * 🟢 اصلاح هوشمند تشخیص عمیق‌ترین سطح دسته برای لود محصولات
+     */
+    public static function getProductByCategory($main_slug, $sub_slug, $child_slug, $column, $orderBy, $page, $paginationName = 'page')
     {
-        if ($main_slug != null && $sub_slug == null && $child_slug == null) {
-            return self::getProductListByMainCategory($main_slug, $column, $orderBy, $page);
-        } elseif ($main_slug == null && $sub_slug != null && $child_slug == null) {
-            return self::getProductListBySubCategory($sub_slug, $column, $orderBy, $page);
-        } elseif ($main_slug == null && $sub_slug != null && $child_slug != null) {
-            return self::getProductListByChildCategory($child_slug, $column, $orderBy, $page);
+        // وضعیت تایید شده محصولات را هم گارد گذاشتیم تا محصول تایید نشده آنلاین نمایش داده نشود
+        if ($child_slug) {
+            return self::getProductListByChildCategory($child_slug, $column, $orderBy, $page, $paginationName);
+        }
+
+        if ($sub_slug) {
+            return self::getProductListBySubCategory($sub_slug, $column, $orderBy, $page, $paginationName);
+        }
+
+        if ($main_slug) {
+            return self::getProductListByMainCategory($main_slug, $column, $orderBy, $page, $paginationName);
         }
     }
 
-    public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null)
+    public static function getProductListByMainCategory($slug, $column, $orderBy, $page = null, $paginationName = 'page')
     {
         $category = self::with('childCategory.childCategory')->where('slug', $slug)->firstOrFail();
 
@@ -188,14 +201,15 @@ class Category extends Model
 
         $query = Product::query()
             ->whereIn('category_id', $categoryIds)
+            ->where('status', ProductStatus::Approved->value) // امنیت آنلاین مارکت
             ->orderBy($column, $orderBy);
 
         return $page
-            ? $query->paginate(20, ['*'], 'page', $page)
+            ? $query->paginate(1, ['*'], $paginationName, $page)
             : $query->get();
     }
 
-    public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null)
+    public static function getProductListBySubCategory($slug, $column, $orderBy, $page = null, $paginationName = 'page')
     {
         $category = self::with('childCategory')->where('slug', $slug)->firstOrFail();
 
@@ -207,22 +221,26 @@ class Category extends Model
 
         $query = Product::query()
             ->whereIn('category_id', $categoryIds)
+            ->where('status', ProductStatus::Approved->value)
             ->orderBy($column, $orderBy);
 
         return $page
-            ? $query->paginate(20, ['*'], 'page', $page)
+            ? $query->paginate(1, ['*'], $paginationName, $page)
             : $query->get();
     }
 
-    public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null)
+    public static function getProductListByChildCategory($slug, $column, $orderBy, $page = null, $paginationName = 'page')
     {
         $category = self::where('slug', $slug)->firstOrFail();
 
-        $query = Product::query()->where('category_id', $category->id)
+        $query = Product::query()
+            ->where('category_id', $category->id)
+            ->where('status', ProductStatus::Approved->value)
             ->orderBy($column, $orderBy);
 
+        // تعداد ۲ پجینیشن شما برای تست بوده، آن را به ۲۰ یا مقدار دلخواه تغییر دهید (یا بگذارید ۲ بماند)
         return $page
-            ? $query->paginate(2, ['*'], 'page', $page)
+            ? $query->paginate(1, ['*'], $paginationName, $page)
             : $query->get();
     }
 }
