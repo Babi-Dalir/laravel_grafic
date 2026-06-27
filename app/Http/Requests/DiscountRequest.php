@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\DateManager;
 use Illuminate\Foundation\Http\FormRequest;
 
 class DiscountRequest extends FormRequest
@@ -15,6 +16,14 @@ class DiscountRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+    protected function prepareForValidation()
+    {
+        if ($this->expiration_date) {
+            $this->merge([
+                'expiration_date' => DateManager::shamsi_to_miladi($this->expiration_date),
+            ]);
+        }
     }
 
     public function rules(): array

@@ -171,8 +171,8 @@
                     <div class="d-flex align-items-center mb-3 font-14 text-dark-75">
                         <i class="mdi mdi-check-circle-outline text-success fs-4 me-2"></i>
                         <div>
-                            <span class="d-block font-weight-semibold">وضعیت کالا: موجود در انبار</span>
-                            <small class="text-muted font-11">آماده ارسال / تحویل آنلاین دیجیتال</small>
+                            <span class="d-block font-weight-semibold">وضعیت کالا: موجود</span>
+                            <small class="text-muted font-11">آماده دانلود / تحویل آنلاین دیجیتال</small>
                         </div>
                     </div>
 

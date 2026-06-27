@@ -187,6 +187,7 @@ class PaymentController extends Controller
     {
         $authority = $request->Authority;
 
+        // پیدا کردن سفارش بر اساس توکن درگاه
         $order = Order::query()
             ->where('transaction_id', $authority)
             ->first();
@@ -200,7 +201,7 @@ class PaymentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | جلوگیری از پرداخت تکراری
+        | جلوگیری از پردازش مجدد در صورت پرداخت موفق قبلی
         |--------------------------------------------------------------------------
         */
         if ($order->status === OrderStatus::Payed) {
@@ -210,6 +211,7 @@ class PaymentController extends Controller
             ]);
         }
 
+        // اگر وضعیت برگشت از بانک OK نبود، مستقیماً سفارش را لغو یا ناموفق نشان بده
         if ($request->Status !== 'OK') {
             return view('frontend.shopping_result', [
                 'order' => $order,
@@ -218,22 +220,39 @@ class PaymentController extends Controller
         }
 
         try {
-            // 🧠 اصلاح شد: متد بهینه‌شده به صورت خودکار ترنزکشن داخلی، دانلودها و سبد خرید را اعمال می‌کند
+            /*
+            |--------------------------------------------------------------------------
+            | 🔴 بخش کلیدی اصلاح شده:
+            | پکیج shetabit به مبلّغ ثبت شده در دیتابیس نیاز دارد تا صحت تراکنش را تایید کند.
+            | مبلّغ باید دقیقاً همان عددی باشد که موقع رفتن به بانک فرستادیم ($order->total_price)
+            |--------------------------------------------------------------------------
+            */
+            $payment = Payment::via($order->payment_type ?? 'zarinpal') // یا هر درگاهی که استفاده می‌کنی
+            ->amount((int) $order->total_price)
+                ->transactionId($authority)
+                ->verify(); // متد تایید اصالت تراکنش پکیج شتابیت
+
+            // اگر وریفای پکیج خطا نداد، یعنی بانک پول را کم کرده و همه‌چیز اوکی است
             Order::successPayment($order);
 
-            // ارسال جزئیات جهت ثبت در حساب فروشندگان
+            // ثبت سهم فروشندگان بر اساس فاکتور فیکس شده در دیتابیس
             $order_details = OrderDetail::query()
                 ->where('order_id', $order->id)
                 ->get();
-            SellerWalletTransaction::registerSale($order_details);
+
+            if ($order_details->isNotEmpty()) {
+                SellerWalletTransaction::registerSale($order_details);
+            }
 
             $result = 'success';
 
         } catch (\Exception $e) {
-            Log::error('Callback Processing Error: ' . $e->getMessage());
+            // اگر وریفای بانک خطا بخورد (مثلاً عدم تطابق مبلّغ یا لغو توسط کاربر) به اینجا می‌آید
+            Log::error('Zarinpal Verification Error: ' . $e->getMessage());
             $result = 'failed';
         }
 
+        // دریافت لینک‌های دانلود برای نمایش در صفحه موفقیت
         $downloads = Downloads::query()
             ->where('user_id', $order->user_id)
             ->whereHas('orderDetail', function ($q) use ($order) {
