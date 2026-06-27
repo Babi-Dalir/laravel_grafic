@@ -10,14 +10,13 @@ use App\Models\GiftCart;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
-use App\Models\ProductPrice;
 use App\Models\SellerWalletTransaction;
 use App\Models\UserCart;
-use App\Models\UserTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Shetabit\Multipay\Invoice;
 use Shetabit\Payment\Facade\Payment;
 
@@ -49,13 +48,11 @@ class PaymentController extends Controller
         $product_discount_price = 0;
 
         foreach ($carts as $cart) {
-
             $product = $cart->product;
+            if (!$product) continue;
 
             $total_price += $product->final_price;
-
-            $product_discount_price +=
-                ($product->main_price - $product->final_price);
+            $product_discount_price += ($product->main_price - $product->final_price);
         }
 
         $discount_code_price = 0;
@@ -67,7 +64,6 @@ class PaymentController extends Controller
         |--------------------------------------------------------------------------
         */
         if (!empty($shop_data['discount_code'])) {
-
             $result = Discount::calculateDiscount(
                 $shop_data,
                 $total_price,
@@ -85,7 +81,6 @@ class PaymentController extends Controller
         |--------------------------------------------------------------------------
         */
         if (!empty($shop_data['gift_cart_code'])) {
-
             $result = GiftCart::calculateGiftCart(
                 $shop_data,
                 $total_price,
@@ -99,25 +94,27 @@ class PaymentController extends Controller
         DB::beginTransaction();
 
         try {
-
-            $order = Order::createOrder(
-                $user,
-                $total_price,
-                $shop_data,
-                $total_discount_price,
-                $gift_cart_code_price
-            );
+            // 🧠 اصلاح شد: ساخت مستقیم سفارش بر اساس فیلدهای Fillable مدل Order
+            $order = Order::query()->create([
+                'user_id'         => $user->id,
+                'order_code'      => 'ORD-' . now()->getTimestampMs() . '-' . Str::upper(Str::random(4)),
+                'total_price'     => $total_price,
+                'discount_price'  => $total_discount_price,
+                'discount_code'   => $shop_data['discount_code'] ?? null,
+                'gift_cart_price' => $gift_cart_code_price,
+                'gift_cart_code'  => $shop_data['gift_cart_code'] ?? null,
+                'status'          => OrderStatus::WaitPayment->value, // وضعیت اولیه در انتظار پرداخت
+            ]);
 
             $order_details = [];
 
             foreach ($carts as $cart) {
-
                 $product = Product::query()
                     ->where('id', $cart->product_id)
                     ->first();
 
                 if (!$product) {
-                    throw new \Exception('قیمت محصول یافت نشد');
+                    throw new \Exception('محصول یافت نشد یا غیرفعال شده است');
                 }
 
                 $order_details[] = OrderDetail::createOrderDetail(
@@ -130,45 +127,25 @@ class PaymentController extends Controller
             DB::commit();
 
         } catch (\Exception $e) {
-
             DB::rollBack();
-
-            Log::error($e->getMessage());
-
-            return back()->with('error', 'خطا در ایجاد سفارش');
+            Log::error('Order Creation Failed: ' . $e->getMessage());
+            return redirect()->route('user.cart')->with('error', 'خطا در ایجاد سفارش: ' . $e->getMessage());
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Offline Payment
+        | Offline Payment (کیف پول یا تست آفلاین)
         |--------------------------------------------------------------------------
         */
-
-        if ($shop_data['payment_type'] === 'offline') {
-
-            DB::beginTransaction();
-
+        if (isset($shop_data['payment_type']) && $shop_data['payment_type'] === 'offline') {
             try {
-
-                Order::successPayment(
-                    $order,
-                    $order_details,
-                    $shop_data['discount_code'] ?? null,
-                    $shop_data['gift_cart_code'] ?? null
-                );
-
+                // 🧠 اصلاح شد: متد جدید مدل فقط خود شیء سفارش را می‌پذیرد
+                Order::successPayment($order);
                 SellerWalletTransaction::registerSale($order_details);
 
-                DB::commit();
-
                 $result = 'success';
-
             } catch (\Exception $e) {
-
-                DB::rollBack();
-
-                Log::error($e->getMessage());
-
+                Log::error('Offline Payment Error: ' . $e->getMessage());
                 $result = 'failed';
             }
 
@@ -179,27 +156,31 @@ class PaymentController extends Controller
                 })
                 ->with('product')
                 ->get();
+
             return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Online Payment
+        | Online Payment (درگاه آنلاین زرین‌پال یا ...)
         |--------------------------------------------------------------------------
         */
-
-        return Payment::via($shop_data['payment_type'])
-            ->purchase(
-                (new Invoice)->amount($total_price),
-                function ($driver, $transactionId) use ($order) {
-
-                    $order->update([
-                        'transaction_id' => $transactionId
-                    ]);
-                }
-            )
-            ->pay()
-            ->render();
+        try {
+            return Payment::via($shop_data['payment_type'])
+                ->purchase(
+                    (new Invoice)->amount((int)$total_price),
+                    function ($driver, $transactionId) use ($order) {
+                        $order->update([
+                            'transaction_id' => $transactionId
+                        ]);
+                    }
+                )
+                ->pay()
+                ->render();
+        } catch (\Exception $e) {
+            Log::error('Payment Gateway Error: ' . $e->getMessage());
+            return redirect()->route('user.cart')->with('error', 'اتصال به درگاه پرداخت با خطا مواجه شد.');
+        }
     }
 
     public function callback(Request $request)
@@ -211,7 +192,6 @@ class PaymentController extends Controller
             ->first();
 
         if (!$order) {
-
             return view('frontend.shopping_result', [
                 'result' => 'failed',
                 'order' => null
@@ -223,9 +203,7 @@ class PaymentController extends Controller
         | جلوگیری از پرداخت تکراری
         |--------------------------------------------------------------------------
         */
-
-        if ($order->status == OrderStatus::Payed->value) {
-
+        if ($order->status === OrderStatus::Payed) {
             return view('frontend.shopping_result', [
                 'order' => $order,
                 'result' => 'success'
@@ -233,42 +211,29 @@ class PaymentController extends Controller
         }
 
         if ($request->Status !== 'OK') {
-
             return view('frontend.shopping_result', [
                 'order' => $order,
                 'result' => 'failed'
             ]);
         }
 
-        DB::beginTransaction();
-
         try {
+            // 🧠 اصلاح شد: متد بهینه‌شده به صورت خودکار ترنزکشن داخلی، دانلودها و سبد خرید را اعمال می‌کند
+            Order::successPayment($order);
 
+            // ارسال جزئیات جهت ثبت در حساب فروشندگان
             $order_details = OrderDetail::query()
                 ->where('order_id', $order->id)
                 ->get();
-
-            Order::successPayment(
-                $order,
-                $order_details,
-                $order->discount_code,
-                $order->gift_cart_code
-            );
-
             SellerWalletTransaction::registerSale($order_details);
-
-            DB::commit();
 
             $result = 'success';
 
         } catch (\Exception $e) {
-
-            DB::rollBack();
-
-            Log::error($e->getMessage());
-
+            Log::error('Callback Processing Error: ' . $e->getMessage());
             $result = 'failed';
         }
+
         $downloads = Downloads::query()
             ->where('user_id', $order->user_id)
             ->whereHas('orderDetail', function ($q) use ($order) {
@@ -276,6 +241,7 @@ class PaymentController extends Controller
             })
             ->with('product')
             ->get();
+
         return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
     }
 }
