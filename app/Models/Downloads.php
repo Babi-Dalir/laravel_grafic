@@ -3,16 +3,25 @@
 namespace App\Models;
 
 use App\Enums\DownloadStatus;
-use App\Enums\OrderDetailStatus;
+use App\Exceptions\DownloadLimitException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Downloads extends Model
 {
+    // ستون‌های مجاز برای ساخت و آپدیت گروهی (دقیقاً بر اساس مایگریشن شما)
     protected $fillable = [
-        'user_id', 'product_id', 'order_detail_id', 'token',
-        'download_count', 'max_download', 'status', 'expire_at',
-        'ip_address', 'user_agent',
+        'user_id',
+        'product_id',
+        'order_detail_id',
+        'token',
+        'download_count',
+        'max_download',
+        'status',
+        'expire_at',
+        'ip_address',
+        'user_agent',
     ];
 
     protected function casts(): array
@@ -38,6 +47,9 @@ class Downloads extends Model
         return $this->belongsTo(OrderDetail::class);
     }
 
+    /**
+     * بررسی وضعیت دانلود (برای استفاده در لایه فرانت/UI)
+     */
     public function canDownload(): bool
     {
         if ($this->status !== DownloadStatus::Active) {
@@ -55,49 +67,39 @@ class Downloads extends Model
         return true;
     }
 
-    /**
-     * 🟢 حل ایراد دوم و چهارم:
-     * ۱. متد هیچ وابستگی به شیء Request ندارد و ورودی‌های صریح می‌گیرد.
-     * ۲. به جای abort از پرتاب Exception برای مدیریت لایه بیزینس استفاده می‌کند.
-     */
-    public function registerDownload(string $ip, ?string $userAgent): void
+
+    public function registerDownload($ip, $userAgent)
     {
-        DB::transaction(function () use ($ip, $userAgent) {
-            $lockedDownload = self::query()->lockForUpdate()->findOrFail($this->id);
 
-            if (!$lockedDownload->canDownload()) {
-                throw new \RuntimeException('Download limit exceeded or link expired.');
-            }
-
-            $lockedDownload->increment('download_count', 1, [
-                'ip_address' => $ip,
-                'user_agent' => $userAgent
+        $affected = self::where('id', $this->id)
+            ->whereRaw('download_count < max_download')
+            ->update([
+                'download_count' => DB::raw('download_count + 1'),
+                'ip_address'     => $ip,
+                'user_agent'     => $userAgent
             ]);
 
-            $lockedDownload->refresh();
+        // ۲. اگر دیتابیس هیچ سطری را آپدیت نکرد (Affected Rows == 0)، یعنی سقف پر بوده است
+        if ($affected === 0) {
+            throw new DownloadLimitException('سقف تعداد دانلود شما برای این محصول به پایان رسیده است.');
+        }
 
-            if ($lockedDownload->download_count >= $lockedDownload->max_download) {
-                $lockedDownload->update([
-                    'status' => DownloadStatus::Expired
-                ]);
-
-                $lockedDownload->orderDetail()->update([
-                    'status' => OrderDetailStatus::Downloaded->value
-                ]);
-            }
-        });
+        $this->refresh();
     }
 
+    /**
+     * ساخت ساختار دانلود اولیه پس از خرید موفق فاکتور
+     */
     public static function createDownload(OrderDetail $order_detail, int $userId): self
     {
         return self::query()->create([
-            'user_id' => $userId,
-            'product_id' => $order_detail->product_id,
+            'user_id'         => $userId,
+            'product_id'      => $order_detail->product_id,
             'order_detail_id' => $order_detail->id,
-            'token' => str()->random(100),
-            'max_download' => 5,
-            'expire_at' => now()->addYear(),
-            'status' => DownloadStatus::Active,
+            'token'           => Str::random(64), // طول توکن در مایگریشن ۱۲۰ است، پس ۶۴ کاراکتر کاملاً ایمن جا می‌شود
+            'max_download'    => 5,
+            'expire_at'       => now()->addYear(),
+            'status'          => DownloadStatus::Active,
         ]);
     }
 }

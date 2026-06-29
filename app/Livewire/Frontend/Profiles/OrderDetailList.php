@@ -27,6 +27,7 @@ class OrderDetailList extends Component
         $order_details = OrderDetail::query()
             ->with(['product', 'download'])
             ->where('order_id', $this->order_id)
+            ->latest()
             ->paginate(1);
 
         return view('livewire.frontend.profiles.order-detail-list', compact('order', 'order_details'));

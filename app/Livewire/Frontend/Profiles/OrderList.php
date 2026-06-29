@@ -12,7 +12,9 @@ class OrderList extends Component
     public function render()
     {
         $user = auth()->user();
-        $orders = Order::query()->where('user_id', $user->id)->paginate(1);
+        $orders = Order::query()->where('user_id', $user->id)
+            ->latest()
+            ->paginate(1);
         return view('livewire.frontend.profiles.order-list',compact('orders'));
     }
 }

@@ -183,84 +183,98 @@ class PaymentController extends Controller
         }
     }
 
-    public function callback(Request $request)
-    {
-        $authority = $request->Authority;
+   public function callback(Request $request)
+{
+    $authority = $request->Authority;
 
-        // پیدا کردن سفارش بر اساس توکن درگاه
-        $order = Order::query()
-            ->where('transaction_id', $authority)
-            ->first();
+    // پیدا کردن سفارش بر اساس توکن درگاه
+    $order = Order::query()
+        ->where('transaction_id', $authority)
+        ->first();
 
-        if (!$order) {
-            return view('frontend.shopping_result', [
-                'result' => 'failed',
-                'order' => null
-            ]);
-        }
+    // 🧼 راه حل ۲: تعریف پیش‌فرض متغیر دانلودها به صورت کالکشن خالی در بالای فانکشن
+    $downloads = collect();
 
+    if (!$order) {
+        return view('frontend.shopping_result', [
+            'result' => 'failed',
+            'order' => null,
+            'downloads' => $downloads // پاس دادن کالکشن خالی
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | مدیریت ایمن رفرش صفحه (اگر قبلاً پرداخت موفق بوده است)
+    |--------------------------------------------------------------------------
+    */
+    if ($order->status === OrderStatus::Payed || $order->status === OrderStatus::Payed->value) {
+        // اورراید کردن دانلودها با استفاده از متد کمکی
+        $downloads = $this->getDownloads($order);
+
+        return view('frontend.shopping_result', [
+            'order' => $order,
+            'result' => 'success',
+            'downloads' => $downloads
+        ]);
+    }
+
+    // اگر وضعیت برگشت از بانک OK نبود
+    if ($request->Status !== 'OK') {
+        return view('frontend.shopping_result', [
+            'order' => $order,
+            'result' => 'failed',
+            'downloads' => $downloads // پاس دادن کالکشن خالی
+        ]);
+    }
+
+    try {
         /*
         |--------------------------------------------------------------------------
-        | جلوگیری از پردازش مجدد در صورت پرداخت موفق قبلی
+        | تایید اصالت تراکنش (فقط برای بار اول)
         |--------------------------------------------------------------------------
         */
-        if ($order->status === OrderStatus::Payed) {
-            return view('frontend.shopping_result', [
-                'order' => $order,
-                'result' => 'success'
-            ]);
-        }
-
-        // اگر وضعیت برگشت از بانک OK نبود، مستقیماً سفارش را لغو یا ناموفق نشان بده
-        if ($request->Status !== 'OK') {
-            return view('frontend.shopping_result', [
-                'order' => $order,
-                'result' => 'failed'
-            ]);
-        }
-
-        try {
-            /*
-            |--------------------------------------------------------------------------
-            | 🔴 بخش کلیدی اصلاح شده:
-            | پکیج shetabit به مبلّغ ثبت شده در دیتابیس نیاز دارد تا صحت تراکنش را تایید کند.
-            | مبلّغ باید دقیقاً همان عددی باشد که موقع رفتن به بانک فرستادیم ($order->total_price)
-            |--------------------------------------------------------------------------
-            */
-            $payment = Payment::via($order->payment_type ?? 'zarinpal') // یا هر درگاهی که استفاده می‌کنی
+        $payment = Payment::via($order->payment_type ?? 'zarinpal')
             ->amount((int) $order->total_price)
-                ->transactionId($authority)
-                ->verify(); // متد تایید اصالت تراکنش پکیج شتابیت
+            ->transactionId($authority)
+            ->verify();
 
-            // اگر وریفای پکیج خطا نداد، یعنی بانک پول را کم کرده و همه‌چیز اوکی است
-            Order::successPayment($order);
+        // تغییر وضعیت سفارش به پرداخت موفق
+        Order::successPayment($order);
 
-            // ثبت سهم فروشندگان بر اساس فاکتور فیکس شده در دیتابیس
-            $order_details = OrderDetail::query()
-                ->where('order_id', $order->id)
-                ->get();
-
-            if ($order_details->isNotEmpty()) {
-                SellerWalletTransaction::registerSale($order_details);
-            }
-
-            $result = 'success';
-
-        } catch (\Exception $e) {
-            // اگر وریفای بانک خطا بخورد (مثلاً عدم تطابق مبلّغ یا لغو توسط کاربر) به اینجا می‌آید
-            Log::error('Zarinpal Verification Error: ' . $e->getMessage());
-            $result = 'failed';
-        }
-
-        // دریافت لینک‌های دانلود برای نمایش در صفحه موفقیت
-        $downloads = Downloads::query()
-            ->where('user_id', $order->user_id)
-            ->whereHas('orderDetail', function ($q) use ($order) {
-                $q->where('order_id', $order->id);
-            })
-            ->with('product')
+        // ثبت سهم فروشندگان
+        $order_details = OrderDetail::query()
+            ->where('order_id', $order->id)
             ->get();
 
-        return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
+        if ($order_details->isNotEmpty()) {
+            SellerWalletTransaction::registerSale($order_details);
+        }
+
+        $result = 'success';
+
+        // اورراید کردن دانلودها پس از موفقیت تراکنش اولیه
+        $downloads = $this->getDownloads($order);
+
+    } catch (\Exception $e) {
+        Log::error('Zarinpal Verification Error: ' . $e->getMessage());
+        $result = 'failed';
     }
+
+    return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
+}
+
+/**
+ * 🏆 متد کمکی برای جلوگیری از تکرار کد واکشی دانلودها
+ */
+private function getDownloads($order)
+{
+    return Downloads::query()
+        ->where('user_id', $order->user_id)
+        ->whereHas('orderDetail', function ($q) use ($order) {
+            $q->where('order_id', $order->id);
+        })
+        ->with('product')
+        ->get();
+}
 }

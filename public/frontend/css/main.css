@@ -7407,7 +7407,6 @@ input[type=number]::-webkit-outer-spin-button {
     margin-bottom: 10px;
     border-radius: 50%;
     display: -webkit-box;
-    display: -ms-flexbox;
     display: flex;
     -webkit-box-pack: center;
     -ms-flex-pack: center;
@@ -10819,3 +10818,195 @@ body.menu-open .btn-menu{
         border-right: 1px solid #eff2f5 !important;
     }
 }
+
+
+/* تنظیم بیس فونت و تمیزکاری پدینگ‌ها */
+.shopping-page {
+    background-color: #f4f6fa !important;
+    font-family: 'Shabnam', Tahoma, sans-serif !important;
+    -webkit-font-smoothing: antialiased !important;
+    letter-spacing: -0.2px !important;
+}
+
+.shopping-page *,
+.shopping-page button,
+.shopping-page input,
+.shopping-page table {
+    font-family: 'Shabnam', Tahoma, sans-serif !important;
+}
+
+/* 🟢 بازطراحی نوار مراحل به سبک کپسول‌های مدرن زنجیره‌ای */
+.premium-steps-container {
+    background: #ffffff !important;
+    padding: 20px 0 !important;
+    border-bottom: 1px solid #eef2f6 !important;
+    margin-bottom: 40px !important;
+}
+
+.premium-checkout-steps {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 12px !important;
+}
+
+.premium-checkout-steps li {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.premium-checkout-steps li .step-capsule {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 20px !important;
+    border-radius: 14px !important;
+    background: #f8fafc !important;
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.premium-checkout-steps li .step-capsule i {
+    font-size: 18px !important;
+}
+
+/* استایل مرحله فعال (اکشن فعلی کاربر) */
+.premium-checkout-steps li.active .step-capsule {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* جداکننده مینی‌مال بین کپسول‌ها */
+.premium-checkout-steps .step-divider {
+    color: #cbd5e1 !important;
+    font-size: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* 📦 کارت اصلی فاکتور با طراحی شناور */
+.checkout-card {
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid #eef2f6 !important;
+    padding: 40px !important;
+    margin-bottom: 40px !important;
+}
+
+/* باکس آلرت وضعیت تراکنش */
+.status-alert-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    margin-bottom: 35px !important;
+}
+.status-alert-box.success-mode { background: #f0fdf4 !important; border: 1px solid #bbf7d0 !important; }
+.status-alert-box.failed-mode { background: #fff5f5 !important; border: 1px solid #fecdd3 !important; }
+
+.status-alert-icon {
+    width: 64px !important;
+    height: 64px !important;
+    border-radius: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 28px !important;
+    color: #ffffff !important;
+    flex-shrink: 0 !important;
+}
+.status-alert-icon.success-mode { background: #10b981 !important; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25) !important; }
+.status-alert-icon.failed-mode { background: #f43f5e !important; box-shadow: 0 8px 24px rgba(244, 63, 94, 0.25) !important; }
+
+.status-alert-title h4 { font-size: 19px !important; font-weight: 700 !important; color: #0f172a !important; margin: 0 0 6px 0 !important; }
+.status-alert-title p { font-size: 13.5px !important; color: #475569 !important; margin: 0 !important; }
+
+/* 💎 گرید لوکس و تکه‌تکه اطلاعات فاکتور */
+.factor-premium-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 16px !important;
+}
+.factor-premium-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    background: #f8fafc !important;
+    border-radius: 18px !important;
+    padding: 20px !important;
+    border: 1px solid #f1f5f9 !important;
+    transition: all 0.2s ease !important;
+}
+.factor-premium-item:hover {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 10px 20px -10px rgba(0,0,0,0.04) !important;
+}
+.factor-premium-item .item-icon {
+    width: 44px !important;
+    height: 44px !important;
+    background: #ffffff !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #64748b !important;
+    font-size: 20px !important;
+    border: 1px solid #e2e8f0 !important;
+}
+.factor-premium-item .item-content { display: flex !important; flex-direction: column !important; gap: 4px !important; }
+.factor-premium-item .label { font-size: 12px !important; color: #64748b !important; }
+.factor-premium-item .value { font-size: 14px !important; font-weight: 600 !important; color: #0f172a !important; }
+
+/* 📥 لیست دانلود محصولات */
+.download-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    padding: 20px 26px !important;
+    border-radius: 20px !important;
+    border: 1px solid #e2e8f0 !important;
+    margin-bottom: 16px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.download-row:hover {
+    border-color: #3b82f6 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* جدول سوابق تراکنش */
+.modern-table { width: 100% !important; border-collapse: collapse !important; text-align: right !important; }
+.modern-table th { background: #f8fafc !important; color: #64748b !important; padding: 18px 20px !important; font-size: 13px !important; font-weight: 600 !important; border-bottom: 1px solid #edf2f7 !important; }
+.modern-table td { padding: 20px !important; font-size: 13.5px !important; border-bottom: 1px solid #f1f5f9 !important; color: #334155 !important; }
+
+.badge-status { padding: 6px 14px !important; border-radius: 50px !important; font-size: 12px !important; font-weight: 600 !important; display: inline-block !important; }
+.badge-status.success { background: #dcfce7 !important; color: #15803d !important; }
+.badge-status.failed { background: #fee2e2 !important; color: #b91c1c !important; }
+
+/* کارت انتخاب درگاه پرداخت */
+.payment-methods-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; gap: 15px !important; margin: 25px 0 !important; }
+.payment-method-card { border: 2px solid #e2e8f0 !important; border-radius: 20px !important; padding: 24px !important; display: flex !important; align-items: center !important; gap: 16px !important; cursor: pointer !important; transition: all 0.25s ease !important; position: relative !important; background: #ffffff !important; }
+.payment-method-card:hover { border-color: #cbd5e1 !important; }
+.payment-method-card.selected { border-color: #3b82f6 !important; background: #f0f6ff !important; }
+
+/* دکمه‌های پرمیوم و فلت */
+.btn-modern { display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; font-weight: 600 !important; border-radius: 14px !important; padding: 14px 32px !important; transition: all 0.25s ease !important; border: none !important; cursor: pointer !important; font-size: 14px !important; }
+.btn-modern-primary { background: #3b82f6 !important; color: #ffffff !important; }
+.btn-modern-primary:hover { background: #2563eb !important; transform: translateY(-1px) !important; box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2) !important; }
+.btn-modern-secondary { background: #f1f5f9 !important; color: #475569 !important; }
+.btn-modern-secondary:hover { background: #e2e8f0 !important; }
+.btn-modern-success { background: #10b981 !important; color: #ffffff !important; }
+.btn-modern-success:hover { background: #059669 !important; transform: translateY(-1px) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2) !important; }
