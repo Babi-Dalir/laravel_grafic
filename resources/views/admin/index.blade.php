@@ -20,7 +20,7 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body">
                         <small>فروش امروز</small>
-                        <h3>{{ number_format($kpis['today_sales']) }}</h3>
+                        <h3>{{ number_format($kpis['today_sales']) }} تومان </h3>
                     </div>
                 </div>
             </div>
@@ -29,7 +29,7 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body">
                         <small>فروش ماه</small>
-                        <h3>{{ number_format($kpis['month_sales']) }}</h3>
+                        <h3>{{ number_format($kpis['month_sales']) }} تومان </h3>
                     </div>
                 </div>
             </div>
@@ -39,11 +39,11 @@
                 <div class="card shadow-sm border-0">
                     <div class="card-body">
                         <small>کل درآمد سایت</small>
-                        <h3>{{ number_format($kpis['total_site_income']) }}</h3>
+                        <h3>{{ number_format($kpis['total_site_income']) }} تومان </h3>
                     </div>
                     <div class="card-body">
                         <small>درآمد ماهانه سایت</small>
-                        <h3>{{ number_format($kpis['site_income_month']) }}</h3>
+                        <h3>{{ number_format($kpis['site_income_month']) }} تومان </h3>
                     </div>
                 </div>
             </div>
@@ -66,7 +66,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <h6>در انتظار تسویه</h6>
-                        <h3>{{ number_format($sellers['pending_balance']) }}</h3>
+                        <h3>{{ number_format($sellers['pending_balance']) }} تومان </h3>
                     </div>
                 </div>
             </div>
@@ -75,7 +75,7 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <h6>تسویه شده</h6>
-                        <h3>{{ number_format($sellers['settled_balance']) }}</h3>
+                        <h3>{{ number_format($sellers['settled_balance']) }} تومان </h3>
                     </div>
                 </div>
             </div>
@@ -112,10 +112,11 @@
                     <div class="card-body">
                         <h5>آخرین تسویه‌ها</h5>
 
+                        {{-- تیکه کد نمایش آخرین تسویه‌ها در بلید --}}
                         @foreach($latest['latest_settlements'] as $settlement)
                             <div class="border-bottom py-2">
-                                {{ $settlement->seller->user->name ?? '---' }}
-                                {{ $settlement->seller->user->mobile ?? '---' }}
+                                {{ $settlement->seller?->user?->name ?? 'کاربر ناشناس' }}
+                                <span class="text-muted">({{ $settlement->seller?->user?->mobile ?? 'بدون موبایل' }})</span>
                             </div>
                         @endforeach
                     </div>

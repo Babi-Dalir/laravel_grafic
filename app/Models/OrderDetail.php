@@ -20,6 +20,12 @@ class OrderDetail extends Model
         'site_share'
     ];
 
+    protected $dispatchesEvents = [
+        'created' => \App\Events\OrderDetailSaved::class,
+        'updated' => \App\Events\OrderDetailSaved::class,
+        'deleted' => \App\Events\OrderDetailSaved::class,
+    ];
+
     protected function casts(): array
     {
         return [
