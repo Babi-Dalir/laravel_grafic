@@ -88,8 +88,6 @@
                                             <img src="{{ url('images/categories/big/' . $category->image) }}"
                                                  alt="">
                                             <h4 class="promotion-category-name">{{ $category->name }}</h4>
-                                            <h6 class="promotion-category-quantity">
-                                                {{ $category->products_count }} </h6>
                                         </a>
                                     </div>
                                 @endforeach
@@ -382,4 +380,107 @@
             <!-- End Feature-Product -->
         </div>
     </main>
+
+    {{-- 🌌 نسخه نهایی و فوق‌پریمیوم Aurora Hologram با تفکیک نوع کمپین (پایین سمت چپ) 🌌 --}}
+    @if(isset($activeDiscountCampaign) && $activeDiscountCampaign->expires_at)
+        <div id="grafic-ultimate-widget" class="grafic-aurora-widget" style="display: none;">
+
+            <div class="aurora-blur-layer"></div>
+            <div class="aurora-shine-streak"></div>
+
+            <button type="button" class="aurora-close-btn" onclick="closeGraficUltimateWidget()" aria-label="بستن">
+                <i class="mdi mdi-close"></i>
+            </button>
+
+            <a href="#" class="aurora-widget-anchor">
+                <div class="aurora-badge-capsule">
+                    <div class="capsule-glow"></div>
+                    <div class="capsule-content">
+                        <span class="font-numeric">{{ $activeDiscountCampaign->percent }}%</span>
+                        <small>OFF</small>
+                    </div>
+                </div>
+
+                <div class="aurora-widget-body">
+                    <div class="aurora-meta-tag">
+                        @if($activeDiscountCampaign->type === \App\Enums\DiscountCampaignType::Global->value)
+                            {{-- 🌐 حالت کل سایت --}}
+                            <span class="tag-badge tag-global">
+                            <span class="pulse-indicator pulse-cyan"></span>
+                            جشنواره سراسری کل سایت
+                        </span>
+                        @else
+                            {{-- 📁 حالت دسته‌بندی خاص --}}
+                            <span class="tag-badge tag-category">
+                            <span class="pulse-indicator pulse-purple"></span>
+                            تخفیف ویژه این دسته‌بندی
+                        </span>
+                        @endif
+                    </div>
+
+                    <h4 class="aurora-widget-title">{{ $activeDiscountCampaign->name }}</h4>
+
+                    <div class="aurora-countdown-wrapper" dir="ltr">
+                        <div class="time-block"><span id="u-days" class="font-numeric">00</span><small>روز</small></div>
+                        <span class="time-divider">:</span>
+                        <div class="time-block"><span id="u-hours" class="font-numeric">00</span><small>ساعت</small></div>
+                        <span class="time-divider">:</span>
+                        <div class="time-block"><span id="u-minutes" class="font-numeric">00</span><small>دقیقه</small></div>
+                        <span class="time-divider">:</span>
+                        <div class="time-block"><span id="u-seconds" class="font-numeric">00</span><small>ثانیه</small></div>
+                    </div>
+                </div>
+
+                <div class="aurora-arrow-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+            </a>
+        </div>
+
+        <script>
+            function closeGraficUltimateWidget() {
+                const widget = document.getElementById('grafic-ultimate-widget');
+                widget.classList.add('aurora-widget-exit');
+                setTimeout(() => widget.remove(), 500);
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const targetTimestamp = new Date("{{ $activeDiscountCampaign->expires_at }}").getTime();
+                const widgetNode = document.getElementById("grafic-ultimate-widget");
+
+                const dNode = document.getElementById("u-days");
+                const hNode = document.getElementById("u-hours");
+                const mNode = document.getElementById("u-minutes");
+                const sNode = document.getElementById("u-seconds");
+
+                function updateUltimateTimer() {
+                    const now = new Date().getTime();
+                    const remainder = targetTimestamp - now;
+
+                    if (remainder < 0) {
+                        closeGraficUltimateWidget();
+                        clearInterval(ultimateInterval);
+                        return;
+                    }
+
+                    const days = Math.floor(remainder / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((remainder % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((remainder % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remainder % (1000 * 60)) / 1000);
+
+                    dNode.innerText = String(days).padStart(2, '0');
+                    hNode.innerText = String(hours).padStart(2, '0');
+                    mNode.innerText = String(minutes).padStart(2, '0');
+                    sNode.innerText = String(seconds).padStart(2, '0');
+
+                    if (widgetNode.style.display === "none") {
+                        widgetNode.style.display = "flex";
+                    }
+                }
+
+                updateUltimateTimer();
+                const ultimateInterval = setInterval(updateUltimateTimer, 1000);
+            });
+        </script>
+    @endif
 @endsection

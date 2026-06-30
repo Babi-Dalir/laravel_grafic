@@ -11010,3 +11010,295 @@ body.menu-open .btn-menu{
 .btn-modern-secondary:hover { background: #e2e8f0 !important; }
 .btn-modern-success { background: #10b981 !important; color: #ffffff !important; }
 .btn-modern-success:hover { background: #059669 !important; transform: translateY(-1px) !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2) !important; }
+
+
+
+/* ==========================================================================
+   🌌 Grafic Ultimate Floating Widget (Aurora Hologram Masterpiece)
+   ========================================================================== */
+
+.grafic-aurora-widget {
+    position: fixed;
+    bottom: 35px;
+    left: 35px;
+    width: 395px;
+    background: #04060a;
+    border-radius: 28px;
+    padding: 20px;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    direction: rtl;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s ease,
+    box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: auroraEntrance 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* هاله نوری پس‌زمینه */
+.aurora-blur-layer {
+    position: absolute;
+    top: -60px;
+    left: -60px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, rgba(139, 92, 246, 0.08) 50%, transparent 100%);
+    filter: blur(10px);
+    z-index: 0;
+    pointer-events: none;
+    transition: transform 0.6s ease;
+}
+
+.aurora-shine-streak {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transform: skewX(-25deg);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* افکت هاور باکس */
+.grafic-aurora-widget:hover {
+    transform: translateY(-10px) scale(1.01);
+    border-color: rgba(0, 242, 254, 0.35);
+    box-shadow: 0 40px 80px rgba(0, 242, 254, 0.1), 0 15px 40px rgba(139, 92, 246, 0.06);
+}
+.grafic-aurora-widget:hover .aurora-blur-layer {
+    transform: translate(30px, 20px) scale(1.3);
+}
+.grafic-aurora-widget:hover .aurora-shine-streak {
+    animation: flashShine 0.8s ease-in-out;
+}
+
+.aurora-widget-anchor {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    text-decoration: none !important;
+    width: 100%;
+    color: #ffffff;
+    z-index: 2;
+}
+
+.aurora-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 10;
+}
+.aurora-close-btn:hover {
+    color: #f43f5e;
+    transform: scale(1.15);
+}
+
+/* کپسول شیشه‌ای درصد */
+.aurora-badge-capsule {
+    position: relative;
+    width: 66px;
+    height: 72px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.capsule-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #00f2fe, #8b5cf6);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.6;
+}
+.capsule-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+}
+.capsule-content span {
+    font-size: 19px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffffff 30%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.capsule-content small {
+    font-size: 8px;
+    font-weight: 800;
+    color: #64748b;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+/* بدنه متون و استایل تگ‌های جدید تفکیک‌کننده */
+.aurora-widget-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.aurora-meta-tag {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+.tag-badge {
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: -0.2px;
+}
+/* تگ اختصاصی کل سایت (فیروزه‌ای) */
+.tag-global {
+    background: rgba(0, 242, 254, 0.05);
+    color: #00f2fe;
+    border: 1px solid rgba(0, 242, 254, 0.15);
+}
+/* تگ اختصاصی دسته‌بندی (بنفش) */
+.tag-category {
+    background: rgba(139, 92, 246, 0.06);
+    color: #a78bfa;
+    border: 1px solid rgba(139, 92, 246, 0.18);
+}
+
+/* پالس‌های نوری رنگی درون تگ‌ها */
+.pulse-indicator {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+.pulse-cyan {
+    background: #00f2fe;
+    box-shadow: 0 0 8px #00f2fe;
+    animation: livePulseCyan 1.8s infinite ease-in-out;
+}
+.pulse-purple {
+    background: #8b5cf6;
+    box-shadow: 0 0 8px #8b5cf6;
+    animation: livePulsePurple 1.8s infinite ease-in-out;
+}
+
+.aurora-widget-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 10px 0;
+    max-width: 210px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* تایمر دیجیتال */
+.aurora-countdown-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.time-block {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 5px 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+}
+.time-block span {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+}
+.time-block small {
+    font-size: 8px;
+    color: #475569;
+    font-weight: 700;
+}
+.time-divider {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.06);
+    font-weight: 900;
+    animation: dividerFlicker 1.2s infinite step-end;
+}
+
+/* دکمه اکشن ناوبری */
+.aurora-arrow-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.grafic-aurora-widget:hover .aurora-arrow-btn {
+    background: #ffffff;
+    color: #04060a;
+    transform: translateX(-5px) rotate(-10deg);
+    border-color: #ffffff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* --- انیمیشن‌ها --- */
+@keyframes auroraEntrance {
+    from { transform: translateY(50px) scale(0.94); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes auroraExit {
+    to { transform: translateY(40px) scale(0.94); opacity: 0; filter: blur(5px); }
+}
+.aurora-widget-exit {
+    animation: auroraExit 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+@keyframes flashShine { 100% { left: 200%; } }
+
+@keyframes livePulseCyan {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #00f2fe; }
+}
+@keyframes livePulsePurple {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #8b5cf6; }
+}
+@keyframes dividerFlicker {
+    from, to { opacity: 0.2; }
+    50% { opacity: 1; color: #00f2fe; }
+}
+
+/* ریسپونسیو موبایل */
+@media (max-width: 575.98px) {
+    .grafic-aurora-widget {
+        left: 15px;
+        bottom: 15px;
+        width: calc(100% - 30px);
+        padding: 14px;
+    }
+    .aurora-widget-title { max-width: 170px; }
+    .aurora-arrow-btn { display: none; }
+}

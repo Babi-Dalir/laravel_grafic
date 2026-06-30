@@ -99,4 +99,21 @@ class DiscountCampaign extends Model
             return $campaign;
         });
     }
+
+    /**
+     * 🚀 واکشی کمپین فعالِ جاری برای نمایش بنر فوقانی سایت
+     */
+    public static function getActiveBannerCampaign()
+    {
+        return self::where('status', \App\Enums\DiscountCampaignStatus::Active->value)
+            ->where('starts_at', '<=', now())
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            })
+            ->whereIn('type', [\App\Enums\DiscountCampaignType::Global->value, \App\Enums\DiscountCampaignType::Category->value]) // ⛔ حذف تخفیف محصول فردی از بنر اصلی
+            ->orderBy('priority', 'asc') // 🥇 اولویت اول: کل سایت (1)، اولویت دوم: دسته‌بندی (2)
+            ->latest()
+            ->first();
+    }
 }

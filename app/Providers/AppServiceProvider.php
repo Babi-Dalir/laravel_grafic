@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Banner;
 use App\Models\Category;
+use App\Models\DiscountCampaign;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
@@ -41,5 +42,9 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         Paginator::useBootstrap();
+
+        View::composer('frontend.index', function ($view) {
+            $view->with('activeDiscountCampaign', DiscountCampaign::getActiveBannerCampaign());
+        });
     }
 }

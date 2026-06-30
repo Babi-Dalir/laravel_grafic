@@ -88,22 +88,41 @@ class Product extends Model
         return $this->morphMany(Comment::class, 'commentable')->where('status', CommentStatus::Approved->value);
     }
 
+    /**
+     * 🟢 اصلاح اساسی: واکشی هدفِ کمپین مستقیم خود محصول
+     */
     public function campaignTargets()
     {
         return $this->hasMany(DiscountCampaignTarget::class, 'target_id')
             ->where('target_type', DiscountCampaignType::Product->value);
     }
 
-    public function campaigns()
+    /**
+     * 🟢 متد جدید و انترپرایز برای واکشی لایوِ بالاترین کمپین فعال متصل به محصول
+     * این متد هر سه حالت (محصول، دسته‌بندی و کل سایت) را با در نظر گرفتن اولویت بررسی می‌کند.
+     */
+    public function getActiveCampaign()
     {
-        return $this->hasManyThrough(
-            DiscountCampaign::class,
-            DiscountCampaignTarget::class,
-            'target_id',
-            'id',
-            'id',
-            'discount_campaign_id'
-        );
+        $now = now();
+
+        return DiscountCampaign::query()
+            ->where('status', DiscountCampaignStatus::Active->value)
+            ->where('starts_at', '<=', $now)
+            ->where(function ($query) use ($now) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+            })
+            ->where(function ($query) {
+                $query->whereHas('targets', function ($q) {
+                    $q->where('target_id', $this->id)->where('target_type', DiscountCampaignType::Product->value);
+                })
+                    ->orWhereHas('targets', function ($q) {
+                        $q->where('target_id', $this->category_id)->where('target_type', DiscountCampaignType::Category->value);
+                    })
+                    ->orWhere('type', DiscountCampaignType::Global->value);
+            })
+            ->orderBy('priority','ASC')
+            ->orderByDesc('percent')
+            ->first();
     }
 
     public function user()
@@ -205,7 +224,6 @@ class Product extends Model
                     : ProductStatus::PendingReview->value,
             ]);
 
-            // ⚡ مدیریت دقیق و بدون نقص ویرایش تخفیف و تاریخ‌های شگفت‌انگیز کمپین محصول
             $existingCampaignTarget = DiscountCampaignTarget::where('target_id', $product->id)
                 ->where('target_type', DiscountCampaignType::Product->value)
                 ->whereHas('campaign', function ($query) {
@@ -213,7 +231,6 @@ class Product extends Model
                 })
                 ->first();
 
-            // آماده‌سازی آرایه داده‌ها با تبدیل به تاریخ میلادی
             $campaignData = [
                 'percent' => $request->input('discount', 0),
                 'starts_at' => $request->filled('spacial_start') ? DateManager::shamsi_to_miladi($request->spacial_start) : now(),
@@ -222,10 +239,8 @@ class Product extends Model
 
             if ($request->filled('discount') && $request->input('discount') > 0) {
                 if ($existingCampaignTarget && $existingCampaignTarget->campaign) {
-                    // اگر کمپین از قبل وجود دارد، آن را بروزرسانی کن
                     $existingCampaignTarget->campaign->update($campaignData);
                 } else {
-                    // اگر قبلاً تخفیف نداشت ولی الان مقدار وارد شده، کمپین جدید بساز
                     $newCampaign = DiscountCampaign::create(array_merge($campaignData, [
                         'name' => "تخفیف محصول: " . $product->name,
                         'type' => DiscountCampaignType::Product->value,
@@ -237,7 +252,6 @@ class Product extends Model
                     ]);
                 }
             } else {
-                // 💡 نکته طلایی: اگر کاربر درصد تخفیف را خالی یا صفر گذاشت، کمپین اختصاصی قبلی حذف شود
                 if ($existingCampaignTarget && $existingCampaignTarget->campaign) {
                     $campaign = $existingCampaignTarget->campaign;
                     $existingCampaignTarget->delete();
@@ -274,27 +288,12 @@ class Product extends Model
         return intval(($completed / $total) * 100);
     }
 
+    /**
+     * 🟢 استفاده از متد بهینه‌شده جهت محاسبه قیمت نهایی دقیق بر اساس اولویت کمپین‌ها
+     */
     public function getFinalPriceAttribute()
     {
-        $now = now();
-
-        $bestCampaign = DiscountCampaign::where('status', DiscountCampaignStatus::Active->value)
-            ->where('starts_at', '<=', $now)
-            ->where(function ($query) use ($now) {
-                $query->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
-            })
-            ->where(function ($query) {
-                $query->whereHas('targets', function ($q) {
-                    $q->where('target_id', $this->id)->where('target_type', DiscountCampaignType::Product->value);
-                })
-                    ->orWhereHas('targets', function ($q) {
-                        $q->where('target_id', $this->category_id)->where('target_type', DiscountCampaignType::Category->value);
-                    })
-                    ->orWhere('type', DiscountCampaignType::Global->value);
-            })
-            ->orderByDesc('priority')
-            ->orderByDesc('percent')
-            ->first();
+        $bestCampaign = $this->getActiveCampaign();
 
         if ($bestCampaign) {
             $discountAmount = ($this->main_price * $bestCampaign->percent) / 100;
@@ -304,12 +303,17 @@ class Product extends Model
         return $this->main_price;
     }
 
+    /**
+     * 🟢 اصلاح اساسی اکسسور درصد تخفیف: درصد لایو بر اساس بالاترین کمپین جاری استخراج می‌شود
+     */
     public function getDiscountPercentAttribute()
     {
-        if ($this->main_price > 0 && $this->final_price < $this->main_price) {
-            $diff = $this->main_price - $this->final_price;
-            return round(($diff / $this->main_price) * 100);
+        $bestCampaign = $this->getActiveCampaign();
+
+        if ($bestCampaign && $this->main_price > 0) {
+            return $bestCampaign->percent;
         }
+
         return 0;
     }
 
@@ -321,7 +325,6 @@ class Product extends Model
     public function scopeSmartOffer($query)
     {
         $now = now();
-        // وضعیت تایید شده از Active به Approved (مطابق با متد کامپوننت لایووایر شما) اصلاح شد
         return $query->where('status', ProductStatus::Approved->value)
             ->where(function ($q) use ($now) {
                 $q->whereHas('campaignTargets.campaign', function ($sub) use ($now) {
