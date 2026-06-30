@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Seller\Settlements;
 
+use App\Enums\SettlementStatus;
 use App\Models\SellerSettlement;
 use App\Services\SettlementManager;
 use Livewire\Component;
@@ -16,21 +17,28 @@ class SettlementList extends Component
     public $search = '';
 
     /**
-     * 🟢 حل باگ ریست پجینیشن: به محض تایپ کاربر، صفحه خودکار یک می‌شود تا دیتای سرچ گم نشود
+     * 🚀 اصلاح بر اساس لایف‌سایکل لایووایر ۳
+     * به محض تغییر رشته سرچ، صفحه پجینیشن فوراً ریست می‌شود تا دیتای سرچ ادمین گم نشود.
      */
-    public function updatingSearch()
+    public function updatedSearch()
     {
         $this->resetPage();
     }
 
     /**
-     * متد ثبت پرداخت با کنترل استیت
+     * متد ثبت پرداخت با کنترل استیت مالی
      */
     public function pay($settlementId)
     {
         $settlement = SellerSettlement::findOrFail($settlementId);
 
-        // اجرای عملیات از طریق سرفصل مدیریت مالی
+        // گارد محافظتی بک‌اند: اگر فاکتور قبلاً پرداخت شده باشد، رکوئست تکراری مکرر را ریجکت کن
+        if ($settlement->status === SettlementStatus::Paid || $settlement->status === SettlementStatus::Paid->value) {
+            session()->flash('error', 'این فاکتور تسویه حساب قبلاً پرداخت شده است.');
+            return;
+        }
+
+        // اجرای عملیات از طریق سرفصل مدیریت مالی پروژه‌ گرافیک
         SettlementManager::markAsPaid(
             $settlement,
             auth()->id()
@@ -42,7 +50,7 @@ class SettlementList extends Component
     public function render()
     {
         $settlements = SellerSettlement::query()
-            // 🟢 حل مشکل N+1 با واکشی عمیق و بهینه روابط دیتابیس (فقط فیلدهای مورد نیاز)
+            // واکشی عمیق و اتمیک روابط جهت بهینه‌سازی کامل پهنای باند رم سرور
             ->with([
                 'seller:id,user_id,first_name,last_name,brand_name',
                 'seller.user:id,mobile',

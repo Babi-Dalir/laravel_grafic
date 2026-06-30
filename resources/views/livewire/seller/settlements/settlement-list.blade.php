@@ -7,6 +7,13 @@
         </div>
     @endif
 
+    {{-- نمایش آلرت خطای احتمالی همپوشانی رکوئست‌ها --}}
+    @if (session()->has('error'))
+        <div class="alert alert-danger alert-dismissible fade show text-right mb-4" role="alert">
+            <i class="ti-alert mr-2"></i> {{ session('error') }}
+        </div>
+    @endif
+
     {{-- فیلتر جستجو --}}
     <div class="form-group row">
         <label class="col-sm-2 col-form-label font-weight-bold">جستجو (فروشنده / نام برند)</label>
@@ -17,7 +24,7 @@
                    wire:model.live.debounce.500ms="search"
                    placeholder="نام فروشنده یا برند مورد نظر را بنویسید...">
 
-            <div wire:loading class="spinner-border spinner-border-sm text-primary m-r-10"></div>
+            <div wire:loading wire:target="search" class="spinner-border spinner-border-sm text-primary m-r-10"></div>
         </div>
     </div>
 
@@ -70,13 +77,13 @@
                     {{ number_format($settlement->amount) }}
                 </td>
 
-                {{-- وضعیت فاکتور تسویه --}}
+                {{-- وضعیت فاکتور تسویه (سازگار با مقدار انوم و رشته خام دیتابیس) --}}
                 <td class="text-center align-middle">
-                    @if($settlement->status === \App\Enums\SettlementStatus::Pending->value)
+                    @if($settlement->status === \App\Enums\SettlementStatus::Pending->value || $settlement->status === \App\Enums\SettlementStatus::Pending)
                         <span class="badge badge-warning px-2 py-1">
                             <i class="ti-time mr-1"></i> در انتظار پرداخت
                         </span>
-                    @elseif($settlement->status === \App\Enums\SettlementStatus::Paid->value)
+                    @elseif($settlement->status === \App\Enums\SettlementStatus::Paid->value || $settlement->status === \App\Enums\SettlementStatus::Paid)
                         <span class="badge badge-success px-2 py-1">
                             <i class="ti-check mr-1"></i> پرداخت شده
                         </span>
@@ -106,14 +113,22 @@
                     @endif
                 </td>
 
-                {{-- عملیات ادمین --}}
+                {{-- عملیات ادمین همراه با لایه ضد دبل‌کلیک مخرب مالی --}}
                 <td class="text-center align-middle">
-                    @if($settlement->status === \App\Enums\SettlementStatus::Pending->value)
+                    @if($settlement->status === \App\Enums\SettlementStatus::Pending->value || $settlement->status === \App\Enums\SettlementStatus::Pending)
                         <button
                             wire:click="pay({{ $settlement->id }})"
                             wire:loading.attr="disabled"
+                            wire:target="pay({{ $settlement->id }})"
                             class="btn btn-success btn-sm px-3 shadow-xs">
-                            <i class="ti-wallet mr-1"></i> ثبت پرداخت
+
+                            {{-- نمایش لودر حین فرستادن اطلاعات مالی به دیتابیس --}}
+                            <span wire:loading.remove wire:target="pay({{ $settlement->id }})">
+                                <i class="ti-wallet mr-1"></i> ثبت پرداخت
+                            </span>
+                            <span wire:loading wire:target="pay({{ $settlement->id }})">
+                                <i class="fa fa-spinner fa-spin mr-1"></i> در حال واریز...
+                            </span>
                         </button>
                     @else
                         <span class="text-muted font-weight-bold"><i class="ti-check-box text-success mr-1"></i> تکمیل شده</span>
