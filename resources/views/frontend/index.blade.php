@@ -89,7 +89,7 @@
                                                  alt="">
                                             <h4 class="promotion-category-name">{{ $category->name }}</h4>
                                             <h6 class="promotion-category-quantity">
-                                                {{ $category->getProductCategoryCount($category->id) }}</h6>
+                                                {{ $category->products_count }} </h6>
                                         </a>
                                     </div>
                                 @endforeach

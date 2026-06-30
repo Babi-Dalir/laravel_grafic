@@ -7,10 +7,20 @@ use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
+/*
+|--------------------------------------------------------------------------
+| Console Routes & Scheduler
+|--------------------------------------------------------------------------
+*/
+
+// دستور پیش‌فرض لایت‌ویت لاراول
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+/**
+ * ۱. جاب روزانه تسویه‌حساب اتوماتیک کیف‌پول فروشندگان
+ */
 Schedule::call(function () {
     SellerSettlementService::run();
 })
@@ -18,15 +28,23 @@ Schedule::call(function () {
     ->withoutOverlapping()
     ->daily();
 
+/**
+ * ۲. پاکسازی کدهای تایید منقضی شده از دیتابیس (هر ۱۰ دقیقه)
+ */
 Schedule::command('verification-codes:clean')
     ->everyTenMinutes();
 
+/**
+ * ۳. 👑 کنترلر هوشمند کش کمپین‌های شگفت‌انگیز صفحه اصلی (هر دقیقه)
+ */
+Schedule::command('campaigns:clean-cache')
+    ->everyMinute();
 
-
+/**
+ * ۴. جاب روزانه پاکسازی فایل‌های چانک آپلود‌های رها شده و ناقص
+ */
 Schedule::call(function () {
     $disk = Storage::disk('digital_files');
-
-    // آدرس دقیق را با FileManager خود ست کنید. ما اینجا هر دو الگو را ایمن می‌کنیم.
     $targetFolder = 'tmp/products';
 
     if (!$disk->exists($targetFolder)) {
@@ -37,16 +55,13 @@ Schedule::call(function () {
 
     foreach ($directories as $dir) {
         try {
-            // پیدا کردن فایل‌های داخل دایرکتوری برای تشخیص زمان دقیق تغییر
             $files = $disk->files($dir);
 
             if (empty($files)) {
-                // اگر پوشه کاملاً خالی است، آن را حذف کن
                 $disk->deleteDirectory($dir);
                 continue;
             }
 
-            // بررسی زمان آخرین فایل آپلود شده در این پوشه چانک
             $lastModifiedTime = 0;
             foreach ($files as $file) {
                 $time = $disk->lastModified($file);
@@ -55,7 +70,7 @@ Schedule::call(function () {
                 }
             }
 
-            // اگر از آخرین چانک آپلود شده بیش از ۲۴ ساعت گذشته باشد، یعنی آپلود رها شده است
+            // اگر ۲۴ ساعت از آخرین چانک رها شده گذشته باشد
             if (time() - $lastModifiedTime > 86400) {
                 $disk->deleteDirectory($dir);
             }
@@ -63,4 +78,7 @@ Schedule::call(function () {
             Log::error("خطا در پاکسازی چانک موقت در مسیر: {$dir}", ['error' => $e->getMessage()]);
         }
     }
-})->daily()->name('cleanup-expired-upload-chunks');
+})
+    ->daily()
+    ->name('cleanup-expired-upload-chunks')
+    ->withoutOverlapping(); // 🟢 گارد امنیتی عدم همپوشانی برای جلوگیری از درگیری شدید I/O سرور

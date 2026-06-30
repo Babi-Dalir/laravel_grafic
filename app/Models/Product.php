@@ -10,6 +10,7 @@ use App\Helpers\DateManager;
 use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -31,6 +32,19 @@ class Product extends Model
         'user_id',
         'category_id',
     ];
+
+    protected static function booted()
+    {
+        $clearHomeCache = function () {
+            Cache::forget('home.products.most_sold');
+            Cache::forget('home.products.newest_products');
+            Cache::forget('home.products.special');
+            Cache::forget('home.products.instant_offers');
+        };
+
+        static::saved($clearHomeCache);
+        static::deleted($clearHomeCache);
+    }
 
     protected $appends = ['final_price', 'discount_percent', 'completion_percent'];
 

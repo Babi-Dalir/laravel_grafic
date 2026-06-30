@@ -11,25 +11,21 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
+        // ۱. بهینه‌سازی لود کاتگوری‌ها با شمارش همزمان محصولات بدون آسیب به دیتابیس
         $categories = Cache::remember(
             'categories',
             now()->addDays(10),
             fn() => Category::query()
                 ->with('childCategory.childCategory')
-                ->where('parent_id',0)
+                ->withCount('products') // 🟢 اضافه شدن فیلد اتوماتیک products_count برای جلوگیری از باگ N+1 در بلید
+                ->where('parent_id', 0)
                 ->get()
         );
 
