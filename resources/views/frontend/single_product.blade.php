@@ -67,7 +67,7 @@
         </div>
     </main>
 
-    {{-- ⚡ اسکریپت فوق پیشرفته و منعطف تایمر معکوس شگفت‌انگیز متصل به هوک‌های لایووایر --}}
+    {{-- ⚡ اسکریپت فوق پیشرفته تایمر معکوس شگفت‌انگیز متصل به هوک‌های لایووایر همراه با حذف داینامیک باکس تخفیف --}}
     <script>
         let babiTimerInterval = null;
 
@@ -78,14 +78,12 @@
             const expirationAttr = timerEl.getAttribute('data-expiration');
             let targetTimestamp = NaN;
 
-            // تحلیل ساختاری امن نوع تاریخ دریافتی دیتابیس
             if (!isNaN(expirationAttr)) {
                 targetTimestamp = parseInt(expirationAttr) * 1000;
             } else {
                 targetTimestamp = Date.parse(expirationAttr.replace(/-/g, '/'));
             }
 
-            // در صورتی که ساختار فرمت تاریخ با مرورگر کلاینت همخوانی نداشت (فال‌بک امن برای جلوگیری از خرابی فرانت)
             if (isNaN(targetTimestamp)) {
                 targetTimestamp = new Date().getTime() + (12 * 60 * 60 * 1000);
             }
@@ -98,10 +96,24 @@
 
                 if (distance < 0) {
                     clearInterval(babiTimerInterval);
-                    document.getElementById('babi-days').innerText = "00";
-                    document.getElementById('babi-hours').innerText = "00";
-                    document.getElementById('babi-minutes').innerText = "00";
-                    document.getElementById('babi-seconds').innerText = "00";
+
+                    // 🟢 ۱. پیدا کردن و حذف کردن بج بالای عکس محصول
+                    const topBadge = document.getElementById('babi-badge-top');
+                    if (topBadge) {
+                        topBadge.style.transition = 'all 0.4s ease';
+                        topBadge.style.opacity = '0';
+                        topBadge.style.transform = 'translateY(-10px)'; // افکت حرکت به سمت بالا هنگام غیب شدن
+                        setTimeout(() => topBadge.remove(), 400);
+                    }
+
+                    // 🟢 ۲. پیدا کردن و حذف کردن باکس سایدبار سمت چپ
+                    const shameBox = document.getElementById('babi-shame-box');
+                    if (shameBox) {
+                        shameBox.style.transition = 'all 0.5s ease';
+                        shameBox.style.opacity = '0';
+                        shameBox.style.transform = 'scale(0.9)';
+                        setTimeout(() => shameBox.remove(), 500);
+                    }
                     return;
                 }
 
@@ -122,10 +134,8 @@
             }, 1000);
         }
 
-        // اجرای اولیه پس از لود دام
         document.addEventListener('DOMContentLoaded', startBabiCountdown);
 
-        // همگام‌سازی و راه‌اندازی مجدد پس از تغییرات الگو توسط Livewire
         document.addEventListener('livewire:load', function () {
             window.Livewire.hook('message.processed', () => {
                 startBabiCountdown();

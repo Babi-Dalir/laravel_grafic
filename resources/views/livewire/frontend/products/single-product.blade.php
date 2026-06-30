@@ -22,13 +22,13 @@
                 aria-current="page">{{ Str::limit($product->name, 40) }}</li>
         </ol>
     </nav>
-    {{-- 🛠️ اصلاح تداخل: بج شگفت‌انگیز به بالا سمت چپ (end-0) منتقل شد تا با دکمه علاقه‌مندی تداخل نداشته باشد --}}
+
+
     @if($expirationDate)
-        <div class="position-absolute top-0 end-0 z-3 p-2" style="z-index: 10;">
-                            <span
-                                class="badge bg-danger font-12 px-3 py-2 rounded-pill shadow-sm font-weight-bold animate-pulse">
-                                <i class="mdi mdi-fire me-1"></i>شگفت‌انگیز بابی شاپ
-                            </span>
+        <div id="babi-badge-top" class="position-absolute top-0 end-0 z-3 p-2" style="z-index: 10;">
+        <span class="badge bg-danger font-12 px-3 py-2 rounded-pill shadow-sm font-weight-bold animate-pulse">
+            <i class="mdi mdi-fire me-1"></i>شگفت‌انگیز
+        </span>
         </div>
     @endif
 
@@ -176,45 +176,39 @@
                         </div>
                     </div>
 
-                    {{-- 🛠️ اصلاح راست‌چین: استفاده از flex-row-reverse جهت نمایش مرتب و اصولی روز، ساعت، دقیقه و ثانیه از راست به چپ --}}
+
                     @if($expirationDate)
                         <div
+                            id="babi-shame-box"
                             class="mb-3 p-3 text-white rounded-15 animate-pulse d-flex flex-column gap-2 border-0 shadow-sm text-center"
                             style="background: linear-gradient(135deg, #ef4056 0%, #c31432 100%);" wire:ignore>
-                            <div
-                                class="d-flex justify-content-center align-items-center gap-1 font-13 font-weight-bold">
+
+                            <div class="d-flex justify-content-center align-items-center gap-1 font-13 font-weight-bold">
                                 <i class="mdi mdi-clock-flash fs-5"></i>
                                 <span>فرصت محدود پیشنهاد شگفت‌انگیز!</span>
                             </div>
+
                             <div
                                 class="babi-custom-timer d-flex flex-row-reverse gap-2 font-numeric align-items-center justify-content-center text-white mt-1"
                                 id="babi-product-countdown"
                                 data-expiration="{{ $expirationDate }}">
 
-                                <div
-                                    class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1"
-                                    style="min-width: 42px;">
+                                <div class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1" style="min-width: 42px;">
                                     <span class="h6 font-weight-black mb-0 text-white" id="babi-days">00</span>
                                     <small style="font-size: 9px; opacity: 0.85;">روز</small>
                                 </div>
                                 <span class="font-weight-black" style="line-height: 1.2; padding-bottom: 12px;">:</span>
-                                <div
-                                    class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1"
-                                    style="min-width: 42px;">
+                                <div class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1" style="min-width: 42px;">
                                     <span class="h6 font-weight-black mb-0 text-white" id="babi-hours">00</span>
                                     <small style="font-size: 9px; opacity: 0.85;">ساعت</small>
                                 </div>
                                 <span class="font-weight-black" style="line-height: 1.2; padding-bottom: 12px;">:</span>
-                                <div
-                                    class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1"
-                                    style="min-width: 42px;">
+                                <div class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1" style="min-width: 42px;">
                                     <span class="h6 font-weight-black mb-0 text-white" id="babi-minutes">00</span>
                                     <small style="font-size: 9px; opacity: 0.85;">دقیقه</small>
                                 </div>
                                 <span class="font-weight-black" style="line-height: 1.2; padding-bottom: 12px;">:</span>
-                                <div
-                                    class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1"
-                                    style="min-width: 42px;">
+                                <div class="d-flex flex-column align-items-center bg-dark bg-opacity-25 rounded-8 px-2 py-1" style="min-width: 42px;">
                                     <span class="h6 font-weight-black mb-0 text-white" id="babi-seconds">00</span>
                                     <small style="font-size: 9px; opacity: 0.85;">ثانیه</small>
                                 </div>
