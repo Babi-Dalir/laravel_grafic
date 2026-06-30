@@ -10,17 +10,24 @@ use Livewire\WithPagination;
 class SellerWalletTransactionList extends Component
 {
     use WithPagination;
+
     protected $paginationTheme = 'bootstrap';
 
     public $search = '';
-    public $type = null;
+    public $type = ''; // 🟢 مقداردهی اولیه به صورت رشته خالی برای جلوگیری از باگ‌های آپدیت سلکتور
 
-    public function updatingSearch()
+    /**
+     * 🚀 همگام‌سازی لایف‌سایکل لایووایر ۳ جهت بازنشانی صفحه پیجینیشن هنگام سرچ
+     */
+    public function updatedSearch()
     {
         $this->resetPage();
     }
 
-    public function updatingType()
+    /**
+     * بازنشانی صفحه پیجینیشن هنگام تغییر فیلتر نوع تراکنش
+     */
+    public function updatedType()
     {
         $this->resetPage();
     }
@@ -30,35 +37,40 @@ class SellerWalletTransactionList extends Component
         $user = auth()->user();
         $seller = $user->seller;
 
+        // گارد محافظتی: اگر کاربر نقش فروشنده نداشت یا اطلاعاتش ثبت نشده بود
+        if (!$seller) {
+            abort(403, 'اطلاعات فروشندگی شما یافت نشد.');
+        }
+
         $transactions = SellerWalletTransaction::query()
+            // 🟢 بهینه‌سازی زنجیره روابط جهت جلوگیری از باگ N+1 و افزایش سرعت لود به میلی‌ثانیه
             ->with([
-                'order.orderDetails.product',
+                'order.orderDetails.product:id,name',
             ])
             ->where('seller_id', $seller->id)
-
-            ->when($this->search, function ($q) {
-                $q->where('description', 'like', "%{$this->search}%")
-                    ->orWhere('code', 'like', "%{$this->search}%")
-                    ->orWhere('reference_id', 'like', "%{$this->search}%");
+            // 🟢 رفع باگ امنیتی IDOR با گروه‌بندی شرط‌های جستجو (Logical Grouping)
+            ->when(filled($this->search), function ($q) {
+                $q->where(function ($innerQuery) {
+                    $searchTerm = "%{$this->search}%";
+                    $innerQuery->where('description', 'like', $searchTerm)
+                        ->orWhere('code', 'like', $searchTerm)
+                        ->orWhere('reference_id', 'like', $searchTerm);
+                });
             })
-
-            ->when($this->type, fn($q) =>
-            $q->where('type', $this->type)
-            )
-
+            // 🟢 فیلتر دقیق نوع تراکنش مبتنی بر انوم سیستم
+            ->when(filled($this->type), function ($q) {
+                $q->where('type', $this->type);
+            })
             ->latest()
             ->paginate(10);
 
         return view('livewire.seller.wallet.seller-wallet-transaction-list', [
             'transactions' => $transactions,
             'seller' => $seller,
-
-            'pending' => $seller->pending_balance,
-            'paid' => $seller->paid_balance,
-
+            'pending' => $seller->pending_balance ?? 0,
+            'paid' => $seller->paid_balance ?? 0,
             'types' => TransactionType::cases(),
-
-            'canWithdraw' => $seller->pending_balance >= 100000,
+            'canWithdraw' => ($seller->pending_balance ?? 0) >= 100000,
         ]);
     }
 }
