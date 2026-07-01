@@ -11558,3 +11558,113 @@ body.menu-open .btn-menu{
 .babi-shake {
     animation: babiShake 0.4s ease-in-out;
 }
+
+
+/* 🔐 کارت تغییر رمز مستقل و ارتقا یافته بصری */
+.babi-password-isolated-card {
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transform: translateY(-10px);
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    margin 0.3s ease;
+    background: #ffffff !important;
+    border-radius: 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.02) !important;
+    padding: 0 20px;
+    margin-top: 0;
+}
+
+/* حالت فعال و باز شده کارت مستقل بدون تحت تاثیر قرار دادن استایل کارت بالایی */
+.babi-password-isolated-card.is-open {
+    max-height: 320px;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    padding: 20px;
+    margin-top: 15px; /* ایجاد فاصله منظم بین کارت‌ها */
+    border: 1px solid rgba(124, 58, 237, 0.2) !important;
+    box-shadow: 0 15px 35px rgba(124, 58, 237, 0.05) !important;
+}
+
+/* استایل دکمه در زمان فعال بودن فرم */
+button.profile-btn.active-btn {
+    background: #7c3aed !important;
+    color: #ffffff !important;
+}
+
+/* فیلدهای داخل کارت مستقل */
+.babi-mini-row {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.babi-mini-row .input-ui {
+    height: 40px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    padding: 5px 12px !important;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.babi-mini-row .input-ui:focus {
+    border-color: #7c3aed !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.08) !important;
+}
+
+/* خط تزیینی زیر فیلدها */
+.babi-mini-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #7c3aed, #00f2fe);
+    transition: all 0.3s ease;
+}
+.babi-mini-row .input-ui:focus ~ .babi-mini-line {
+    width: 100%;
+    left: 0;
+}
+
+/* هندل کردن ارورها بصورت مینی‌مال */
+.babi-mini-row.has-err .input-ui {
+    border-color: #f43f5e !important;
+    background: #fff1f2 !important;
+}
+.babi-mini-row.has-err .babi-sidebar-err { display: block; }
+.babi-mini-row.is-ok .input-ui { border-color: #10b981 !important; }
+
+.babi-sidebar-err {
+    display: none;
+    font-size: 11px;
+    color: #f43f5e;
+    margin-top: 4px;
+    font-weight: bold;
+    padding-right: 2px;
+}
+
+/* دکمه بروزرسانی */
+.babi-btn-glow-mini {
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.2) !important;
+    transition: all 0.2s ease;
+}
+.babi-btn-glow-mini:hover {
+    box-shadow: 0 8px 18px rgba(139, 92, 246, 0.35) !important;
+    transform: translateY(-1px);
+}
