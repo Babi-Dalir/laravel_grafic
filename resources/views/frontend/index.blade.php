@@ -116,11 +116,7 @@
                                             <div class="product-card">
                                                 <div class="product-head">
                                                     <div class="rating-stars">
-                                                        <i class="mdi mdi-star active"></i>
-                                                        <i class="mdi mdi-star active"></i>
-                                                        <i class="mdi mdi-star active"></i>
-                                                        <i class="mdi mdi-star active"></i>
-                                                        <i class="mdi mdi-star active"></i>
+
                                                     </div>
                                                     @if($product->discount_percent > 0)
                                                         <div class="discount">
@@ -204,11 +200,7 @@
                                         {{-- بخش بالایی کارت شامل ستاره‌ها و تخفیف --}}
                                         <div class="product-head">
                                             <div class="rating-stars">
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
+
                                             </div>
                                             {{-- استفاده از اکسسوری که در مدل محصول ساختیم --}}
                                             @if($spacial_product->discount_percent > 0)
@@ -274,11 +266,7 @@
                                     <div class="product-card">
                                         <div class="product-head">
                                             <div class="rating-stars">
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
-                                                <i class="mdi mdi-star active"></i>
+
                                             </div>
                                             @if($newest_product->discount_percent > 0)
                                                 <div class="discount">

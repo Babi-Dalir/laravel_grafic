@@ -21,13 +21,6 @@
                             </a>
                         </div>
 
-                        <div class="rating-stars">
-                            <i class="mdi mdi-star active"></i>
-                            <i class="mdi mdi-star active"></i>
-                            <i class="mdi mdi-star active"></i>
-                            <i class="mdi mdi-star active"></i>
-                            <i class="mdi mdi-star"></i>
-                        </div>
 
                         <div class="card-horizontal-product-price">
                             <span>
