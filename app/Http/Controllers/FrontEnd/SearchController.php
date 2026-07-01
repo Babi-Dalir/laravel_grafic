@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\FrontEnd;
 
+use App\Enums\ProductStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
@@ -16,21 +17,18 @@ class SearchController extends Controller
         if (mb_strlen($query) < 2) {
             return response()->json([
                 'products' => [],
-                'categories' => [],
             ]);
         }
 
-        $products = Product::where('name', 'LIKE', "%{$query}%")
-            ->take(10)
+        $products = Product::select(['id', 'name', 'slug'])
+            ->where('status', ProductStatus::Approved->value)
+            ->where('name', 'LIKE', "%{$query}%")
+            ->take(8) // نمایش ۸ محصول اول برای شیک ماندن باکس سرچ
             ->get();
 
-        $categories = Category::where('name', 'LIKE', "%{$query}%")
-            ->take(5)
-            ->get();
 
         return response()->json([
             'products' => $products,
-            'categories' => $categories,
         ]);
     }
 }

@@ -33,12 +33,11 @@
         let resultList   = $('#search-result-list');
         let closeBtn     = $('#close-search-result');
 
-        // استفاده از input event برای پوشش همه حالت‌ها
         searchInput.on('input', function(){
 
             let query = $(this).val().trim();
 
-            // اگر خالی شد → کامل ریست
+            // اگر خالی شد → ریست کامل
             if(query.length === 0){
                 resultList.empty();
                 searchResult.hide();
@@ -54,7 +53,7 @@
                 return;
             }
 
-            // نمایش ضربدر
+            // نمایش دکمه پاکسازی (ضربدر)
             closeBtn.show();
 
             $.ajax({
@@ -65,25 +64,24 @@
 
                     let html = '';
 
-                    if(response.categories.length > 0){
-                        html += '<li class="search-title">دسته‌بندی‌ها</li>';
-                        response.categories.forEach(function(cat){
-                            html += `<li><a href="/search_category_product_list/${cat.slug}">${cat.name}</a></li>`;
-                        });
-                    }
-
-                    if(response.products.length > 0){
-                        html += '<li class="search-title">محصولات</li>';
+                    // 🟢 منطق جدید: فقط و فقط رندر کردن محصولات
+                    if(response.products && response.products.length > 0){
+                        html += '<li class="search-title"><i class="mdi mdi-vector-square me-1"></i>محصولات یافت شده</li>';
                         response.products.forEach(function(prod){
-                            html += `<li><a href="/single_products/${prod.slug}">${prod.name}</a></li>`;
+                            // از مسیر صحیح تک‌محصول پلتفرمت استفاده کن
+                            html += `<li><a href="/single_products/${prod.slug}"><i class="mdi mdi-link-variant me-2 text-muted"></i>${prod.name}</a></li>`;
                         });
-                    }
-
-                    if(response.categories.length == 0 && response.products.length == 0){
+                    } else {
+                        // در صورتی که هیچ محصولی با این نام پیدا نشد
                         html += `<li class="empty-result">نتیجه‌ای برای «${query}» پیدا نشد</li>`;
                     }
 
                     resultList.html(html);
+                    searchResult.show();
+                },
+                error: function() {
+                    // مدیریت خطاهای احتمالی شبکه جهت جلوگیری از خرابی فرانت
+                    resultList.html('<li class="empty-result text-danger">خطا در برقراری ارتباط با سرور</li>');
                     searchResult.show();
                 }
             });
@@ -97,6 +95,13 @@
             searchResult.hide();
             closeBtn.hide();
             searchInput.focus();
+        });
+
+        // بستن باکس سرچ اگر کاربر جایی خارج از باکس کلیک کرد
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.search-area').length) {
+                searchResult.hide();
+            }
         });
 
     });

@@ -84,7 +84,7 @@
                             <div class="category-slider owl-carousel">
                                 @foreach ($categories as $category)
                                     <div class="item">
-                                        <a href="#" class="promotion-category">
+                                        <a href="{{ route('main.category.product.list', $category->slug) }}" class="promotion-category">
                                             <img src="{{ url('images/categories/big/' . $category->image) }}"
                                                  alt="">
                                             <h4 class="promotion-category-name">{{ $category->name }}</h4>

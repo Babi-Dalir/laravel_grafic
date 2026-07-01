@@ -23,7 +23,7 @@
                             <i class="far fa-search search-icon"></i>
 
                             <input type="text" class="form-control search-input"
-                                   placeholder="نام کالا، برند یا دسته مورد نظر خود را جستجو کنید…" id="ajax-search"
+                                   placeholder="نام طرح مورد نظر خود را جستجو کنید…" id="ajax-search"
                                    autocomplete="off">
 
                             <button type="button" id="close-search-result" style="display:none;">
