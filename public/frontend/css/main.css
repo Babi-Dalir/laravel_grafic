@@ -9786,7 +9786,6 @@ footer.mini-footer .copy-right-mini-footer {
     border:2px solid rgba(99,102,241,.4);
     background:transparent;
 }
-
 /* =========================
    HAMBURGER
 ========================= */
@@ -9798,17 +9797,24 @@ footer.mini-footer .copy-right-mini-footer {
     background:transparent;
     cursor:pointer;
     padding:0;
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 20001;
-    transition: .35s;
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:20001;
+
+    transition:
+        opacity .35s ease,
+        visibility .35s ease,
+        transform .35s ease;
 }
+
 body.menu-open .btn-menu{
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transform:scale(.9);
 }
+
 .btn-menu .align{
     width:24px;
     height:18px;
@@ -9841,14 +9847,22 @@ body.menu-open .btn-menu{
     background:rgba(0,0,0,.35);
     opacity:0;
     visibility:hidden;
-    transition:.3s;
+
+    transition:
+        opacity .45s ease,
+        visibility 0s linear .45s;
+
     z-index:9998;
 }
 
 .overlay-side-menu.active{
     opacity:1;
     visibility:visible;
+
+    transition:
+        opacity .45s ease;
 }
+
 
 /* =========================
    SIDEBAR
@@ -9863,13 +9877,23 @@ body.menu-open .btn-menu{
     background:#fff;
     z-index:9999;
     overflow-y:auto;
-    transition:.35s ease;
+
     box-shadow:-5px 0 25px rgba(0,0,0,.08);
+
     transform:translateX(100%);
+    opacity:0;
+
+    transition:
+        transform .55s cubic-bezier(.22,1,.36,1),
+        opacity .4s ease,
+        box-shadow .4s ease;
+
+    will-change:transform,opacity;
 }
 
 .side-menu.active{
     transform:translateX(0);
+    opacity:1;
 }
 
 /* لوگو */
@@ -9889,6 +9913,7 @@ body.menu-open .btn-menu{
     border-bottom:1px solid #f2f2f2;
 }
 
+
 /* =========================
    MENU
 ========================= */
@@ -9901,19 +9926,50 @@ body.menu-open .btn-menu{
 
 .side-menu ul li{
     border-bottom:1px solid #f8f8f8;
+
+    opacity:0;
+    transform:translateX(20px);
+
+    transition:
+        opacity .35s ease,
+        transform .35s ease;
 }
+
+.side-menu.active ul li{
+    opacity:1;
+    transform:translateX(0);
+}
+
+/* تاخیر برای ظاهر شدن آیتم‌ها */
+
+.side-menu.active li:nth-child(1){transition-delay:.05s;}
+.side-menu.active li:nth-child(2){transition-delay:.08s;}
+.side-menu.active li:nth-child(3){transition-delay:.11s;}
+.side-menu.active li:nth-child(4){transition-delay:.14s;}
+.side-menu.active li:nth-child(5){transition-delay:.17s;}
+.side-menu.active li:nth-child(6){transition-delay:.20s;}
+.side-menu.active li:nth-child(7){transition-delay:.23s;}
+.side-menu.active li:nth-child(8){transition-delay:.26s;}
+.side-menu.active li:nth-child(9){transition-delay:.29s;}
+.side-menu.active li:nth-child(10){transition-delay:.32s;}
+.side-menu.active li:nth-child(11){transition-delay:.35s;}
+.side-menu.active li:nth-child(12){transition-delay:.38s;}
 
 .side-menu ul li a{
     display:block;
     padding:14px 16px;
     color:#444;
     font-size:14px;
-    transition:.2s;
+    transition:
+        background .25s ease,
+        color .25s ease,
+        padding-right .25s ease;
 }
 
 .side-menu ul li a:hover{
     background:#fafafa;
     color:#ef394e;
+    padding-right:20px;
 }
 
 .side-menu ul li ul{
@@ -9928,11 +9984,12 @@ body.menu-open .btn-menu{
 .side-menu ul li ul li ul a{
     padding-right:45px;
 }
-@media (min-width:768px){
-    .btn-menu{
-        display:none;
-    }
-}
+
+
+/* =========================
+   CLOSE BUTTON
+========================= */
+
 .close-menu{
     position:absolute;
     top:15px;
@@ -9941,8 +9998,26 @@ body.menu-open .btn-menu{
     background:none;
     font-size:28px;
     cursor:pointer;
+    transition:
+        transform .25s ease,
+        color .25s ease;
 }
 
+.close-menu:hover{
+    transform:rotate(90deg);
+    color:#ef394e;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (min-width:768px){
+    .btn-menu{
+        display:none;
+    }
+}
 
 .social-list {
     list-style: none;
