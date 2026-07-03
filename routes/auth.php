@@ -40,6 +40,11 @@ Route::middleware('guest')->group(function () {
         ->name('verify.mobile');
     Route::post('verify_code', [VerifyMobileController::class, 'verifyCode'])
         ->name('verify.code');
+
+    // ⚡ روت جدید ارسال مجدد کد (محدود شده با تراتل لاراول جهت جلوگیری از اسپم اس‌ام‌اس)
+    Route::post('resend_otp', [VerifyMobileController::class, 'resendOtp'])
+        ->middleware('throttle:3,1') // حداکثر ۳ بار ارسال مجدد در دقیقه
+        ->name('verify.resend');
 });
 
 Route::middleware('auth')->group(function () {

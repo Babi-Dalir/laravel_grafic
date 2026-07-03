@@ -24,7 +24,7 @@ class VerifyMobileController extends Controller
             'code' => ['required', 'array', 'size:5'],
             'code.*' => ['required', 'numeric']
         ]);
-        
+
         $code = (int)implode('', $request->code);
         $mobile = Session::get('mobile');
         $check = VerificationCode::checkVerificationCode($mobile, $code);
@@ -33,7 +33,7 @@ class VerifyMobileController extends Controller
             return redirect()
                 ->back()
                 ->with(
-                    'message',
+                    'error',
                     'کد وارد شده صحیح نمیباشد'
                 );
         }
@@ -44,7 +44,7 @@ class VerifyMobileController extends Controller
             return redirect()
                 ->route('login')
                 ->with(
-                    'message',
+                    'error',
                     'این شماره قبلا ثبت شده است'
                 );
         }
@@ -74,5 +74,36 @@ class VerifyMobileController extends Controller
 
         return redirect()->route('home');
 
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $mobile = Session::get('mobile');
+
+        if (!$mobile) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'اطلاعات شماره همراه یافت نشد'
+            ], 422);
+        }
+
+        VerificationCode::query()->where('mobile', $mobile)->delete();
+
+        $newCode = rand(11111, 99999);
+
+        VerificationCode::create([
+            'mobile' => $mobile,
+            'code'   => $newCode,
+        ]);
+
+        // Sms sender
+        // SmsManager::sendOtp($mobile, $newCode);
+
+        Session::keep(['name', 'mobile', 'password']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'کد جدید ارسال شد'
+        ]);
     }
 }
