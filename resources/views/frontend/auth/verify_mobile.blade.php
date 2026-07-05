@@ -115,7 +115,7 @@
                                     <div id="babi-countdown-container" class="d-flex align-items-center justify-content-center">
                                         <i class="fal fa-clock ml-2 text-muted"></i>
                                         <span class="text-muted ml-1">ارسال مجدد کد پس از:</span>
-                                        <span id="countdown-verify-end" class="babi-timer-num">02:00</span>
+
                                     </div>
 
                                     <button type="button" id="babi-resend-btn" class="btn babi-resend-link" style="display:none;">
