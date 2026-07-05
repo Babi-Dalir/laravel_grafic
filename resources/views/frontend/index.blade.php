@@ -74,25 +74,64 @@
             </div>
             <!-- End Main-Slider -->
             <!-- Start Category-Section -->
-            <div class="row mt-3 mb-5">
+            <div class="row mt-4 mb-5">
                 <div class="col-12">
-                    <div class="category-section dt-sn dt-sl border">
-                        <div class="category-section-title dt-sl">
-                            <h3>دسته بندی ها</h3>
+                    <div class="category-section dt-sn dt-sl border" style="padding: 30px 20px; background: #ffffff; border-radius: 26px; position: relative; overflow: hidden;">
+
+                        <div class="section-title text-sm-title title-wide no-after-title-wide mb-4">
+                            <h2 style="font-size: 18.5px; font-weight: 850; color: #0f172a; display: flex; align-items: center; gap: 12px;">
+                                <span class="grafic-neon-pulse-dot"></span>
+                                دسته‌بندی‌ها
+                            </h2>
                         </div>
-                        <div class="category-section-slider dt-sl">
-                            <div class="category-slider owl-carousel">
-                                @foreach ($categories as $category)
-                                    <div class="item">
-                                        <a href="{{ route('main.category.product.list', $category->slug) }}" class="promotion-category">
-                                            <img src="{{ url('images/categories/big/' . $category->image) }}"
-                                                 alt="">
-                                            <h4 class="promotion-category-name">{{ $category->name }}</h4>
+
+                        <div class="row g-4 px-2">
+                            @foreach ($categories as $category)
+                                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mb-3">
+                                    <div class="grafic-future-neon-box">
+
+                                        <div class="neon-plasma-glow"></div>
+
+                                        <a href="{{ route('main.category.product.list', $category->slug) }}" class="neon-box-anchor">
+
+                                            <div class="neon-icon-core-wrapper">
+                                                <div class="neon-loading-ring-flow"></div>
+                                                <div class="neon-icon-shield">
+                                                    <img src="{{ url('images/categories/big/' . $category->image) }}" alt="{{ $category->name }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="neon-box-details">
+                                                <h4 class="neon-box-title">{{ $category->name }}</h4>
+                                                <span class="neon-box-status font-numeric">
+                                        <span class="neon-online-indicator"></span>
+                                        {{ $category->products_count }} منبع دیجیتال
+                                    </span>
+                                            </div>
+
+                                            <div class="neon-box-action-btn">
+                                                <i class="mdi mdi-arrow-left"></i>
+                                            </div>
                                         </a>
+
+                                        <div class="neon-box-footer-tags">
+                                            @if($category->childCategory && $category->childCategory->count() > 0)
+                                                @foreach($category->childCategory->take(2) as $subCategory)
+                                                    <a href="{{ route('main.category.product.list', $subCategory->slug) }}">
+                                                        {{ $subCategory->name }}
+                                                    </a>
+                                                @endforeach
+                                            @else
+                                                <span class="neon-static-tag-prime">پریمیوم</span>
+                                                <span class="neon-static-tag-prime">وکتور کات</span>
+                                            @endif
+                                        </div>
+
                                     </div>
-                                @endforeach
-                            </div>
+                                </div>
+                            @endforeach
                         </div>
+
                     </div>
                 </div>
             </div>
