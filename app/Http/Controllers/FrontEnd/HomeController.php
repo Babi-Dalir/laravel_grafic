@@ -83,6 +83,11 @@ class HomeController extends Controller
         ));
     }
 
+    public function about()
+    {
+        return view('frontend.about');
+    }
+
     public function userCart()
     {
         // سبد خرید کاربر نیازی به کش سراسری ندارد چون دیتای داینامیک شخصی است

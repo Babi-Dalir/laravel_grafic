@@ -15,6 +15,9 @@ require __DIR__ . '/auth.php';
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 
+// مسیر صفحه درباره ما
+Route::get('/about_us', [HomeController::class, 'about'])->name('about');
+
 Route::get('/single_products/{slug}', [ProductController::class, 'singleProduct'])->name('single.product');
 
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');

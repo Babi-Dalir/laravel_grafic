@@ -11998,3 +11998,158 @@ button.profile-btn.active-btn {
     caret-color: transparent !important; /* پنهان کردن خط چشمک‌زن فوکوس */
     direction: ltr !important;
 }
+
+/* --- استایل‌های اختصاصی صفحه درباره ما لوکس --- */
+
+.babi-about-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px 30px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 15px 35px rgba(148, 163, 184, 0.1);
+    transition: transform 0.1s ease-out;
+}
+
+.babi-about-header {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.03) 0%, rgba(109, 40, 217, 0.03) 100%);
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px dashed rgba(124, 58, 237, 0.15);
+    margin-bottom: 35px;
+}
+
+.babi-about-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.babi-about-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+.babi-about-body {
+    line-height: 34px;
+    font-size: 15.5px;
+    color: #475569;
+    text-align: justify;
+    padding: 0 10px;
+}
+
+.babi-about-lead {
+    font-size: 16.5px;
+    margin-bottom: 20px;
+}
+
+.babi-highlight {
+    color: #7c3aed;
+    font-weight: 700;
+}
+
+.babi-about-text {
+    margin-bottom: 40px;
+}
+
+/* کارت‌های آماری شیشه‌ای و نئون */
+.babi-stats-grid {
+    margin-bottom: 40px;
+}
+
+.babi-stat-box {
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.babi-stat-icon-wrapper {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    font-size: 24px;
+}
+
+.babi-stat-number {
+    font-size: 22px;
+    font-weight: 900;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.babi-stat-label {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* تنوع رنگی نئون برای باکس‌ها */
+.box-purple {
+    background: rgba(124, 58, 237, 0.03);
+    border-color: rgba(124, 58, 237, 0.08);
+}
+.box-purple .babi-stat-icon-wrapper {
+    background: rgba(124, 58, 237, 0.08);
+    color: #7c3aed;
+}
+
+.box-emerald {
+    background: rgba(16, 185, 129, 0.03);
+    border-color: rgba(16, 185, 129, 0.08);
+}
+.box-emerald .babi-stat-icon-wrapper {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+}
+
+.box-amber {
+    background: rgba(245, 158, 11, 0.03);
+    border-color: rgba(245, 158, 11, 0.08);
+}
+.box-amber .babi-stat-icon-wrapper {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+}
+
+.babi-stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.04);
+}
+
+/* دکمه لوکس بازگشت به صفحه اصلی */
+.babi-btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    border: none;
+    color: #ffffff !important;
+    padding: 12px 35px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.25);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.babi-btn-back i {
+    transition: transform 0.2s ease;
+}
+
+.babi-btn-back:hover {
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+    transform: translateY(-2px);
+}
+
+.babi-btn-back:hover i {
+    transform: translateX(3px); /* جابجایی نرم آیکون فلش به سمت راست در هاور فارسی */
+}

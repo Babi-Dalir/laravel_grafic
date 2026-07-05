@@ -80,10 +80,10 @@
                             <h3 class="card-title">درباره ما</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li><a href="#">درباره فروشگاه</a></li>
+                            <li><a href="{{route('about')}}">درباره رابی گرافیک</a></li>
                             <li><a href="#">فروش طرح‌های گرافیکی</a></li>
                             <li><a href="#">همکاری با طراحان</a></li>
-                            <li><a href="#">تماس با ما</a></li>
+                            <li><a href="{{route('about')}}#contact-info">تماس با ما</a></li>
                         </ul>
                     </div>
                 </div>
@@ -151,9 +151,9 @@
             <div class="row">
 
                 <div class="site-description col-12 col-lg-8">
-                    <h1 class="site-title">
+                    <h2 class="site-title" style="font-size: 18px; font-weight: bold;">
                         فروشگاه فایل‌های گرافیکی، دیجیتال و لایه‌باز
-                    </h1>
+                    </h2>
                     <p>
                         این فروشگاه مرجع دانلود و خرید انواع طرح‌های گرافیکی شامل فایل‌های PSD،
                         قالب‌های آماده، وکتور، موکاپ و فایل‌های لایه‌باز است.
