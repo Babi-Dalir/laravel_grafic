@@ -3,30 +3,25 @@
 namespace App\Console\Commands;
 
 use App\Enums\DiscountCampaignStatus;
+use App\Enums\DiscountStatus;
+use App\Enums\GiftCartStatus; // 🟢 اضافه شدن انوم کارت هدیه
 use App\Models\DiscountCampaign;
+use App\Models\Discount;
+use App\Models\GiftCart; // 🟢 اضافه شدن مدل کارت هدیه
 use Illuminate\Console\Command;
 
 class CheckExpiredCampaigns extends Command
 {
-    /**
-     * نام دستوری که در آرتیسان صدا زده می‌شود
-     */
     protected $signature = 'campaigns:check-expiry';
 
-    /**
-     * توضیحات کامند
-     */
-    protected $description = 'بررسی خودکار کمپین‌های تخفیف و غیرفعال کردن موارد منقضی شده';
+    protected $description = 'بررسی خودکار کمپین‌ها، کدهای تخفیف و کارت‌های هدیه و غیرفعال کردن موارد منقضی شده';
 
-    /**
-     * منطق اصلی دستور
-     */
     public function handle()
     {
         $now = now();
 
-        // واکشی و آپدیت اتمیک کمپین‌هایی که فعال هستند اما تاریخ انقضای آن‌ها گذشته است
-        $updatedCount = DiscountCampaign::query()
+        // ۱. غیرفعال کردن کمپین‌های منقضی شده
+        $updatedCampaigns = DiscountCampaign::query()
             ->where('status', DiscountCampaignStatus::Active->value)
             ->whereNotNull('expires_at')
             ->where('expires_at', '<', $now)
@@ -34,10 +29,31 @@ class CheckExpiredCampaigns extends Command
                 'status' => DiscountCampaignStatus::InActive->value
             ]);
 
-        if ($updatedCount > 0) {
-            $this->info("تعداد {$updatedCount} کمپین منقضی شده با موفقیت غیرفعال شدند.");
-        } else {
-            $this->info('هیچ کمپین منقضی شده‌ای برای غیرفعال‌سازی یافت نشد.');
+        // ۲. غیرفعال کردن کدهای تخفیف منقضی شده
+        $updatedDiscounts = Discount::query()
+            ->where('status', DiscountStatus::Active->value)
+            ->whereNotNull('expiration_date')
+            ->where('expiration_date', '<', $now)
+            ->update([
+                'status' => DiscountStatus::InActive->value
+            ]);
+
+        // ۳. 🟢 غیرفعال کردن کارت‌های هدیه منقضی شده (سناریوی جدید شما)
+        $updatedGiftCarts = GiftCart::query()
+            ->where('status', GiftCartStatus::Active->value)
+            ->whereNotNull('expiration_date')
+            ->where('expiration_date', '<', $now)
+            ->update([
+                'status' => GiftCartStatus::InActive->value
+            ]);
+
+        // چاپ گزارش در ترمینال یا لاگ سرور
+        if ($updatedCampaigns > 0) $this->info("تعداد {$updatedCampaigns} کمپین غیرفعال شد.");
+        if ($updatedDiscounts > 0) $this->info("تعداد {$updatedDiscounts} کد تخفیف غیرفعال شد.");
+        if ($updatedGiftCarts > 0) $this->info("تعداد {$updatedGiftCarts} کارت هدیه منقضی شده غیرفعال شد.");
+
+        if ($updatedCampaigns === 0 && $updatedDiscounts === 0 && $updatedGiftCarts === 0) {
+            $this->info('هیچ آیتم منقضی شده‌ای برای غیرفعال‌سازی یافت نشد.');
         }
     }
 }

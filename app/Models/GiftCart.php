@@ -17,13 +17,27 @@ class GiftCart extends Model
         'expiration_date',
     ];
 
-    // 🟢 تضمین یکپارچگی کستینگ برای دیتابیس سرور لینوکس
     protected function casts(): array
     {
         return [
             'status' => GiftCartStatus::class,
             'expiration_date' => 'datetime',
         ];
+    }
+
+    /**
+     * 🟢 شنود تغییرات مدل برای غیرفعال‌سازی خودکار در صورت اتمام موجودی (امنیتی آنلاین)
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // به محض اینکه فیلد balance در هر کجای پروژه آپدیت شد، این بخش اجرا می‌شود
+        self::updating(function ($giftCart) {
+            if ($giftCart->isDirty('balance') && $giftCart->balance <= 0) {
+                $giftCart->status = GiftCartStatus::InActive->value;
+            }
+        });
     }
 
     public function user()
@@ -33,7 +47,6 @@ class GiftCart extends Model
 
     public static function calculateGiftCart($shop_data, $total_price, $gif_cart_code_price)
     {
-        // 🟢 بهینه‌سازی سرور: استفاده از now() مرکزی لاراول برای جلوگیری از باگ چند ساعت اختلاف زمان سرور میزبان
         $gift_cart = self::query()
             ->where('code', $shop_data['gift_cart_code'])
             ->where('user_id', auth()->id())
