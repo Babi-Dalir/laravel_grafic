@@ -1,7 +1,7 @@
 <header class="main-header">
     <!-- Start ads -->
     <div class="ads-header-wrapper">
-        <a href="#" class="ads-header hidden-sm" target="_blank"
+        <a href="{{route('home')}}" class="ads-header hidden-sm" target="_blank"
            style="background-image: url({{ url('images/banners/big/' . $banners->where('type', 'top_banner')->first()->image) }})"></a>
     </div>
     <!-- End ads -->
@@ -148,7 +148,7 @@
                     </button>
                     <div class="logo-nav-res dt-sl text-center">
                         <a href="#">
-                            <img src="assets/img/logo.png" alt="">
+                            <img src="{{ url('frontend/img/logo.png') }}" alt="">
                         </a>
                     </div>
 

@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Categories;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -41,6 +42,7 @@ class CategoryList extends Component
         $category = Category::findOrFail($id);
         $category->delete();
         $this->mount(); // بروزرسانی لیست
+        Cache::forget('categories');
     }
 
     public function searchData()

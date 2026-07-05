@@ -6,6 +6,7 @@ use App\Enums\ProductStatus;
 use App\Helpers\ImageManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
 {
@@ -48,6 +49,7 @@ class Category extends Model
 
     public static function createCategory($request)
     {
+        Cache::forget('categories');
         self::query()->create([
             'name' => $request->input('name'),
             'e_name' => $request->input('e_name'),
@@ -59,6 +61,7 @@ class Category extends Model
 
     public static function updateCategory($request, $category)
     {
+        Cache::forget('categories');
         $imageName = $category->image;
         if ($request->hasFile('image')) {
             ImageManager::unlinkImage('categories', $category); // حذف عکس قبلی

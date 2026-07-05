@@ -23,7 +23,7 @@ class StoreBannerRequest extends FormRequest
     {
         return [
             'type' => ['required', 'string', 'max:50'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3048'],
         ];
     }
     public function messages(): array

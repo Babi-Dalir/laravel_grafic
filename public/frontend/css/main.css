@@ -10065,6 +10065,12 @@ body.menu-open .btn-menu{
     box-shadow: 0 12px 25px rgba(34,158,217,0.35);
 }
 
+/* Rubika */
+.social-icon.rubika:hover {
+    background: #24C267; /* رنگ روبیکا */
+    box-shadow: 0 12px 25px rgba(36,194,103,.35);
+}
+
 /* Behance */
 .social-icon.behance:hover {
     background: #1769ff;

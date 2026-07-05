@@ -97,10 +97,26 @@
 
                         <!-- Social (بدون تغییر) -->
                         <ul class="social-list">
-                            <li><a href="#" class="social-icon instagram"><i class="mdi mdi-instagram"></i></a></li>
-                            <li><a href="#" class="social-icon telegram"><i class="mdi mdi-telegram"></i></a></li>
-                            <li><a href="#" class="social-icon behance"><i class="mdi mdi-behance"></i></a></li>
-                            <li><a href="#" class="social-icon dribbble"><i class="mdi mdi-dribbble"></i></a></li>
+
+                            <!-- Instagram -->
+                            <li><a href="{{ config('social.instagram') }}" class="social-icon instagram"><i
+                                        class="mdi mdi-instagram"></i></a></li>
+
+                            <!-- Telegram -->
+                            <li><a href="{{ config('social.telegram') }}" class="social-icon telegram"><i class="mdi mdi-telegram"></i></a></li>
+
+                            <!-- Rubika -->
+                            <li>
+                                <a href="{{ config('social.rubika') }}"
+                                   class="social-icon rubika"
+                                   target="_blank">
+
+                                    <img src="{{ url('frontend/img/rubika.png') }}"
+                                         alt="Rubika"
+                                         style="width:30px;height:30px;">
+
+                                </a>
+                            </li>
                         </ul>
 
                         <!-- SUPPORT (فقط کنترل layout) -->
@@ -112,9 +128,9 @@
 
                                 <span class="support-text">پشتیبانی :</span>
 
-                                <a href="tel:02112345678" class="support-phone">
+                                <a href="tel:{{ config('social.phone') }}" class="support-phone">
                                     <i class="mdi mdi-phone"></i>
-                                    021-12345678
+                                    {{ config('social.phone') }}
                                 </a>
 
                             </div>

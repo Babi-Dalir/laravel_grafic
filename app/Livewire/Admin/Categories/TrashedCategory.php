@@ -5,6 +5,7 @@ namespace App\Models; // در صورت نیاز به ایمپورت متدهای
 namespace App\Livewire\Admin\Categories;
 
 use App\Models\Category;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,6 +37,7 @@ class TrashedCategory extends Component
         if ($category) {
             $category->restore();
         }
+        Cache::forget('categories');
     }
 
     public function searchData()
