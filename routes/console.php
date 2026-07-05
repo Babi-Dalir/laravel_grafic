@@ -82,3 +82,7 @@ Schedule::call(function () {
     ->daily()
     ->name('cleanup-expired-upload-chunks')
     ->withoutOverlapping(); // 🟢 گارد امنیتی عدم همپوشانی برای جلوگیری از درگیری شدید I/O سرور
+
+
+// اجرای کامند بررسی انقضای کمپین‌ها به صورت هر ساعت
+Schedule::command('campaigns:check-expiry')->everyHour();
