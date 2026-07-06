@@ -22,6 +22,21 @@
 
         {{-- بخش باکس آپلود هوشمند --}}
         <div class="upload-box" wire:ignore>
+            {{-- 🟢 هشدار ثابت: راهنمایی فایل‌های سنگین --}}
+            <div class="alert-modern alert-modern-warning mb-3" role="alert" style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px;">
+                <i class="fa fa-info-circle text-warning" style="font-size: 20px;"></i>
+                <span class="alert-text" style="color: #92400e; font-size: 13.5px; font-weight: 600;">
+                    توصیه مهم: برای پایداری بیشتر در فرآیند آپلود و حفظ ساختار لایه‌ها، پیشنهاد می‌شود فایل‌های سنگین و حجیم خود را حتماً به صورت فشرده (فرمت ZIP) آپلود نمایید.
+                </span>
+            </div>
+
+            {{-- 🟢 هشدار داینامیک: عدم رفرش صفحه (به صورت پیش‌فرض مخفی است و با شروع آپلود ظاهر می‌شود) --}}
+            <div id="refresh-danger-alert" class="alert-modern alert-modern-danger mb-4 d-none" role="alert" style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px; animation: pulse 2s infinite;">
+                <i class="fa fa-exclamation-triangle text-danger" style="font-size: 20px;"></i>
+                <span class="alert-text" style="color: #991b1b; font-size: 13.5px; font-weight: 700;">
+                    هشدار حیاتی: فرآیند قطعه‌بندی باینری در حال انجام است؛ به هیچ عنوان صفحه را رفرش نکنید یا دکمه بازگشت را نزنید تا آپلود مخدوش نشود!
+                </span>
+            </div>
             <div class="row">
                 <div class="col-12 mb-4 text-left">
                     <label class="input-label">عنوان نمایشی فایل <span class="optional-tag">(اختیاری)</span></label>
@@ -202,7 +217,9 @@
     const progressPercent = document.getElementById('progress-percent');
     const statusText = document.getElementById('upload-status-text');
     const titleInput = document.getElementById('file-title');
+    const refreshDangerAlert = document.getElementById('refresh-danger-alert'); // المان هشدار رفرش
     let completed = false;
+    let isUploadingCurrently = false; // فلگ کنترل وضعیت آپلود برای گارد خروج
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -218,6 +235,15 @@
     });
 
     r.assignBrowse(uploadContainer);
+
+    // 🔒 گارد امنیتی مرورگر برای جلوگیری از رفرش ناخواسته صفحه (F5 یا بستن تب)
+    window.addEventListener('beforeunload', function (e) {
+        if (isUploadingCurrently) {
+            e.preventDefault();
+            e.returnValue = 'فرآیند آپلود فایل در حال انجام است. در صورت خروج، آپلود ناقص می‌ماند. آیا مطمئن هستید؟';
+            return e.returnValue;
+        }
+    });
 
     r.on('fileAdded', function (file) {
         completed = false;
@@ -259,6 +285,10 @@
             resumableTotalSize: r.files[0].size
         };
 
+        // 🟢 فعال‌سازی گارد خروج و نمایش هشدار عدم رفرش در ویو
+        isUploadingCurrently = true;
+        refreshDangerAlert.classList.remove('d-none');
+
         r.upload();
         startBtn.setAttribute('disabled', 'true');
         progressWrapper.classList.remove('d-none');
@@ -266,10 +296,23 @@
     });
 
     r.on('fileProgress', function (file) {
+        // ۱. محاسبه درصد پیشرفت کل فایل
         const progress = Math.floor(file.progress() * 100);
         progressBar.style.width = progress + '%';
         progressPercent.innerText = progress + '%';
-        statusText.innerText = 'در حال ارسال قطعه پارت (' + r.files[0].chunks.filter(c => c.status() === 'complete').length + ' از ' + r.files[0].chunks.length + ')...';
+
+        // ۲. 🟢 فرمول ریاضی دقیق برای محاسبه پارت در حال ارسال بدون باگ صفر
+        const totalChunks = file.chunks.length;
+        // مقدار سقف ریاضی ضربدر تعداد پارت‌ها، پارت در حال پردازش فعلی را دقیقاً لود می‌کند
+        let currentChunkIndex = Math.ceil(file.progress() * totalChunks);
+
+        // گارد کوچک که اگر صفر بود، نشان دهد پارت ۱ است
+        if (currentChunkIndex === 0 && totalChunks > 0) {
+            currentChunkIndex = 1;
+        }
+
+        // ۳. به‌روزرسانی متن وضعیت با اعداد داینامیک و زنده
+        statusText.innerText = 'در حال ارسال قطعه پارت (' + currentChunkIndex + ' از ' + totalChunks + ')...';
     });
 
     r.on('fileSuccess', function(file, message){
@@ -277,6 +320,11 @@
             const data = JSON.parse(message);
             if(data.status === 'success' && data.completed && !completed){
                 completed = true;
+
+                // 🟢 غیرفعال کردن گارد خروج و مخفی کردن هشدار عدم رفرش
+                isUploadingCurrently = false;
+                refreshDangerAlert.classList.add('d-none');
+
                 statusText.innerText = 'فایل پارت آخر با موفقیت منتقل و به صف پردازش نهایی ارسال شد.';
                 r.removeFile(file);
                 fileInfo.innerText = 'فایل خود را به این‌جا بکشید یا کلیک کنید';
@@ -289,6 +337,10 @@
     });
 
     r.on('fileError', function (file, message) {
+        // 🟢 آزادسازی گارد در صورت فیل شدن آپلود برای امکان بازگشت کاربر
+        isUploadingCurrently = false;
+        refreshDangerAlert.classList.add('d-none');
+
         progressBar.style.width = '100%';
         progressBar.style.background = '#ef4444';
         progressPercent.style.background = '#fef2f2';
