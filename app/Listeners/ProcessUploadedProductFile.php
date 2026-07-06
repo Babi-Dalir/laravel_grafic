@@ -30,11 +30,12 @@ class ProcessUploadedProductFile implements ShouldQueue
     protected ProductFileUploadService $uploadValidation;
 
     public function __construct(
-        ZipScannerService $zipScanner,
-        FileAssemblerService $assembler,
-        DigitalStorageService $storageService,
+        ZipScannerService        $zipScanner,
+        FileAssemblerService     $assembler,
+        DigitalStorageService    $storageService,
         ProductFileUploadService $uploadValidation
-    ) {
+    )
+    {
         $this->zipScanner = $zipScanner;
         $this->assembler = $assembler;
         $this->storageService = $storageService;
@@ -114,19 +115,25 @@ class ProcessUploadedProductFile implements ShouldQueue
             // ۴. انتقال استریم باینری خارج از تراکنش دیتابیس
             $this->storageService->streamToFinalStorage($event->tempName, $product->id);
 
+            // ... کدهای قبلی مرحله ۳ و ۴ متد هندل شما
+
             // ۵. ارتقای نهایی وضعیت سند
             $productFile->update(['status' => UploadFileStatus::Ready->value]);
 
+            // 🟢 حذف از تمپ فقط و فقط در صورت موفقیت کامل پایپ‌لاین
             $this->storageService->deleteFromTemp($event->tempName);
 
         } catch (\Throwable $e) {
+            // ثبت وضعیت شکست برای این پارت در دیتابیس
             ProductFile::where('stored_name', $event->tempName)->update([
                 'status' => UploadFileStatus::Failed->value,
                 'failure_reason' => mb_substr($e->getMessage(), 0, 500)
             ]);
 
+            // ❌ حذف متد deleteFromTemp از اینجا!
+            // فایل باید روی هارد بماند تا اگر جاب دوباره تلاش کرد (Retry)، بتوند فایل را بخواند.
+
             $this->storageService->deleteAbsoluteFile($event->productId, $event->tempName);
-            $this->storageService->deleteFromTemp($event->tempName);
 
             throw $e;
         } finally {
