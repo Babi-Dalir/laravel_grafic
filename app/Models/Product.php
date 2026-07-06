@@ -120,7 +120,7 @@ class Product extends Model
                     })
                     ->orWhere('type', DiscountCampaignType::Global->value);
             })
-            ->orderBy('priority','ASC')
+            ->orderBy('priority', 'ASC')
             ->orderByDesc('percent')
             ->first();
     }
@@ -271,10 +271,66 @@ class Product extends Model
     {
         parent::boot();
 
+        // 🟢 ۱. مدیریت کمپین‌ها هنگام "حذف موقت" یا "حذف قطعی" محصول
         static::deleting(function ($product) {
+
+            // پیدا کردن رکوردهای واسط کمپین مربوط به این محصول
+            $existingCampaignTargets = DiscountCampaignTarget::query()
+                ->where('target_id', $product->id)
+                ->where('target_type', DiscountCampaignType::Product->value)
+                ->get();
+
+            foreach ($existingCampaignTargets as $target) {
+                if ($target->campaign) {
+
+                    if ($product->isForceDeleting()) {
+                        // 🔥 الف) محصول برای همیشه نابود شد -> کمپین کلاً فیزیکی پاک شود
+                        $target->campaign->delete();
+                    } else {
+                        // 💤 ب) محصول رفت به سطل زباله -> کمپین غیرفعال شود تا در سایت تاثیر نگذارد
+                        $target->campaign->update([
+                            'status' => DiscountCampaignStatus::InActive->value
+                        ]);
+                    }
+
+                }
+
+                // حذف رکورد واسط (تارگت)
+                if ($product->isForceDeleting()) {
+                    $target->delete();
+                }
+            }
+
+            // پاکسازی فایل‌های فیزیکی محصول روی سرور (فقط در حذف قطعی)
             if ($product->isForceDeleting()) {
+                foreach ($product->galleries as $gallery) {
+                    // حذف فیزیکی فایل‌های گالری (سایزهای مختلف مثل کوچک و اصلی)
+                    ImageManager::unlinkImage('products', $gallery);
+
+                    // حذف ردیف خود این عکس از جدول گالری در دیتابیس
+                    $gallery->delete();
+                }
+
                 ImageManager::unlinkImage('products', $product);
                 Storage::disk('digital_files')->deleteDirectory("products/{$product->id}");
+            }
+        });
+
+        // 🟢 ۲. بازگردانی و فعال‌سازی مجدد کمپین هنگام "بازیابی (Restore)" محصول
+        static::restoring(function ($product) {
+
+            $existingCampaignTargets = DiscountCampaignTarget::query()
+                ->where('target_id', $product->id)
+                ->where('target_type', DiscountCampaignType::Product->value)
+                ->get();
+
+            foreach ($existingCampaignTargets as $target) {
+                if ($target->campaign) {
+                    // ⚡ محصول برگشت؟ کمپین تخفیفش را دوباره فعال و زنده کن
+                    $target->campaign->update([
+                        'status' => DiscountCampaignStatus::Active->value
+                    ]);
+                }
             }
         });
     }
@@ -391,9 +447,9 @@ class Product extends Model
     public function reviewErrors(): array
     {
         return collect($this->reviewChecklist())
-            ->filter(fn ($value) => !$value)
+            ->filter(fn($value) => !$value)
             ->keys()
-            ->mapWithKeys(fn ($key) => [$key => $this->errorMessage($key)])
+            ->mapWithKeys(fn($key) => [$key => $this->errorMessage($key)])
             ->toArray();
     }
 
