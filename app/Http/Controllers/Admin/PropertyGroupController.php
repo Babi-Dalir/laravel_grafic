@@ -24,7 +24,7 @@ class PropertyGroupController extends Controller
     public function create()
     {
         $title = "ایجاد گروه ویژگی";
-        $categories = Category::getCategories();
+        $categories = Category::getLayer2Categories();
         return view('admin.property_groups.create',compact('title','categories'));
     }
 
@@ -52,7 +52,7 @@ class PropertyGroupController extends Controller
     public function edit(string $id)
     {
         $title ="ویرایش گروه ویژگی";
-        $categories = Category::getCategories();
+        $categories = Category::getLayer2Categories();
         $property_group = PropertyGroup::query()->findOrfail($id);
         return view('admin.property_groups.edit',compact('title','categories','property_group'));
     }

@@ -110,6 +110,20 @@ class Category extends Model
         return $array;
     }
 
+    public static function getLayer2Categories(): array
+    {
+        // واکشی لایه اول همراه با فرزندان مستقیم (لایه دوم)
+        return self::query()
+            ->with('childCategory')
+            ->where('parent_id', 0)
+            ->get()
+            ->keyBy('name')
+            ->map(function ($mainCategory) {
+                return $mainCategory->childCategory->pluck('name', 'id')->toArray();
+            })
+            ->toArray();
+    }
+
     public static function getLayer3Categories()
     {
         $array = [];
