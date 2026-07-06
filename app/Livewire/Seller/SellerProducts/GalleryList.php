@@ -25,6 +25,12 @@ class GalleryList extends Component
         $gallery->delete();
     }
 
+    #[On('refreshSellerGalleryList')]
+    public function refreshList()
+    {
+        // این متد خالی فقط باعث رندر مجدد کامپوننت می‌شود
+    }
+
     public function searchData()
     {
         $this->resetPage();
