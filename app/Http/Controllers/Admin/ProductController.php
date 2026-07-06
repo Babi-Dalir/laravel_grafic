@@ -79,15 +79,38 @@ class ProductController extends Controller
 
     public function storeGallery(Request $request, $id)
     {
-        $request->validate([
+        $product = Product::findOrFail($id);
+
+        // ۱. ولیدیشن دقیق با پیام‌های فارسی
+        $validator = \Validator::make($request->all(), [
             'file' => 'required|image|mimes:jpeg,jpg,png,webp|max:2048'
+        ], [
+            'file.required' => 'لطفاً یک فایل تصویر انتخاب کنید.',
+            'file.image'    => 'فایل انتخاب شده باید تصویر باشد.',
+            'file.mimes'    => 'فرمت‌های مجاز: jpeg, jpg, png, webp',
+            'file.max'      => 'حجم تصویر پیش‌نمایش نمی‌تواند بیشتر از ۲ مگابایت باشد.',
         ]);
 
+        // ۲. اگر ولیدیشن رد شد و درخواست AJAX بود (سمت Dropzone)
+        if ($validator->fails()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'error' => $validator->errors()->first()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        // ۳. ذخیره‌سازی عکس
         Gallery::query()->create([
-            'product_id' => $id,
+            'product_id' => $product->id,
             'image' => ImageManager::saveProductImage('products', $request->file('file')),
-            'position' => Gallery::query()->where('product_id', $id)->count()
+            'position' => Gallery::query()->where('product_id', $product->id)->count()
         ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => 'تصویر با موفقیت اضافه شد.']);
+        }
 
         return redirect()->back()->with('message', 'تصویر به گالری اضافه شد.');
     }

@@ -1,4 +1,4 @@
-<div class="table overflow-auto" tabindex="8" wire:poll.2s>
+<div class="table overflow-auto" tabindex="8">
     <table class="table table-striped table-hover">
         <thead class="thead-light">
         <tr>
@@ -37,29 +37,29 @@
          class="pagination pagination-rounded pagination-sm d-flex justify-content-center">
         {{$galleries->appends(Request::except('page'))->links()}}
     </div>
-</div>
-@section('scripts')
     <script>
-        Livewire.on('deleteGallery', (event) => {
-            Swal.fire({
-                title: "آیا از حذف مطمئن هستید؟",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "بله",
-                cancelButtonText: "خیر",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Livewire.dispatch('destroy_gallery', {id: event.id})
-                    Swal.fire({
-                        title: "حذف با موفقیت انجام شد!",
-                        icon: "success"
-                    });
-                }
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('deleteGallery', (event) => {
+                Swal.fire({
+                    title: "آیا از حذف مطمئن هستید؟",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "بله",
+                    cancelButtonText: "خیر",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Livewire.dispatch('destroy_gallery', {id: event.id})
+                        Swal.fire({
+                            title: "حذف با موفقیت انجام شد!",
+                            icon: "success"
+                        });
+                    }
+                });
             });
-        })
+        });
     </script>
-@endsection
+</div>
 
 
