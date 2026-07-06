@@ -47,6 +47,23 @@ class Category extends Model
         return $this->hasMany(DiscountCampaignTarget::class, 'target_id');
     }
 
+    /**
+     * 🚀 واکشی مستقیم تمام محصولات زیرمجموعه‌ها برای دسته‌های اصلی
+     */
+    public function subProducts()
+    {
+        // پارامتر اول: مدل مقصد (محصول)
+        // پارامتر دوم: مدل واسط (دسته‌بندی برای ارتباط والد و فرزندی)
+        return $this->hasManyThrough(
+            Product::class,
+            Category::class,
+            'parent_id', // کلید خارجی در جدول واسط (اشاره به دسته اصلی)
+            'category_id', // کلید خارجی در جدول مقصد (اشاره به زیردسته)
+            'id', // کلید داخلی در جدول اصلی
+            'id'  // کلید داخلی در جدول واسط
+        );
+    }
+
     public static function createCategory($request)
     {
         Cache::forget('categories');

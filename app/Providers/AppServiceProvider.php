@@ -19,13 +19,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // ۱. بهینه‌سازی لود کاتگوری‌ها با شمارش همزمان محصولات بدون آسیب به دیتابیس
         $categories = Cache::remember(
             'categories',
             now()->addDays(10),
             fn() => Category::query()
                 ->with('childCategory.childCategory')
-                ->withCount('products') // 🟢 اضافه شدن فیلد اتوماتیک products_count برای جلوگیری از باگ N+1 در بلید
+                ->withCount('subProducts') // 🟢 جایگزین شدن متد جدید برای شمارش دقیق زنجیره‌ای
                 ->where('parent_id', 0)
                 ->get()
         );

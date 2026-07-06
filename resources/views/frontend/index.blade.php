@@ -105,7 +105,7 @@
                                                 <h4 class="neon-box-title">{{ $category->name }}</h4>
                                                 <span class="neon-box-status font-numeric">
                                         <span class="neon-online-indicator"></span>
-                                        {{ $category->products_count }} منبع دیجیتال
+                                        {{ $category->sub_products_count }} منبع دیجیتال
                                     </span>
                                             </div>
 
