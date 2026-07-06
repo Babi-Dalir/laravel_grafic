@@ -31,7 +31,7 @@
                         <div class="carousel-inner">
                             @foreach ($sliders as $slider)
                                 <div class="carousel-item @if ($loop->first) active @endif">
-                                    <a class="main-slider-slide" href="#"
+                                    <a class="main-slider-slide" href="{{$slider->link}}"
                                        style="background-image: url({{ url('images/sliders/big/' . $slider->image) }})">
                                     </a>
                                 </div>

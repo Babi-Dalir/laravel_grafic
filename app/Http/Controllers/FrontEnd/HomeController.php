@@ -19,7 +19,7 @@ class HomeController extends Controller
         $now = now()->toDateTimeString();
 
         // ۱. کش اسلایدرها -> افزایش به ۳۰ روز (کاملاً ایستا)
-        $sliders = Cache::remember('home.sliders', 60 * 60 * 24 * 30, function () {
+        $sliders = Cache::remember('sliders', 60 * 60 * 24 * 30, function () {
             return Slider::query()
                 ->where('status', SliderStatus::Active->value)
                 ->select(['id', 'image', 'link'])
