@@ -34,20 +34,22 @@ class ProfileController extends Controller
     public function profileUpdate(ProfileUpdate $request)
     {
         $user = auth()->user();
-        $imageName = $user->image; // ۱. مقدار پیش‌فرض تصویر، همان تصویر قبلی است
+
+        // 🟢 ۱. ذخیره نام عکس قدیمی دقیقاً همین‌جا (قبل از هرگونه آپدیت)
+        $oldImage = $user->image;
+
+        $imageName = $oldImage; // مقدار پیش‌فرض تصویر، همان تصویر قبلی است
         $newImageSaved = false;
 
         try {
-
             DB::beginTransaction();
 
             if ($request->hasFile('image')) {
-
                 $imageName = ImageManager::saveImage('users', $request->image);
                 $newImageSaved = true;
             }
 
-            // ۴. بروزرسانی اطلاعات اصلی کاربر
+            // ۲. بروزرسانی اطلاعات اصلی کاربر
             $user->update([
                 'name'      => $request->input('name'),
                 'user_name' => $request->input('user_name'),
@@ -56,7 +58,7 @@ class ProfileController extends Controller
                 'image'     => $imageName
             ]);
 
-            // ۵. بروزرسانی یا ایجاد اطلاعات پروفایل فرعی
+            // ۳. بروزرسانی یا ایجاد اطلاعات پروفایل فرعی
             $user->userProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -70,18 +72,19 @@ class ProfileController extends Controller
 
             DB::commit();
 
-            // ۶. حذف عکس قبلی "تنها و تنها" پس از موفقیت کامل دیتابیس و ذخیره فایل جدید
-            if ($newImageSaved && $user->getOriginal('image')) {
-                // متد getOriginal تصویر قبلی را از کش مدل می‌آورد تا عکس جدید متولد شده پاک نشود!
+            // 🟢 ۴. همگام‌سازی آنی سشن با اطلاعات جدید برای سایدبار
+            auth()->setUser($user);
+
+            // 🟢 ۵. حذف عکس قدیمی واقعی بدون آسیب زدن به عکس جدید
+            if ($newImageSaved && $oldImage) {
                 ImageManager::unlinkImage(
-                    'users', (object)['image' => $user->getOriginal('image')]
+                    'users', (object)['image' => $oldImage]
                 );
-        }
+            }
 
             return redirect()->back()->with('message', "اطلاعات شما با موفقیت ثبت شد");
 
         } catch (Exception $e) {
-
             DB::rollBack();
 
             if ($newImageSaved && isset($imageName)) {

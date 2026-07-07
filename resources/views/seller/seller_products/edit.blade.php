@@ -127,5 +127,22 @@
             $dropdownParent: $('#parent')
         })
         $('.form-select').select2()
+
+        var customOptions = {
+            placeholder: "روز / ماه / سال"
+            , twodigit: false
+            , closeAfterSelect: true
+            , nextButtonIcon: "fa fa-arrow-circle-right"
+            , previousButtonIcon: "fa fa-arrow-circle-left"
+            , buttonsColor: "#5867dd"
+            , markToday: true
+            , markHolidays: true
+            , highlightSelectedDay: true
+            , sync: true
+            , gotoToday: true
+        }
+        kamaDatepicker('spacial_start', customOptions);
+        kamaDatepicker('spacial_expiration', customOptions);
+        $('.form-select').select2()
     </script>
 @endsection

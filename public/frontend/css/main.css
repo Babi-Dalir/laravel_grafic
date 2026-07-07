@@ -10590,18 +10590,32 @@ body.menu-open .btn-menu{
     justify-content:center;
     font-size:28px;
 }
+/* =========================
+   VERIFICATION BUTTON MODERNIZE
+========================= */
 
-.verification-btn{
-    background:#fff;
-    color:#4f46e5;
-    padding:12px 20px;
-    border-radius:12px;
-    text-decoration:none;
-    font-weight:700;
+.verification-btn {
+    background: #fff;
+    color: #4f46e5 !important; /* قفل کردن رنگ بنفش اصلی روی دکمه */
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-weight: 700;
+    display: inline-block;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.25s ease-in-out; /* نرم کردن انیمیشن تغییرات */
 }
 
-.verification-btn:hover{
-    color:#4f46e5;
+.verification-btn:hover {
+    background: #f4f5fa; /* تغییر ملایم پس‌زمینه به خاکستری روشن */
+    color: #7c3aed !important; /* تبدیل رنگ متن به بنفش مایل به ارغوانی */
+    transform: translateY(-2px); /* بالا آمدن مینی‌مال دکمه */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* عمق دادن به سایه زیر دکمه */
+}
+
+.verification-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* =========================

@@ -55,7 +55,7 @@
                              width="45" height="45" class="rounded-circle shadow-sm" style="object-fit: cover;" alt="product image">
                     </figure>
                 </td>
-                <td class="align-middle font-weight-bold text-right pr-3 text-dark">{{ $product->name }}</td>
+                <td class="align-middle font-weight-bold text-center pr-3 text-dark">{{ $product->name }}</td>
                 <td class="align-middle">
                     <span class="badge badge-light border text-muted px-2 py-1">{{ $product->category->name ?? 'بدون دسته' }}</span>
                 </td>

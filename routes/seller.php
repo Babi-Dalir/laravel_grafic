@@ -28,6 +28,3 @@ Route::get('seller_products/{product}/files',[ProductFileController::class,'inde
 //Seller Transaction Route
 Route::get('seller_transaction_list',[SellerController::class,'sellerTransactionList'])->name('seller.transaction.list');
 
-//Seller verification Route
-Route::get('create_seller_verification',[SellerController::class,'createSellerVerification'])->name('create.seller.verification');
-Route::post('store_seller_verification',[SellerController::class,'storeSellerVerification'])->name('store.seller.verification');

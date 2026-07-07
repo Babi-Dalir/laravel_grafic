@@ -7,6 +7,7 @@ use App\Http\Controllers\FrontEnd\PaymentController;
 use App\Http\Controllers\FrontEnd\ProductController;
 use App\Http\Controllers\FrontEnd\ProfileController;
 use App\Http\Controllers\FrontEnd\SearchController;
+use App\Http\Controllers\Seller\SellerController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/auth.php';
@@ -54,4 +55,9 @@ Route::middleware('auth')->group(function () {
 
 
     Route::post('products/{product}/upload-chunk', [ProductFileController::class, 'uploadChunk'])->name('product.upload-chunk');
+
+
+    //Seller verification Route
+    Route::get('create_seller_verification',[SellerController::class,'createSellerVerification'])->name('create.seller.verification');
+    Route::post('store_seller_verification',[SellerController::class,'storeSellerVerification'])->name('store.seller.verification');
 });

@@ -169,9 +169,8 @@ class Product extends Model
                 'description' => $request->input('description'),
                 'main_price' => $request->input('main_price', 0),
                 'image' => $request->image ? ImageManager::saveProductImage('products', $request->image) : null,
-                'status' => auth()->user()->hasRole('مدیر')
-                    ? ProductStatus::Approved->value
-                    : ProductStatus::PendingReview->value,
+                // 🟢 اصلاح: حتی اگر مدیر هم بود، محصول در ابتدا تایید نشود تا مراحل گالری و ویژگی‌ها طی شود
+                'status' => ProductStatus::PendingReview->value,
             ]);
 
             if ($request->filled('discount') && $request->discount > 0) {
@@ -210,6 +209,7 @@ class Product extends Model
                 $imageName = ImageManager::saveProductImage('products', $request->image);
             }
 
+            // ۱. آپدیت اطلاعات اولیه و پایه محصول
             $product->update([
                 'name' => $request->input('name'),
                 'e_name' => $request->input('e_name'),
@@ -219,11 +219,24 @@ class Product extends Model
                 'main_price' => $request->input('main_price', 0),
                 'image' => $imageName,
                 'review_note' => auth()->user()->hasRole('مدیر') ? $product->review_note : null,
-                'status' => auth()->user()->hasRole('مدیر')
-                    ? ProductStatus::Approved->value
-                    : ProductStatus::PendingReview->value,
             ]);
 
+            // ۲. 🟢 اعمال سیستم گارد تایید هوشمند وضعیت محصول پس از ویرایش
+            // بررسی می‌کند که آیا محصول در همین لحظه گالری، ویژگی، فایل و... را کامل دارد یا خیر
+            if ($product->isReadyForReview()) {
+                $product->update([
+                    'status' => auth()->user()->hasRole('مدیر')
+                        ? ProductStatus::Approved->value       // مدیر ویرایش کرده و همه‌چیز کامله؟ مستقیم منتشر بشود
+                        : ProductStatus::PendingReview->value  // فروشنده ویرایش کرده؟ برود برای بررسی مجدد مدیر
+                ]);
+            } else {
+                // ⚠️ اگر محصول به هر دلیلی ناقص است (مثلا گالری یا ویژگی ندارد)، به هیچ وجه نباید تایید شده بماند
+                $product->update([
+                    'status' => ProductStatus::PendingReview->value
+                ]);
+            }
+
+            // ۳. مدیریت زنجیره‌ای کمپین‌های تخفیف (کدهای قبلی شما بدون تغییر)
             $existingCampaignTarget = DiscountCampaignTarget::where('target_id', $product->id)
                 ->where('target_type', DiscountCampaignType::Product->value)
                 ->whereHas('campaign', function ($query) {

@@ -237,10 +237,9 @@
                                     </div>
 
                                     <a href="{{ route('profile.verification.seller') }}"
-                                       class="verification-btn">
-
+                                       class="btn-save d-inline-block text-center text-white"
+                                       style="background: #fff; color: #4f46e5 !important; box-shadow: none;">
                                         شروع احراز هویت
-
                                     </a>
 
                                 </div>

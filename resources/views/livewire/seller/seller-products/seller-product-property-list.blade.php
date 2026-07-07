@@ -2,7 +2,7 @@
     <h6 class="card-title">ایجاد ویژگی‌های محصول: <strong class="text-info">{{ $product->name }}</strong></h6>
 
     @if (session()->has('message'))
-        <div class="alert alert-success text-right">{{ session('message') }}</div>
+        <div class="alert alert-success text-left">{{ session('message') }}</div>
     @endif
 
     <form wire:submit.prevent="submit" class="mb-4">

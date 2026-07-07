@@ -14,36 +14,52 @@ class SellerVerificationRequest extends FormRequest
         return true;
     }
 
+    // 🟢 تبدیل خودکار اعداد فارسی/عربی به انگلیسی پیش از بررسی ولیدیشن
+    protected function prepareForValidation()
+    {
+        $fields = ['national_code', 'card_number', 'account_number', 'iban'];
+        $replacements = [
+            '۰'=>'0', '۱'=>'1', '۲'=>'2', '۳'=>'3', '۴'=>'4', '۵'=>'5', '۶'=>'6', '۷'=>'7', '۸'=>'8', '۹'=>'9',
+            '٠'=>'0', '١'=>'1', '٢'=>'2', '٣'=>'3', '٤'=>'4', '٥'=>'5', '٦'=>'6', '٧'=>'7', '٨'=>'8', '٩'=>'9'
+        ];
+
+        $input = $this->all();
+
+        foreach ($fields as $field) {
+            if ($this->has($field) && is_string($this->input($field))) {
+                // تبدیل اعداد
+                $cleanValue = strtr($this->input($field), $replacements);
+                // حذف فاصله‌های خالی احتمالی که کاربر وارد کرده
+                $cleanValue = str_replace(' ', '', $cleanValue);
+
+                $input[$field] = $cleanValue;
+            }
+        }
+
+        $this->merge($input);
+    }
+
     public function rules(): array
     {
         return [
             'first_name' => ['required', 'string', 'min:2', 'max:100'],
-
             'last_name' => ['required', 'string', 'min:2', 'max:100'],
-
             'brand_name' => ['nullable', 'string', 'max:255'],
 
-            'national_code' => [
-                'required',
-                'digits:10',
-            ],
+            // کد ملی
+            'national_code' => ['required', 'digits:10'],
 
-            'card_number' => [
-                'required',
-                'digits:16',
-            ],
+            // شماره کارت (۱۶ رقم عددی)
+            'card_number' => ['required', 'digits:16'],
 
-            'account_number' => [
-                'required',
-                'string',
-                'min:6',
-                'max:30',
-            ],
+            // شماره حساب
+            'account_number' => ['required', 'string', 'min:6', 'max:30'],
 
+            // 🟢 اصلاح ریجکس شبا برای پذیرش حروف کوچک و بزرگ (Case-Insensitive)
             'iban' => [
                 'required',
                 'string',
-                'regex:/^IR[0-9]{24}$/',
+                'regex:/^(IR|ir)[0-9]{24}$/',
             ],
         ];
     }
