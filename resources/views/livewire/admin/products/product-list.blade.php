@@ -47,30 +47,36 @@
             <th class="text-center align-middle text-primary">تکمیل محصول</th>
         </tr>
         </thead>
+
         <tbody>
         @forelse($products as $index=>$product)
-            <tr>
+            @php
+                // 🟢 واکشی تفکیک‌شده و اختصاصی چک‌لیست وضعیت بررسی هر محصول
+                $checklist = $product->reviewChecklist();
+
+                $hasProperties = $checklist['properties'] ?? false;
+                $hasGallery    = $checklist['gallery'] ?? false;
+                $hasFiles      = $checklist['files'] ?? false;
+
+                $percent = $product->completion_percent;
+            @endphp
+            <tr wire:key="product-row-{{ $product->id }}">
                 <td class="text-center align-middle">{{$products->firstItem()+$index}}</td>
                 <td class="text-center align-middle">
-
                     <img
                         src="{{ url('images/products/small/'.$product->image) }}"
                         width="60"
                         class="rounded">
-
                 </td>
                 <td class="text-center align-middle">{{$product->name}}</td>
 
                 <td class="text-center align-middle">
-                    {{-- 🟢 بررسی اینکه آیا محصول متعلق به مدیر است یا فروشنده عادی --}}
                     @if($product->user?->hasRole('مدیر'))
                         <span class="badge badge-primary p-2"
                               style="font-size: 12px; font-weight: bold; border-radius: 6px;">
                         <i class="ti-world mr-1"></i> محصول سایت
                         </span>
-
                     @else
-
                         <span class="font-weight-bold text-dark">
                             {{ $product->user?->name ?? 'بدون نام' }}
                         </span>
@@ -80,38 +86,44 @@
                         </small>
                     @endif
                 </td>
-                <td class="text-center align-middle">{{$product->category->name}}</td>
+                <td class="text-center align-middle">{{$product->category?->name ?? '--'}}</td>
+
+                {{-- 🎯 ستون ویژگی‌های محصول (بررسی کاملاً اختصاصی) --}}
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-secondary" href="{{route('create.product.properties',$product)}}">
-                        ویژگی های محصول
+                    <a class="btn {{ !$hasProperties ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-secondary' }}"
+                       href="{{route('create.product.properties',$product)}}">
+                        @if(!$hasProperties)
+                            <i class="ti-alert mr-1"></i> ویژگی‌ها (ناقص)
+                        @else
+                            ویژگی های محصول
+                        @endif
                     </a>
                 </td>
+
+                {{-- 🎯 ستون گالری تصاویر (بررسی کاملاً اختصاصی) --}}
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-success" href="{{route('add.product.gallery',$product->id)}}">
-                        گالری
+                    <a class="btn {{ !$hasGallery ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-success' }}"
+                       href="{{route('add.product.gallery',$product->id)}}">
+                        <i class="ti-cloud-up mr-1"></i>
+                        @if(!$hasGallery)
+                            آپلود عکس (ناقص)
+                        @else
+                            گالری
+                        @endif
                     </a>
                 </td>
 
+                {{-- 🎯 ستون فایل محصول (بررسی کاملاً اختصاصی با نمایش تعداد فایل‌ها در حالت تکمیل) --}}
                 <td class="text-center align-middle">
-
-                    @if($product->files->count())
-
-                        <a
-                            href="{{ route('product.file.list',$product) }}"
-                            class="btn btn-outline-info">
-
+                    <a href="{{ route('product.file.list',$product) }}"
+                       class="btn {{ !$hasFiles ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-info' }}">
+                        <i class="ti-cloud-up mr-1"></i>
+                        @if(!$hasFiles)
+                            آپلود فایل (ناقص)
+                        @else
                             فایل‌ها ({{ $product->files->count() }})
-
-                        </a>
-
-                    @else
-
-                        <span class="badge badge-secondary">
-                            بدون فایل
-                        </span>
-
-                    @endif
-
+                        @endif
+                    </a>
                 </td>
 
                 <td class="text-center align-middle">
@@ -122,48 +134,40 @@
                         class="status-interactive-wrapper"
                         @endrole
                     >
-
                         @if($product->status === \App\Enums\ProductStatus::Approved->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
                                 <span>تایید شده</span>
                             </div>
-
                         @elseif($product->status === \App\Enums\ProductStatus::Rejected->value)
                             <div class="modern-status-btn inactive">
                                 <i class="ti-close mr-1"></i>
                                 <span>رد شده</span>
                             </div>
-
                         @elseif($product->status === \App\Enums\ProductStatus::PendingReview->value)
                             <div class="modern-status-btn waiting">
                                 <div class="status-pulse"></div>
                                 <i class="ti-time mr-1"></i>
                                 <span>ارسال شده برای بررسی</span>
                             </div>
-
                         @elseif($product->status === \App\Enums\ProductStatus::Draft->value)
                             <div class="modern-status-btn stop">
                                 <i class="ti-control-pause mr-1"></i>
                                 <span>درخواست اولیه</span>
                             </div>
-
                         @elseif($product->status === \App\Enums\ProductStatus::Archived->value)
                             <div class="modern-status-btn banned">
                                 <i class="ti-na mr-1"></i>
                                 <span>غیر فعال</span>
                             </div>
                         @endif
-
                     </div>
                 </td>
 
-                <td class="text-center">
-
+                <td class="text-center align-middle">
                     @role('مدیر')
                     @if($product->status === \App\Enums\ProductStatus::PendingReview->value)
-
                         <button
                             wire:click="approveProductRequest({{ $product->id }})"
                             class="btn btn-success btn-sm">
@@ -177,10 +181,8 @@
                             data-target="#rejectModal">
                             رد
                         </button>
-
                     @endif
                     @endrole
-
                 </td>
 
                 <td class="text-center align-middle">
@@ -201,24 +203,14 @@
                 <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($product->created_at)->format('%d%B، %Y')}}</td>
 
                 <td class="text-center align-middle">
-
-                    @php
-                        $percent = $product->completion_percent;
-                    @endphp
-
                     <div class="progress">
-
                         <div
                             class="progress-bar
                             {{ $percent == 100 ? 'bg-success' : ($percent >= 70 ? 'bg-info' : ($percent >= 40 ? 'bg-warning' : 'bg-danger')) }}"
                             style="width: {{ $percent }}%">
-
                             {{ $percent }}%
-
                         </div>
-
                     </div>
-
                 </td>
             </tr>
         @empty
@@ -246,6 +238,7 @@
                 </td>
             </tr>
         @endforelse
+        </tbody>
     </table>
     <div
         wire:ignore.self

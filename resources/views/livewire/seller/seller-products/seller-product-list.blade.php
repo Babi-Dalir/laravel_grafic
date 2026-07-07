@@ -35,6 +35,17 @@
         </thead>
         <tbody>
         @forelse($products as $index => $product)
+            @php
+                // واکشی آرایه چک‌لیست وضعیت بررسی محصول برای تک‌تک بخش‌ها به صورت مجزا
+                $checklist = $product->reviewChecklist();
+
+                $hasProperties = $checklist['properties'] ?? false;
+                $hasGallery    = $checklist['gallery'] ?? false;
+                $hasFiles      = $checklist['files'] ?? false;
+
+                $percent = $product->completion_percent;
+            @endphp
+
             <tr wire:key="product-row-{{ $product->id }}">
                 <td class="text-center align-middle">{{ $products->firstItem() + $index }}</td>
                 <td class="text-center align-middle">
@@ -54,26 +65,37 @@
 
                 <td class="text-center align-middle">{{ $product->total_download_count ?? 0 }}</td>
 
+                {{-- 🎯 ستون ویژگی‌ها (بررسی کاملاً اختصاصی) --}}
                 <td class="text-center align-middle">
-                    <a class="btn btn-outline-secondary"
-                       href="{{ route('create.seller.product.properties', $product) }}">ویژگی ها</a>
-                </td>
-                <td class="text-center align-middle">
-                    <a class="btn btn-outline-success" href="{{ route('add.seller.product.gallery', $product->id) }}">گالری</a>
+                    <a class="btn {{ !$hasProperties ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-secondary' }}"
+                       href="{{ route('create.seller.product.properties', $product) }}">
+                        @if(!$hasProperties)
+                            <i class="ti-alert mr-1"></i> ویژگی‌ها (ناقص)
+                        @else
+                            ویژگی‌ها
+                        @endif
+                    </a>
                 </td>
 
-                {{-- 🟢 دکمه مدیریت آپلود فایل‌های محصول با استایل هماهنگ و متصل به روت اختصاصی فروشنده --}}
+                {{-- 🎯 ستون گالری عکس (بررسی کاملاً اختصاصی) --}}
                 <td class="text-center align-middle">
-                    @php
-                        $percent = $product->completion_percent;
-                        // بررسی اینکه آیا محصول به دلیل نداشتن فایل ناقص است یا خیر (یا به سلیقه خودتان برای همه باز بگذارید)
-                        $isNeedsFile = $percent < 100;
-                    @endphp
+                    <a class="btn {{ !$hasGallery ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-success' }}"
+                       href="{{ route('add.seller.product.gallery', $product->id) }}">
+                        <i class="ti-cloud-up mr-1"></i>
+                        @if(!$hasGallery)
+                            آپلود عکس (ناقص)
+                        @else
+                            گالری
+                        @endif
+                    </a>
+                </td>
 
-                    <a class="btn {{ $isNeedsFile ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-primary' }}"
+                {{-- 🎯 ستون آپلود فایل دیجیتال (بررسی کاملاً اختصاصی) --}}
+                <td class="text-center align-middle">
+                    <a class="btn {{ !$hasFiles ? 'btn-warning text-dark font-weight-bold' : 'btn-outline-primary' }}"
                        href="{{ route('seller.product.file.list', $product) }}">
                         <i class="ti-cloud-up mr-1"></i>
-                        @if($isNeedsFile)
+                        @if(!$hasFiles)
                             آپلود فایل (ناقص)
                         @else
                             مدیریت فایل‌ها
@@ -144,12 +166,9 @@
                 <td colspan="17" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
                         <h5 class="text-dark" style="font-weight: 600;">نتیجه‌ای یافت نشد!</h5>
-                        <p class="text-muted">محصولی با عبارت <strong class="text-danger">"{{ $search }}"</strong> یافت
-                            نشد.</p>
+                        <p class="text-muted">محصولی با عبارت <strong class="text-danger">"{{ $search }}"</strong> یافت نشد.</p>
                         @if($search)
-                            <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">پاکسازی
-                                جستجو
-                            </button>
+                            <button wire:click="$set('search', '')" class="btn btn-outline-primary btn-sm mt-2">پاکسازی جستجو</button>
                         @endif
                     </div>
                 </td>
