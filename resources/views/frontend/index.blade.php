@@ -157,7 +157,7 @@
                                                     <div class="rating-stars">
 
                                                     </div>
-                                                    @if($product->discount_percent > 0)
+                                                    @if($product->discount_percent > 0 && $product->main_price > 0)
                                                         <div class="discount">
                                                             <span>{{ $product->discount_percent }}%</span>
                                                         </div>
@@ -175,13 +175,18 @@
                                                     </h5>
                                                     <a class="product-meta"
                                                        href="#">{{ $product->category->name }}</a>
-                                                    @if($product->hasDiscount())
-                                                        <del
-                                                            class="text-danger small">{{ number_format($product->main_price) }}</del>
-                                                        <span class="product-price">{{ number_format($product->final_price) }} تومان</span>
-                                                    @else
-                                                        <span class="product-price">{{ number_format($product->main_price) }} تومان</span>
-                                                    @endif
+
+                                                    {{-- 🟢 اصلاح قیمت محصولات رایگان و تخفیف دار در پرفروش ترین ها --}}
+                                                    <div class="product-price-info">
+                                                        @if($product->main_price == 0)
+                                                            <span class="product-price text-success font-weight-bold" style="font-size: 1.15rem;">رایگان!</span>
+                                                        @elseif($product->hasDiscount())
+                                                            <del class="text-danger small">{{ number_format($product->main_price) }}</del>
+                                                            <span class="product-price d-block">{{ number_format($product->final_price) }} تومان</span>
+                                                        @else
+                                                            <span class="product-price">{{ number_format($product->main_price) }} تومان</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -194,6 +199,67 @@
                 </div>
             </div>
             <!-- End Product-Slider -->
+
+            <!-- Start Free-Product-Slider -->
+            @if($free_products->count() > 0)
+                <section class="slider-section dt-sl mb-5">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="section-title text-sm-title title-wide no-after-title-wide mb-4">
+                                <h2 style="font-size: 18.5px; font-weight: 850; color: #0f172a; display: flex; align-items: center; gap: 12px;">
+                                    <span class="grafic-neon-pulse-dot" style="background: #10b981; box-shadow: 0 0 12px #10b981;"></span>
+                                    هدیه رابی گرافیک؛ دانلودهای رایگان
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div class="col-12 px-res-0">
+                            <div class="product-carousel carousel-lg owl-carousel owl-theme">
+                                @foreach ($free_products as $free_product)
+                                    <div class="item">
+                                        <div class="product-card free-emerald-card">
+
+                                            <div class="emerald-glow-effect"></div>
+
+                                            <div class="emerald-card-head">
+                                                <div class="emerald-free-badge">
+                                                    <span>رایگان</span>
+                                                </div>
+                                            </div>
+
+                                            <a class="emerald-product-thumb" href="{{ route('single.product', $free_product->slug) }}">
+                                                <img src="{{ url('images/products/big/' . $free_product->image) }}" alt="{{ $free_product->name }}">
+                                            </a>
+
+                                            <div class="emerald-card-body">
+                                                <h5 class="emerald-product-title">
+                                                    <a href="{{ route('single.product', $free_product->slug) }}">
+                                                        {{ $free_product->name }}
+                                                    </a>
+                                                </h5>
+
+                                                <div class="emerald-meta-footer">
+                                                    <a class="emerald-product-meta" href="#">
+                                                        <i class="mdi mdi-folder-outline ml-1"></i>{{ $free_product->category->name }}
+                                                    </a>
+
+                                                    <div class="free-badge-wrapper">
+                                        <span class="emerald-price-text">
+                                            رایگان
+                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            @endif
+            <!-- End Free-Product-Slider -->
+
             <!-- Start Banner -->
             <div class="row mt-3 mb-5">
                 @foreach ($banners->where('type', 'medium_banner') as $medium_banner)
@@ -242,7 +308,7 @@
 
                                             </div>
                                             {{-- استفاده از اکسسوری که در مدل محصول ساختیم --}}
-                                            @if($spacial_product->discount_percent > 0)
+                                            @if($spacial_product->discount_percent > 0 && $spacial_product->main_price > 0)
                                                 <div class="discount">
                                                     <span>{{ $spacial_product->discount_percent }}%</span>
                                                 </div>
@@ -259,10 +325,17 @@
                                             </h5>
                                             <a class="product-meta"
                                                href="#">{{ $spacial_product->category->name }}</a>
-                                            {{-- قیمت خط خورده و قیمت نهایی --}}
+
+                                            {{-- 🟢 اصلاح قیمت محصولات رایگان و تخفیف دار در شگفت انگیز --}}
                                             <div class="product-price-info">
-                                                <del class="text-danger small">{{ number_format($spacial_product->main_price) }}</del>
-                                                <span class="product-price d-block">{{ number_format($spacial_product->final_price) }} تومان</span>
+                                                @if($spacial_product->main_price == 0)
+                                                    <span class="product-price text-success font-weight-bold" style="font-size: 1.15rem;">رایگان!</span>
+                                                @elseif($spacial_product->hasDiscount())
+                                                    <del class="text-danger small">{{ number_format($spacial_product->main_price) }}</del>
+                                                    <span class="product-price d-block">{{ number_format($spacial_product->final_price) }} تومان</span>
+                                                @else
+                                                    <span class="product-price d-block">{{ number_format($spacial_product->main_price) }} تومان</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -307,7 +380,7 @@
                                             <div class="rating-stars">
 
                                             </div>
-                                            @if($newest_product->discount_percent > 0)
+                                            @if($newest_product->discount_percent > 0 && $newest_product->main_price > 0)
                                                 <div class="discount">
                                                     <span>{{ $newest_product->discount_percent }}%</span>
                                                 </div>
@@ -325,10 +398,13 @@
                                             </h5>
                                             <a class="product-meta"
                                                href="#">{{ $newest_product->category->name }}</a>
+
+                                            {{-- 🟢 اصلاح قیمت محصولات رایگان و تخفیف دار در جدیدترین ها --}}
                                             <div class="product-price">
-                                                @if($newest_product->hasDiscount())
-                                                    <del
-                                                        class="text-danger small">{{ number_format($newest_product->main_price) }}</del>
+                                                @if($newest_product->main_price == 0)
+                                                    <span class="product-price text-success font-weight-bold" style="font-size: 1.15rem;">رایگان!</span>
+                                                @elseif($newest_product->hasDiscount())
+                                                    <del class="text-danger small">{{ number_format($newest_product->main_price) }}</del>
                                                     <span class="d-block">{{ number_format($newest_product->final_price) }} تومان</span>
                                                 @else
                                                     <span>{{ number_format($newest_product->main_price) }} تومان</span>
@@ -367,7 +443,7 @@
                                         </a>
 
                                         {{-- نشان تخفیف قرمز و استایلی --}}
-                                        @if($product->discount_percent > 0)
+                                        @if($product->discount_percent > 0 && $product->main_price > 0)
                                             <div class="discount-badge-red">
                                                 <span>{{ $product->discount_percent }}%</span>
                                             </div>
@@ -381,12 +457,15 @@
                                             </a>
                                         </div>
 
+                                        {{-- 🟢 اصلاح قیمت محصولات رایگان و تخفیف دار در پیشنهاد ما (کارت های افقی) --}}
                                         <div class="card-horizontal-product-price">
-                                            @if($product->hasDiscount())
+                                            @if($product->main_price == 0)
+                                                <span class="product-price text-success font-weight-bold" style="font-size: 1.15rem;">رایگان!</span>
+                                            @elseif($product->hasDiscount())
                                                 <del class="text-secondary small d-block">{{ number_format($product->main_price) }}</del>
                                                 <span class="text-danger font-weight-bold" style="font-size: 1.1rem;">
-                                    {{ number_format($product->final_price) }} <small>تومان</small>
-                                </span>
+                                                    {{ number_format($product->final_price) }} <small>تومان</small>
+                                                </span>
                                             @else
                                                 <span class="font-weight-bold">{{ number_format($product->main_price) }} تومان</span>
                                             @endif
@@ -440,7 +519,7 @@
                             {{-- 📁 حالت دسته‌بندی خاص --}}
                             <span class="tag-badge tag-category">
                             <span class="pulse-indicator pulse-purple"></span>
-                            تخفیف ویژه این دسته‌بندی
+                            تخفیف ویژه این دسته‌ب بندی
                         </span>
                         @endif
                     </div>

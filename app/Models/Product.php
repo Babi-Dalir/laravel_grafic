@@ -41,6 +41,7 @@ class Product extends Model
             Cache::forget('home.products.newest_products');
             Cache::forget('home.products.special');
             Cache::forget('home.products.instant_offers');
+            Cache::forget('home.products.free');
 
             // ۲. متلاشی کردن کش‌های دسته‌بندی (هدر سایت و فرم‌های ادمین/فروشنده)
             Cache::forget('categories');
@@ -460,7 +461,7 @@ class Product extends Model
             'gallery' => $this->galleries()->exists(),
             'properties' => $this->propertyGroups()->exists(),
             'files' => $this->files()->exists(),
-            'price' => $this->main_price > 0,
+            'price' => !is_null($this->main_price) && $this->main_price >= 0,
         ];
     }
 
@@ -481,7 +482,7 @@ class Product extends Model
             'gallery' => 'حداقل یک تصویر در گالری لازم است',
             'properties' => 'ویژگی‌های محصول تعریف نشده است',
             'files' => 'حداقل یک فایل باید آپلود شود',
-            'price' => 'قیمت محصول مشخص نیست',
+            'price' => 'قیمت محصول وارد نشده است (حتی مقدار 0 برای محصولات رایگان لازم است)',
             default => 'اطلاعات ناقص است',
         };
     }

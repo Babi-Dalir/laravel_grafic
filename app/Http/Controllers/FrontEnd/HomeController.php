@@ -30,6 +30,7 @@ class HomeController extends Controller
         $most_sold = Cache::remember('home.products.most_sold', 43200, function () {
             return Product::query()
                 ->with(['category:id,name', 'campaignTargets.campaign'])
+                ->where('main_price', '>', 0)
                 ->where('status', ProductStatus::Approved->value)
                 ->orderBy('sold', 'DESC')
                 ->take(10)
@@ -40,6 +41,7 @@ class HomeController extends Controller
         $newest_products = Cache::remember('home.products.newest_products', 86400, function () {
             return Product::query()
                 ->with(['category:id,name', 'campaignTargets.campaign'])
+                ->where('main_price', '>', 0)
                 ->where('status', ProductStatus::Approved->value)
                 ->orderBy('created_at', 'DESC')
                 ->take(10)
@@ -50,6 +52,7 @@ class HomeController extends Controller
         $spacial_products = Cache::remember('home.products.special', 21600, function () use ($now) {
             return Product::query()
                 ->with(['category:id,name', 'campaignTargets.campaign'])
+                ->where('main_price', '>', 0)
                 ->where('status', ProductStatus::Approved->value)
                 ->where(function ($q) use ($now) {
                     $q->whereHas('campaignTargets.campaign', function ($query) use ($now) {
@@ -70,7 +73,19 @@ class HomeController extends Controller
         $instant_offers = Cache::remember('home.products.instant_offers', 3600, function () {
             return Product::smartOffer()
                 ->with(['category:id,name'])
+                ->where('main_price', '>', 0)
+                ->latest()
                 ->limit(9)
+                ->get();
+        });
+
+        $free_products = Cache::remember('home.products.free', 43200, function () {
+            return Product::query()
+                ->with(['category:id,name'])
+                ->where('main_price', 0) // 🟢 فقط محصولات رایگان
+                ->where('status', ProductStatus::Approved->value)
+                ->latest()
+                ->take(10)
                 ->get();
         });
 
@@ -79,7 +94,8 @@ class HomeController extends Controller
             'most_sold',
             'spacial_products',
             'newest_products',
-            'instant_offers'
+            'instant_offers',
+            'free_products'
         ));
     }
 
