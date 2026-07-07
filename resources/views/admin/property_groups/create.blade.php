@@ -11,14 +11,14 @@
                         <div class="form-group row mb-4">
                             <label class="col-sm-2 col-form-label">عنوان گروه ویژگی</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control text-right" dir="rtl" name="name" value="{{ old('name') }}">
+                                <input type="text" class="form-control text-left" dir="rtl" name="name" value="{{ old('name') }}">
                             </div>
                         </div>
 
                         <div class="form-group row mb-4">
                             <label class="col-sm-2 col-form-label">دسته بندی (لایه دوم)</label>
                             <div class="col-sm-10">
-                                <select name="category_id" class="form-select text-right" dir="rtl">
+                                <select name="category_id" class="form-select text-left" dir="rtl">
                                     <option value="">-- انتخاب کنید --</option>
 
                                     @foreach($categories as $mainCategoryName => $subCategories)

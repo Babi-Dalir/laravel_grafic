@@ -32,7 +32,7 @@ class SellerController extends Controller
     public function createSellerProduct()
     {
         $title = "ایجاد محصول توسط فروشنده";
-        $categories = Category::getCategories();
+        $categories = Category::getLeafCategoriesInTree();
         $tags = Tag::query()->pluck('name','id');
         return view('seller.seller_products.create',compact('title','categories','tags'));
     }
@@ -47,7 +47,7 @@ class SellerController extends Controller
     public function editSellerProduct(string $id)
     {
         $title ="ویرایش محصول";
-        $categories = Category::getCategories();
+        $categories = Category::getLeafCategoriesInTree();
         $tags = Tag::query()->pluck('name','id');
         $product = Product::findOrfail($id);
         return view('seller.seller_products.edit',compact('title','categories','tags','product'));

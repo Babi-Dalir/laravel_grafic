@@ -22,7 +22,7 @@ class ProductController extends Controller
     public function create()
     {
         $title = "ایجاد محصول";
-        $categories = Category::getCategories();
+        $categories = Category::getLeafCategoriesInTree();
         $tags = Tag::query()->pluck('name', 'id');
         return view('admin.products.create', compact('title', 'categories', 'tags'));
     }
@@ -44,7 +44,7 @@ class ProductController extends Controller
     public function edit(string $id)
     {
         $title = "ویرایش محصول";
-        $categories = Category::getCategories();
+        $categories = Category::getLeafCategoriesInTree();
         $tags = Tag::query()->pluck('name', 'id');
         $product = Product::findOrFail($id);
 

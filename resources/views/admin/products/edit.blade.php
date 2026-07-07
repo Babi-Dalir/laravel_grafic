@@ -24,18 +24,42 @@
                                        value="{{$product->e_name}}">
                             </div>
                         </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">دسته بندی</label>
+                        <div class="form-group row mb-4">
+                            <label class="col-sm-2 col-form-label font-weight-bold">دسته بندی محصول</label>
                             <div class="col-sm-10">
-                                <select name="category_id" class="form-select">
-                                    @foreach($categories as $key => $value)
-                                        @if($product->category_id == $key)
-                                            <option selected value="{{$key}}">{{$value}}</option>
-                                        @else
-                                            <option value="{{$key}}">{{$value}}</option>
-                                        @endif
+                                <select name="category_id" class="form-select text-right" dir="rtl" required style="width: 100%;">
+                                    <option value="">-- انتخاب لایه نهایی دسته‌بندی --</option>
+
+                                    @foreach($categories as $mainCategory => $subContent)
+                                        {{-- 📂 لایه اول: دسته اصلی (غیرقابل انتخاب) --}}
+                                        <option value="" disabled style="font-weight: bold; color: #1e293b; background-color: #f1f5f9;">
+                                            📂 {{ $mainCategory }}
+                                        </option>
+
+                                        @foreach($subContent as $subKey => $subVal)
+                                            @if(is_string($subKey))
+                                                {{-- 🔹 لایه دوم: زیردسته واسط که خودش فرزند دارد (غیرقابل انتخاب) --}}
+                                                <option value="" disabled style="font-weight: 600; color: #475569; padding-right: 15px;">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;🔹 {{ $subKey }}
+                                                </option>
+
+                                                {{-- 🎯 لایه سوم: برگ نهایی و عمیق‌ترین سطح (بررسی وضعیت selected با دسته‌بندی فعلی محصول) --}}
+                                                @foreach($subVal as $leaf)
+                                                    <option value="{{ $leaf->id }}" {{ $product->category_id == $leaf->id ? 'selected' : '' }} style="padding-right: 30px; color: #0284c7;">
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔸 {{ $leaf->name }}
+                                                    </option>
+                                                @endforeach
+                                            @else
+                                                {{-- 🎯 اگر دسته کلاً ۲ لایه‌ای بود و لایه دومش خودش برگ نهایی بود (بررسی وضعیت selected با دسته‌بندی فعلی محصول) --}}
+                                                <option value="{{ $subVal->id }}" {{ $product->category_id == $subVal->id ? 'selected' : '' }} style="padding-right: 15px; color: #0284c7;">
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;🔸 {{ $subVal->name }}
+                                                </option>
+                                            @endif
+                                        @endforeach
                                     @endforeach
+
                                 </select>
+                                <small class="form-text text-muted mt-2">دسته‌بندی فعلی محصول به صورت خودکار انتخاب شده است. در صورت نیاز می‌توانید آن را به یک زیردسته نهایی (🔸) دیگر تغییر دهید.</small>
                             </div>
                         </div>
                         <div class="form-group row">

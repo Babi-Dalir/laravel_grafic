@@ -146,6 +146,54 @@ class Category extends Model
             ->toArray();
     }
 
+
+    public static function getLeafCategoriesWithParent()
+    {
+        return self::query()
+            ->doesntHave('childCategory') // فقط برگ‌های نهایی
+            ->with('parentCategory')     // بارگذاری والد برای هدر گروه
+            ->get()
+            ->groupBy(function ($category) {
+                return $category->parentCategory ? $category->parentCategory->name : 'دسته‌بندی‌های عمومی';
+            });
+    }
+
+    public static function getLeafCategoriesInTree(): array
+    {
+        // ۱. فقط برگ‌های نهایی را همراه با زنجیره والدهایشان به صورت بهینه می‌کشیم
+        $leafCategories = self::query()
+            ->doesntHave('childCategory')
+            ->with('parentCategory.parentCategory')
+            ->get();
+
+        $tree = [];
+
+        // ۲. ساخت داینامیک درخت پله‌پله بدون فشار به دیتابیس
+        foreach ($leafCategories as $leaf) {
+            $mainName = 'دسته‌بندی‌های عمومی';
+            $subName = null;
+
+            // اگر لایه ۳ بود
+            if ($leaf->parentCategory && $leaf->parentCategory->parent_id != 0) {
+                $mainName = $leaf->parentCategory->parentCategory ? $leaf->parentCategory->parentCategory->name : 'عمومی';
+                $subName = $leaf->parentCategory->name;
+            }
+            // اگر لایه ۲ بود
+            elseif ($leaf->parentCategory) {
+                $mainName = $leaf->parentCategory->name;
+            }
+
+            // چیدمان آرایه به صورت پله‌پله
+            if ($subName) {
+                $tree[$mainName][$subName][] = $leaf;
+            } else {
+                $tree[$mainName][] = $leaf;
+            }
+        }
+
+        return $tree;
+    }
+
     public static function getProductCategoryCount($id)
     {
         $sum = 0;
