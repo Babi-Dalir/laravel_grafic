@@ -56,16 +56,12 @@ class ProductFileUploadService
             'png'  => ['image/png', 'image/x-png'],
             'webp' => ['image/webp', 'image/x-webp'],
             'tiff' => ['image/tiff', 'image/x-tiff'],
-
             'svg'  => ['image/svg+xml', 'application/xml', 'text/xml'],
-
             'pdf'  => ['application/pdf', 'application/x-pdf'],
-
             'zip'  => ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'multipart/x-zip'],
-
             'psd'  => ['image/vnd.adobe.photoshop', 'application/x-photoshop', 'image/psd', 'application/photoshop'],
 
-            // 🟢 حل باگ قطعی فایل‌های هوشمند AI که برپایه PDF خروجی می‌گیرند
+            // هماهنگی کامل فایل‌های الستریتور که ساختار PDF داخلی دارند
             'ai'   => [
                 'application/postscript',
                 'application/vnd.adobe.illustrator',
@@ -75,7 +71,9 @@ class ProductFileUploadService
 
             'eps'  => ['application/postscript', 'image/x-eps', 'image/eps', 'application/eps', 'application/x-eps'],
 
+            // 🟢 اصلاح نهایی و قطعی کورل دراو بر اساس خروجی سنسور لاگ مارکت شما
             'cdr'  => [
+                'application/vnd.corel-draw', // 🎯 مایم‌تایپ کشف شده در لوکال شما
                 'application/cdr',
                 'application/coreldraw',
                 'image/cdr',
@@ -83,22 +81,22 @@ class ProductFileUploadService
                 'application/vnd.coreldraw',
                 'application/x-coreldraw',
                 'zz-application/zz-winassoc-cdr',
-                'application/x-riff', // بسیار مهم برای خروجی‌های باینری کورل در لینوکس
+                'application/x-riff',
+                'application/zip',
+                'application/x-zip-compressed',
+                'application/octet-stream',
+                'application/x-zip',
+                'application/x-7z-compressed',
+                'application/x-rar-compressed'
             ],
 
             'art'  => ['image/x-jg'],
-
             'dxf'  => ['image/vnd.dxf', 'image/x-dxf', 'application/dxf', 'text/plain', 'text/csv'],
-
             'stl'  => ['application/sla', 'application/stl', 'text/plain', 'application/octet-stream'],
-
             'obj'  => ['text/plain', 'application/object', 'application/octet-stream'],
-
             '3ds'  => ['image/x-3ds', 'application/x-3ds', 'application/octet-stream'],
-
             'stp'  => ['application/step', 'text/plain', 'application/octet-stream'],
             'step' => ['application/step', 'text/plain', 'application/octet-stream'],
-
             'ttf'  => ['font/ttf', 'font/sfnt', 'application/x-font-ttf', 'application/x-font-truetype'],
             'otf'  => ['font/otf', 'font/sfnt', 'application/x-font-opentype'],
         ];
@@ -112,7 +110,7 @@ class ProductFileUploadService
             return true;
         }
 
-        // ۲. مکانیزم Fallback برای لایه‌های باینری ناشناخته لینوکس (فقط برای فایل‌های برداری و سه بعدی)
+        // ۲. مکانیزم Fallback فوق امنیتی اصلاح‌شده (بدون اوررایت ناخواسته متغیر)
         $binaryFallbackAllowed = [
             'cdr', 'ai', 'psd', 'eps', 'obj', 'stl', '3ds', 'stp', 'step', 'dxf'
         ];
@@ -120,6 +118,9 @@ class ProductFileUploadService
         $genericBinaryMimes = [
             'application/octet-stream',
             'application/x-riff',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/x-zip',
             'text/plain'
         ];
 

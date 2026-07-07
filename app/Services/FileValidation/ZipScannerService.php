@@ -17,8 +17,17 @@ class ZipScannerService
         'exe', 'dll', 'msi', 'bat', 'cmd', 'sh', 'js', 'jar', 'py', 'rb'
     ];
 
-    public function scan(string $absolutePath): void
+    // 🟢 اصلاح امضا بر اساس ساختار پیشنهادی شما
+    public function scan(string $absolutePath, ?string $extension = null): void
     {
+        $extension = $extension ?: strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
+
+        // گارد اختصاصی برای فایل‌های کورل دراو (CDR)
+        if ($extension === 'cdr') {
+            $this->validateCorelDrawStructure($absolutePath);
+            return;
+        }
+
         $zip = new ZipArchive();
 
         if ($zip->open($absolutePath) !== true) {
@@ -72,6 +81,52 @@ class ZipScannerService
             }
         } finally {
             $zip->close();
+        }
+    }
+
+    /**
+     * 🔒 تایید اصالت امضا و ساختار داخلی فایل‌های کورل‌دراو بدون ریسک فیل شدن جاب
+     */
+    private function validateCorelDrawStructure(string $absolutePath): void
+    {
+        if (!file_exists($absolutePath) || filesize($absolutePath) < 4) {
+            throw new Exception('فایل کورل دراو ارسالی مخدوش یا خالی است.');
+        }
+
+        // خواندن ۴ بایت اول فایل (Magic Number) جهت احراز هویت واقعی باینری
+        $handle = fopen($absolutePath, 'rb');
+        $bytes = fread($handle, 4);
+        fclose($handle);
+
+        $hex = bin2hex($bytes);
+
+        // ۱. نسخه‌های قدیمی کورل با امضای باینری RIFF شروع می‌شوند (52494646)
+        // ۲. نسخه‌های جدید کورل با امضای زیپ استاندارد PK شروع می‌شوند (504b0304)
+        if ($hex !== '52494646' && $hex !== '504b0304') {
+            throw new Exception('جعل پسوند مخدوش شناسایی شد! محتوای این فایل با پسوند .cdr همخوانی ندارد.');
+        }
+
+        // اگر کورل جدید بر پایه ZIP بود، مطمئن می‌شویم که پکیج مخدوش یا حاوی کدهای مخرب تزریقی نباشد
+        if ($hex === '504b0304') {
+            $zip = new ZipArchive();
+            if ($zip->open($absolutePath) === true) {
+                // ساختار داخلی فایل‌های کورل جدید حتماً باید شامل پوشه یا فایلی به نام content یا metadata یا root باشد
+                $hasCorelSign = false;
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $name = $zip->getNameIndex($i);
+                    if (str_contains($name, 'content/') || str_contains($name, 'metadata/') || str_contains($name, 'content.xml')) {
+                        $hasCorelSign = true;
+                        break;
+                    }
+                }
+                $zip->close();
+
+                if (!$hasCorelSign) {
+                    throw new Exception('امنیت فایل رد شد. این فایل یک زیپ عادی تغییر نام یافته به CDR است و فایل کورل دراو واقعی نیست.');
+                }
+            } else {
+                throw new Exception('فایل کورل دراو ساختار فشرده مخدوشی دارد و باز نمی‌شود.');
+            }
         }
     }
 

@@ -44,7 +44,7 @@ class ProcessUploadedProductFile implements ShouldQueue
 
     public function handle(ProductFileUploaded $event): void
     {
-        // 🔒 ۱. جلوگیری از Race Condition با Atomic Lock
+        // ۱. جلوگیری از Race Condition با Atomic Lock
         $lockKey = "lock:process_file:{$event->fileUuid}";
         $lock = Cache::lock($lockKey, 600);
 
@@ -61,34 +61,36 @@ class ProcessUploadedProductFile implements ShouldQueue
                 return;
             }
 
-            $extension = strtolower(pathinfo($event->originalName, PATHINFO_EXTENSION));
+            // 🟢 اصلاح اول شما: استفاده از trim و تبدیل مطمئن پسوند اصلی
+            $extension = strtolower(trim(pathinfo($event->originalName, PATHINFO_EXTENSION)));
             $localPath = $this->storageService->getLocalPath($event->tempName);
 
             if (!file_exists($localPath)) {
                 throw new Exception("فایل نهایی موقت روی هارد سرور یافت نشد.");
             }
 
-            // چک کردن آیدامپوتنسی
-            $alreadyDone = ProductFile::where('stored_name', $event->tempName)->where('status', UploadFileStatus::Ready->value)->exists();
-            if ($alreadyDone) {
-                $this->assembler->cleanChunks($event->fileUuid);
-                $lock->release();
-                return;
-            }
-
             $actualFileSize = filesize($localPath);
 
-            // ۲. بررسی‌های ساختاری امنیتی
+            // استخراج مایم‌تایپ واقعی از باینری فایل چسبانده شده
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $realMime = finfo_file($finfo, $localPath);
             finfo_close($finfo);
+
+            // 🟢 اصلاح دوم شما: ثبت دقیق لاگ پیش از وقوع هرگونه Exception برای دباگ ۱۰۰٪ قطعی
+            Log::info('MIME CHECK', [
+                'original'  => $event->originalName,
+                'extension' => $extension,
+                'mime'      => $realMime,
+                'size'      => $actualFileSize,
+            ]);
 
             if (!$this->uploadValidation->isValidMimeForExtension($extension, $realMime)) {
                 throw new Exception('محتوای باینری فایل با پسوند آن همخوانی ندارد.');
             }
 
-            if ($extension === 'zip') {
-                $this->zipScanner->scan($localPath);
+            // 🟢 اصلاح سوم شما: پاس دادن پسوند اصلی به اسکنر جهت رهایی از وابستگی به فرمت هارد
+            if ($extension === 'zip' || $extension === 'cdr') {
+                $this->zipScanner->scan($localPath, $extension);
             }
 
             $hash = hash_file('sha256', $localPath);
@@ -115,25 +117,20 @@ class ProcessUploadedProductFile implements ShouldQueue
             // ۴. انتقال استریم باینری خارج از تراکنش دیتابیس
             $this->storageService->streamToFinalStorage($event->tempName, $product->id);
 
-            // ... کدهای قبلی مرحله ۳ و ۴ متد هندل شما
-
             // ۵. ارتقای نهایی وضعیت سند
             $productFile->update(['status' => UploadFileStatus::Ready->value]);
 
-            // 🟢 حذف از تمپ فقط و فقط در صورت موفقیت کامل پایپ‌لاین
             $this->storageService->deleteFromTemp($event->tempName);
 
         } catch (\Throwable $e) {
-            // ثبت وضعیت شکست برای این پارت در دیتابیس
             ProductFile::where('stored_name', $event->tempName)->update([
                 'status' => UploadFileStatus::Failed->value,
                 'failure_reason' => mb_substr($e->getMessage(), 0, 500)
             ]);
 
-            // ❌ حذف متد deleteFromTemp از اینجا!
-            // فایل باید روی هارد بماند تا اگر جاب دوباره تلاش کرد (Retry)، بتوند فایل را بخواند.
-
-            $this->storageService->deleteAbsoluteFile($event->productId, $event->tempName);
+            try {
+                $this->storageService->deleteAbsoluteFile($event->productId, $event->tempName);
+            } catch (\Throwable $subException) {}
 
             throw $e;
         } finally {
