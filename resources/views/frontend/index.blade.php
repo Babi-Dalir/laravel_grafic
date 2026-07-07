@@ -9,7 +9,7 @@
                     <!-- Start banner -->
                     <div class="sidebar-inner dt-sl">
                         <div class="sidebar-banner">
-                            <a href="#" target="_top">
+                            <a href="{{ $banners->where('type', 'side_banner')->first()->link ?? '#' }}" target="_top">
                                 <img
                                     src="{{ url('images/banners/big/' . $banners->where('type', 'side_banner')->first()->image) }}"
                                     width="100%" height="329" alt="">
@@ -279,7 +279,7 @@
             <div class="row mt-3 mb-5">
                 <div class="col-12">
                     <div class="widget-banner">
-                        <a href="#">
+                        <a href="{{ $banners->where('type', 'large_banner')->first()->link ?? '#' }}">
                             <img
                                 src="{{ url('images/banners/big/' . $banners->where('type', 'large_banner')->first()->image) }}"
                                 alt="">

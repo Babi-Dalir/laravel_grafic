@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBannerRequest;
+use App\Http\Requests\UpdateBannerRequest;
 use App\Models\Banner;
 
 class BannerController extends Controller
@@ -57,7 +58,7 @@ class BannerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreBannerRequest $request, string $id)
+    public function update(UpdateBannerRequest $request, string $id)
     {
         Banner::updateBanner($request,$id);
         return redirect()->route('banners.index')->with('message', 'بنر با موفقیت ویرایش شد');
