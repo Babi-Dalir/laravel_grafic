@@ -35,15 +35,22 @@ class Product extends Model
 
     protected static function booted()
     {
-        $clearHomeCache = function () {
+        $clearCaches = function () {
+            // ۱. پاکسازی کش‌های صفحه اصلی فرانت
             Cache::forget('home.products.most_sold');
             Cache::forget('home.products.newest_products');
             Cache::forget('home.products.special');
             Cache::forget('home.products.instant_offers');
+
+            // ۲. متلاشی کردن کش‌های دسته‌بندی (هدر سایت و فرم‌های ادمین/فروشنده)
+            Cache::forget('categories');
+            Cache::forget('categories.tree.leaf');
         };
 
-        static::saved($clearHomeCache);
-        static::deleted($clearHomeCache);
+        // اعمال روی تمام وضعیت‌های ایجاد، آپدیت، حذف موقت و بازیابی
+        static::saved($clearCaches);
+        static::deleted($clearCaches);
+        static::restoring($clearCaches);
     }
 
     protected $appends = ['final_price', 'discount_percent', 'completion_percent'];

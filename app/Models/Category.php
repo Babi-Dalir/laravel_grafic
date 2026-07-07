@@ -61,7 +61,7 @@ class Category extends Model
             'category_id', // کلید خارجی در جدول مقصد (اشاره به زیردسته)
             'id', // کلید داخلی در جدول اصلی
             'id'  // کلید داخلی در جدول واسط
-        );
+        )->where('products.status', ProductStatus::Approved->value);
     }
 
     public static function createCategory($request)
@@ -158,40 +158,50 @@ class Category extends Model
             });
     }
 
+    protected static function booted()
+    {
+        $clearCategoryCaches = function () {
+            // متلاشی کردن کش منوی هدر و فرم‌های درختی بک‌آند
+            Cache::forget('categories');
+            Cache::forget('categories.tree.leaf');
+        };
+
+        static::saved($clearCategoryCaches);
+        static::deleted($clearCategoryCaches);
+    }
+
     public static function getLeafCategoriesInTree(): array
     {
-        // ۱. فقط برگ‌های نهایی را همراه با زنجیره والدهایشان به صورت بهینه می‌کشیم
-        $leafCategories = self::query()
-            ->doesntHave('childCategory')
-            ->with('parentCategory.parentCategory')
-            ->get();
+        return Cache::remember('categories.tree.leaf', now()->addDays(10), function () {
+            $leafCategories = self::query()
+                ->doesntHave('childCategory')
+                ->withCount('subProducts') // 🟢 استفاده از متد شمارنده زنجیره‌ای شما
+                ->with('parentCategory.parentCategory')
+                ->get();
 
-        $tree = [];
+            $tree = [];
 
-        // ۲. ساخت داینامیک درخت پله‌پله بدون فشار به دیتابیس
-        foreach ($leafCategories as $leaf) {
-            $mainName = 'دسته‌بندی‌های عمومی';
-            $subName = null;
+            foreach ($leafCategories as $leaf) {
+                $mainName = 'دسته‌بندی‌های عمومی';
+                $subName = null;
 
-            // اگر لایه ۳ بود
-            if ($leaf->parentCategory && $leaf->parentCategory->parent_id != 0) {
-                $mainName = $leaf->parentCategory->parentCategory ? $leaf->parentCategory->parentCategory->name : 'عمومی';
-                $subName = $leaf->parentCategory->name;
+                if ($leaf->parentCategory && $leaf->parentCategory->parent_id != 0) {
+                    $mainName = $leaf->parentCategory->parentCategory ? $leaf->parentCategory->parentCategory->name : 'عمومی';
+                    $subName = $leaf->parentCategory->name;
+                }
+                elseif ($leaf->parentCategory) {
+                    $mainName = $leaf->parentCategory->name;
+                }
+
+                if ($subName) {
+                    $tree[$mainName][$subName][] = $leaf;
+                } else {
+                    $tree[$mainName][] = $leaf;
+                }
             }
-            // اگر لایه ۲ بود
-            elseif ($leaf->parentCategory) {
-                $mainName = $leaf->parentCategory->name;
-            }
 
-            // چیدمان آرایه به صورت پله‌پله
-            if ($subName) {
-                $tree[$mainName][$subName][] = $leaf;
-            } else {
-                $tree[$mainName][] = $leaf;
-            }
-        }
-
-        return $tree;
+            return $tree;
+        });
     }
 
     public static function getProductCategoryCount($id)
