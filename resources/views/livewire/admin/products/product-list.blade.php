@@ -60,13 +60,25 @@
 
                 </td>
                 <td class="text-center align-middle">{{$product->name}}</td>
-                <td class="text-center align-middle">
-                    {{$product->user?->name}}
-                    <br>
 
-                    <small class="text-muted">
-                        {{ $product->user?->mobile }}
-                    </small>
+                <td class="text-center align-middle">
+                    {{-- 🟢 بررسی اینکه آیا محصول متعلق به مدیر است یا فروشنده عادی --}}
+                    @if($product->user?->hasRole('مدیر'))
+                        <span class="badge badge-primary p-2"
+                              style="font-size: 12px; font-weight: bold; border-radius: 6px;">
+                        <i class="ti-world mr-1"></i> محصول سایت
+                        </span>
+
+                    @else
+
+                        <span class="font-weight-bold text-dark">
+                            {{ $product->user?->name ?? 'بدون نام' }}
+                        </span>
+                        <br>
+                        <small class="text-muted d-block mt-1">
+                            <i class="ti-mobile mr-1"></i> {{ $product->user?->mobile ?? '--' }}
+                        </small>
+                    @endif
                 </td>
                 <td class="text-center align-middle">{{$product->category->name}}</td>
                 <td class="text-center align-middle">

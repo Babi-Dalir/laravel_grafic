@@ -39,6 +39,7 @@
             <th class="align-middle text-primary">ردیف</th>
             <th class="align-middle text-primary">عکس</th>
             <th class="align-middle text-primary">عنوان محصول</th>
+            <th class="align-middle text-primary">نام فروشنده</th>
             <th class="align-middle text-primary">دسته‌بندی</th>
             <th class="align-middle text-primary">بازگردانی</th>
             <th class="align-middle text-primary">حذف دائمی</th>
@@ -56,6 +57,27 @@
                     </figure>
                 </td>
                 <td class="align-middle font-weight-bold text-center pr-3 text-dark">{{ $product->name }}</td>
+
+                <td class="text-center align-middle">
+                    {{-- 🟢 بررسی اینکه آیا محصول متعلق به مدیر است یا فروشنده عادی --}}
+                    @if($product->user?->hasRole('مدیر'))
+                        <span class="badge badge-primary p-2"
+                              style="font-size: 12px; font-weight: bold; border-radius: 6px;">
+                        <i class="ti-world mr-1"></i> محصول سایت
+                        </span>
+
+                    @else
+
+                        <span class="font-weight-bold text-dark">
+                            {{ $product->user?->name ?? 'بدون نام' }}
+                        </span>
+                        <br>
+                        <small class="text-muted d-block mt-1">
+                            <i class="ti-mobile mr-1"></i> {{ $product->user?->mobile ?? '--' }}
+                        </small>
+                    @endif
+                </td>
+
                 <td class="align-middle">
                     <span class="badge badge-light border text-muted px-2 py-1">{{ $product->category->name ?? 'بدون دسته' }}</span>
                 </td>
