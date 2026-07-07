@@ -55,7 +55,8 @@ class SellerProductList extends Component
             ->where('user_id', auth()->id())
             ->findOrFail($id);
 
-        $this->rejectReason = $product->review_note;
+
+        $this->rejectReason = $product->review_note ?? 'دلیلی توسط مدیریت ثبت نشده است.';
         $this->showRejectModal = true;
     }
 

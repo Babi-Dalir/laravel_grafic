@@ -23,15 +23,17 @@
         {{-- بخش باکس آپلود هوشمند --}}
         <div class="upload-box" wire:ignore>
             {{-- 🟢 هشدار ثابت: راهنمایی فایل‌های سنگین --}}
-            <div class="alert-modern alert-modern-warning mb-3" role="alert" style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px;">
+            <div class="alert-modern alert-modern-warning mb-3" role="alert"
+                 style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px;">
                 <i class="fa fa-info-circle text-warning" style="font-size: 20px;"></i>
                 <span class="alert-text" style="color: #92400e; font-size: 13.5px; font-weight: 600;">
                     توصیه مهم: برای پایداری بیشتر در فرآیند آپلود و حفظ ساختار لایه‌ها، پیشنهاد می‌شود فایل‌های سنگین و حجیم خود را حتماً به صورت فشرده (فرمت ZIP) آپلود نمایید.
                 </span>
             </div>
 
-            {{-- 🟢 هشدار داینامیک: عدم رفرش صفحه (به صورت پیش‌فرض مخفی است و با شروع آپلود ظاهر می‌شود) --}}
-            <div id="refresh-danger-alert" class="alert-modern alert-modern-danger mb-4 d-none" role="alert" style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px; animation: pulse 2s infinite;">
+            {{-- 🟢 هشدار داینامیک: عدم رفرش صفحه --}}
+            <div id="refresh-danger-alert" class="alert-modern alert-modern-danger mb-4 d-none" role="alert"
+                 style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 12px; animation: pulse 2s infinite;">
                 <i class="fa fa-exclamation-triangle text-danger" style="font-size: 20px;"></i>
                 <span class="alert-text" style="color: #991b1b; font-size: 13.5px; font-weight: 700;">
                     هشدار حیاتی: فرآیند قطعه‌بندی باینری در حال انجام است؛ به هیچ عنوان صفحه را رفرش نکنید یا دکمه بازگشت را نزنید تا آپلود مخدوش نشود!
@@ -40,7 +42,8 @@
             <div class="row">
                 <div class="col-12 mb-4 text-left">
                     <label class="input-label">عنوان نمایشی فایل <span class="optional-tag">(اختیاری)</span></label>
-                    <input type="text" id="file-title" class="input-modern w-100" placeholder="مثلاً: منبع لایه‌باز اصلی، نمونه سه‌بعدی خروجی...">
+                    <input type="text" id="file-title" class="input-modern w-100"
+                           placeholder="مثلاً: منبع لایه‌باز اصلی، نمونه سه‌بعدی خروجی...">
                 </div>
 
                 <div class="col-12">
@@ -85,8 +88,7 @@
             </div>
         </div>
 
-        {{-- لیست فایل‌های آپلود شده (دارای Polling هوشمند ۵ ثانیه‌ای در زمان پردازش صف) --}}
-        {{-- فعال‌سازی مشروط پولینگ؛ فقط در زمان لزوم سرور صدا زده می‌شود --}}
+        {{-- لیست فایل‌های آپلود شده --}}
         <div class="table-container" @if($isProcessing) wire:poll.3s="checkProcessingStatus" @endif>
             <div class="table-responsive">
                 <table class="table table-modern mb-0 align-middle responsive-table">
@@ -105,51 +107,71 @@
                         <tr wire:key="file-row-{{ $file->id }}">
                             <td data-label="ردیف" class="row-number">{{ $files->firstItem() + $index }}</td>
                             <td data-label="مشخصات فایل">
-                                <div class="file-details-wrapper">
-                                    <div class="file-icon-box">
-                                        <i class="fa fa-file-archive-o"></i>
+                                <div
+                                    class="file-details-wrapper d-flex align-items-center justify-content-between w-100">
+                                    <div class="d-flex align-items-center">
+                                        <div class="file-icon-box">
+                                            <i class="fa fa-file-archive-o"></i>
+                                        </div>
+                                        <div class="file-meta mr-2">
+                                            <span
+                                                class="file-title-text">{{ $file->title ?? 'بدون عنوان تعریفی' }}</span>
+                                            <small class="file-name-text"
+                                                   title="{{ $file->original_name }}">{{ $file->original_name }}</small>
+                                        </div>
                                     </div>
-                                    <div class="file-meta">
-                                        <span class="file-title-text">{{ $file->title ?? 'بدون عنوان تعریفی' }}</span>
-                                        <small class="file-name-text" title="{{ $file->original_name }}">{{ $file->original_name }}</small>
-                                    </div>
+
+                                    {{-- 🟢 دکمه دانلود اختصاصی مدیریت: بر اساس متد کنترلر و روت اختصاصی سیستم شما بدون آسیب به کانت و لاگ فروشنده --}}
+                                    @if(auth()->check() && auth()->user()->hasRole('مدیر'))
+                                        <div class="download-action-box">
+                                            <a href="{{ route('product.files.download', $file) }}"
+                                               class="btn btn-sm text-white px-3"
+                                               style="gap: 6px; font-size: 11px; font-weight: bold; background-color: #10b981; border: none; border-radius: 8px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);"
+                                               title="دانلود مستقیم جهت بررسی کیفیت و محتوای فنی فایل">
+                                                <i class="fa fa-download"></i>
+                                                <span>دانلود بررسی مدیر</span>
+                                            </a>
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
                             <td data-label="پسوند">
                                 <span class="badge-extension">{{ $file->extension }}</span>
                             </td>
-                            <td data-label="حجم دقیق" class="file-size-text">{{ number_format($file->size / 1024 / 1024, 2) }} MB</td>
+                            <td data-label="حجم دقیق"
+                                class="file-size-text">{{ number_format($file->size / 1024 / 1024, 2) }} MB
+                            </td>
 
-                            {{-- 🔄 ستون وضعیت سند متصل به State Machine دیتابیس --}}
+                            {{-- ستون وضعیت سند متصل به State Machine دیتابیس --}}
                             <td data-label="وضعیت سند" class="text-center">
                                 @if($file->status === 'ready')
                                     @if($file->is_default)
                                         <span class="badge-status-active">
-                                    <i class="fa fa-star ml-1"></i> فایل اصلی محصول
-                                </span>
+                                            <i class="fa fa-star ml-1"></i> فایل اصلی محصول
+                                        </span>
                                     @else
                                         <button wire:click="setDefault({{ $file->id }})" class="btn-set-default">
                                             انتخاب به عنوان اصلی
                                         </button>
                                     @endif
                                 @elseif($file->status === 'failed')
-                                    <span class="badge-status-failed text-danger" title="{{ $file->failure_reason }}" style="cursor: help;">
-                                <i class="fa fa-times-circle ml-1"></i> خطای پردازش امنیتی
-                            </span>
+                                    <span class="badge-status-failed text-danger" title="{{ $file->failure_reason }}"
+                                          style="cursor: help;">
+                                        <i class="fa fa-times-circle ml-1"></i> خطای پردازش امنیتی
+                                    </span>
                                 @else
-                                    {{-- وضعیت‌های uploading یا processing --}}
                                     <span class="badge-status-processing text-warning">
-                                <i class="fa fa-spinner fa-spin ml-1"></i> در حال پردازش سرور...
-                            </span>
+                                        <i class="fa fa-spinner fa-spin ml-1"></i> در حال پردازش سرور...
+                                    </span>
                                 @endif
                             </td>
 
                             <td data-label="حذف" class="text-center">
-                                {{-- غیرفعال کردن دکمه حذف برای فایل‌هایی که در حال پردازش هستند --}}
                                 <button type="button"
                                         class="btn-delete-file"
                                         title="حذف"
-                                        @if(in_array($file->status, ['uploading', 'processing'])) disabled style="opacity: 0.5; cursor: not-allowed;" @endif
+                                        @if(in_array($file->status, ['uploading', 'processing'])) disabled
+                                        style="opacity: 0.5; cursor: not-allowed;" @endif
                                         onclick="openDeleteModal({{ $file->id }}, '{{ $file->title ?? $file->original_name }}')">
                                     <i class="fa fa-trash-o"></i>
                                 </button>
@@ -159,7 +181,8 @@
                         <tr>
                             <td colspan="6" class="empty-state-row">
                                 <i class="fa fa-folder-open-o empty-icon"></i>
-                                <p class="empty-text">هنوز هیچ فایلی برای این محصول آپلود نشده یا فایل‌های ارسالی در صف پردازش هستند...</p>
+                                <p class="empty-text">هنوز هیچ فایلی برای این محصول آپلود نشده یا فایل‌های ارسالی در صف
+                                    پردازش هستند...</p>
                             </td>
                         </tr>
                     @endforelse
@@ -192,7 +215,8 @@
             </div>
             <h3 class="modal-confirm-title">حذف قطعی سند</h3>
             <p class="modal-confirm-text">
-                آیا از حذف فایل <span id="modal-file-name-placeholder" class="text-danger font-weight-bold"></span> مطمئن هستید؟ این عملیات غیرقابل بازگشت است.
+                آیا از حذف فایل <span id="modal-file-name-placeholder" class="text-danger font-weight-bold"></span>
+                مطمئن هستید؟ این عملیات غیرقابل بازگشت است.
             </p>
             <div class="modal-actions-wrapper">
                 <button type="button" class="btn-modal-action btn-modal-cancel" onclick="closeDeleteModal(null)">
@@ -217,9 +241,9 @@
     const progressPercent = document.getElementById('progress-percent');
     const statusText = document.getElementById('upload-status-text');
     const titleInput = document.getElementById('file-title');
-    const refreshDangerAlert = document.getElementById('refresh-danger-alert'); // المان هشدار رفرش
+    const refreshDangerAlert = document.getElementById('refresh-danger-alert');
     let completed = false;
-    let isUploadingCurrently = false; // فلگ کنترل وضعیت آپلود برای گارد خروج
+    let isUploadingCurrently = false;
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -236,7 +260,6 @@
 
     r.assignBrowse(uploadContainer);
 
-    // 🔒 گارد امنیتی مرورگر برای جلوگیری از رفرش ناخواسته صفحه (F5 یا بستن تب)
     window.addEventListener('beforeunload', function (e) {
         if (isUploadingCurrently) {
             e.preventDefault();
@@ -285,7 +308,6 @@
             resumableTotalSize: r.files[0].size
         };
 
-        // 🟢 فعال‌سازی گارد خروج و نمایش هشدار عدم رفرش در ویو
         isUploadingCurrently = true;
         refreshDangerAlert.classList.remove('d-none');
 
@@ -296,32 +318,26 @@
     });
 
     r.on('fileProgress', function (file) {
-        // ۱. محاسبه درصد پیشرفت کل فایل
         const progress = Math.floor(file.progress() * 100);
         progressBar.style.width = progress + '%';
         progressPercent.innerText = progress + '%';
 
-        // ۲. 🟢 فرمول ریاضی دقیق برای محاسبه پارت در حال ارسال بدون باگ صفر
         const totalChunks = file.chunks.length;
-        // مقدار سقف ریاضی ضربدر تعداد پارت‌ها، پارت در حال پردازش فعلی را دقیقاً لود می‌کند
         let currentChunkIndex = Math.ceil(file.progress() * totalChunks);
 
-        // گارد کوچک که اگر صفر بود، نشان دهد پارت ۱ است
         if (currentChunkIndex === 0 && totalChunks > 0) {
             currentChunkIndex = 1;
         }
 
-        // ۳. به‌روزرسانی متن وضعیت با اعداد داینامیک و زنده
         statusText.innerText = 'در حال ارسال قطعه پارت (' + currentChunkIndex + ' از ' + totalChunks + ')...';
     });
 
-    r.on('fileSuccess', function(file, message){
+    r.on('fileSuccess', function (file, message) {
         try {
             const data = JSON.parse(message);
-            if(data.status === 'success' && data.completed && !completed){
+            if (data.status === 'success' && data.completed && !completed) {
                 completed = true;
 
-                // 🟢 غیرفعال کردن گارد خروج و مخفی کردن هشدار عدم رفرش
                 isUploadingCurrently = false;
                 refreshDangerAlert.classList.add('d-none');
 
@@ -331,13 +347,12 @@
                 titleInput.value = '';
                 $wire.dispatch('refresh-file-list');
             }
-        } catch(e) {
+        } catch (e) {
             console.error('Error parsing response', e);
         }
     });
 
     r.on('fileError', function (file, message) {
-        // 🟢 آزادسازی گارد در صورت فیل شدن آپلود برای امکان بازگشت کاربر
         isUploadingCurrently = false;
         refreshDangerAlert.classList.add('d-none');
 
@@ -352,8 +367,8 @@
             try {
                 const response = JSON.parse(message);
                 errorMessage = response.message || errorMessage;
-            } catch(e) {
-                if(typeof message === 'string' && message.length < 150) {
+            } catch (e) {
+                if (typeof message === 'string' && message.length < 150) {
                     errorMessage = message;
                 }
             }
@@ -369,14 +384,14 @@
     const modalFileNamePlaceholder = document.getElementById('modal-file-name-placeholder');
     const modalConfirmDeleteBtn = document.getElementById('modal-confirm-delete-btn');
 
-    window.openDeleteModal = function(id, name) {
+    window.openDeleteModal = function (id, name) {
         targetFileId = id;
         modalFileNamePlaceholder.innerText = `«${name}»`;
         deleteModal.classList.remove('d-none');
         document.body.style.overflow = 'hidden';
     }
 
-    window.closeDeleteModal = function(event) {
+    window.closeDeleteModal = function (event) {
         if (event === null || event.target === deleteModal) {
             deleteModal.classList.add('d-none');
             document.body.style.overflow = '';
@@ -384,7 +399,7 @@
         }
     }
 
-    modalConfirmDeleteBtn.addEventListener('click', function() {
+    modalConfirmDeleteBtn.addEventListener('click', function () {
         if (targetFileId) {
             $wire.dispatch('destroy_product_file', [targetFileId]);
             closeDeleteModal(null);
