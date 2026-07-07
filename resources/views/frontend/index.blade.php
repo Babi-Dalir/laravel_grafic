@@ -199,7 +199,7 @@
                 @foreach ($banners->where('type', 'medium_banner') as $medium_banner)
                     <div class="col-sm-6 col-12 mb-2">
                         <div class="widget-banner">
-                            <a href="#">
+                            <a href="{{$medium_banner->link}}">
                                 <img src="{{ url('images/banners/big/' . $medium_banner->image) }}" alt="">
                             </a>
                         </div>
@@ -212,7 +212,7 @@
                 @foreach ($banners->where('type', 'small_banner') as $small_banner)
                     <div class="col-md-3 col-sm-6 col-6 mb-2">
                         <div class="widget-banner">
-                            <a href="#">
+                            <a href="{{$small_banner->link}}">
                                 <img src="{{ url('images/banners/big/' . $small_banner->image) }}" alt="">
                             </a>
                         </div>

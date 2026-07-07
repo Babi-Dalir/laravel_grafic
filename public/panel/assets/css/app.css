@@ -12593,3 +12593,100 @@ body.dark .ui-datepicker select {
         padding: 10px !important;
     }
 }
+
+/* استایل فیلد لینک با فونت چاق و خوانای وزیر */
+.banner-input-link {
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Vazir', 'vazir', Tahoma, sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    letter-spacing: 0.3px !important;
+    color: #1e293b !important;
+    height: 52px !important;
+    border-radius: 8px 0 0 8px !important;
+    background-color: #ffffff !important;
+    transition: all 0.2s ease;
+}
+
+/* افکت جذاب زمانی که ادمین روی اینپوت لینک کلیک می‌کند */
+.banner-input-link:focus {
+    color: #0f172a !important;
+    background-color: #fff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* اصلاح ارتفاع آیکون لینک برای هماهنگی با اینپوت چاق شده */
+.banner-input-icon {
+    border-radius: 0 8px 8px 0 !important;
+    background-color: #f1f5f9 !important;
+    color: #64748b !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.banner-select-type {
+    height: 48px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    color: #334155 !important;
+}
+
+/* باکس آپلود مدرن بنر */
+.grafic-upload-zone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 30px 20px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    position: relative;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.grafic-upload-zone:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.grafic-upload-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.upload-zone-title {
+    display: block;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+/* کارت فرم‌ها */
+.banner-form-card {
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+.banner-form-header {
+    width: 46px;
+    height: 46px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 50%;
+}

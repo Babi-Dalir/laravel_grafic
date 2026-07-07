@@ -10,6 +10,7 @@ class Banner extends Model
 {
     protected $fillable = [
         'image',
+        'link',
         'type'
     ];
 
@@ -26,6 +27,7 @@ class Banner extends Model
         self::clearCache();
 
         self::query()->create([
+            'link'  => $request->input('link'),
             'type'  => $request->input('type'),
             'image' => ImageManager::saveImage('banners', $request->image)
         ]);
@@ -44,6 +46,7 @@ class Banner extends Model
         }
 
         $banner->update([
+            'link'  => $request->input('link'),
             'type'  => $request->input('type'),
             'image' => $imageName
         ]);
