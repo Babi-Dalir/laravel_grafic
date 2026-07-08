@@ -217,10 +217,10 @@
                     @endif
 
                     <div class="price-section-box mb-4 p-3 bg-white rounded-15 border-0">
-                        @if($product->discount_percent > 0)
+                        @if($product->discount_percent > 0 && $product->main_price > 0)
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <span class="text-muted font-13"><del
-                                        class="font-numeric">{{ number_format($product->main_price) }}</del></span>
+                                class="font-numeric">{{ number_format($product->main_price) }}</del></span>
                                 <span class="badge bg-danger rounded-pill font-numeric font-12 px-2 py-1">{{ $product->discount_percent }}٪ تخفیف</span>
                             </div>
                         @endif
@@ -228,17 +228,31 @@
                         <div class="d-flex align-items-baseline justify-content-between mt-2">
                             <span class="text-secondary font-13 font-weight-bold">قیمت نهایی:</span>
                             <div>
-                                <span class="h3 font-weight-black font-numeric mb-0"
-                                      style="color: #8b5cf6;">{{ number_format($product->final_price) }}</span>
-                                <small class="text-muted ms-1 font-11">تومان</small>
+                                @if($product->final_price <= 0)
+                                    {{-- 🎁 نمایش عبارت رایگان در صورتی که قیمت صفر یا کمتر باشد --}}
+                                    <span class="h4 font-weight-black mb-0 px-3 py-1 rounded-8" style="color: #10b981; background-color: #ecfdf5;">
+                                            رایگان!
+                                    </span>
+                                @else
+                                    <span class="h3 font-weight-black font-numeric mb-0"
+                                          style="color: #8b5cf6;">{{ number_format($product->final_price) }}</span>
+                                    <small class="text-muted ms-1 font-11">تومان</small>
+                                @endif
                             </div>
                         </div>
 
-                        @if($product->main_price > $product->final_price)
+                        {{-- سود خرید فقط زمانی معنی دارد که محصول نهایی کاملاً رایگان نشده باشد یا تخفیف روی محصول پولی اعمال شده باشد --}}
+                        @if($product->main_price > $product->final_price && $product->final_price > 0)
                             <div
                                 class="text-center mt-2 pt-2 border-top border-dashed font-12 text-danger font-numeric">
                                 <i class="mdi mdi-tag-heart-outline"></i> سود شما از خرید:
                                 <span>{{ number_format($product->main_price - $product->final_price) }}</span> تومان
+                            </div>
+                        @elseif($product->main_price > 0 && $product->final_price <= 0)
+                            {{-- اگر محصول قبلاً پولی بوده و الان ۱۰۰٪ تخفیف خورده یا رایگان شده --}}
+                            <div
+                                class="text-center mt-2 pt-2 border-top border-dashed font-12 text-success font-numeric">
+                                <i class="mdi mdi-gift-outline"></i> هدیه رابی گرافیک؛ ۱۰۰٪ تخفیف به ارزش <span>{{ number_format($product->main_price) }}</span> تومان!
                             </div>
                         @endif
                     </div>

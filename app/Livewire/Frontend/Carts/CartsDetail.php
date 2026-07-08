@@ -42,10 +42,23 @@ class CartsDetail extends Component
 
     public function submitPayment()
     {
+        // محاسبه مجدد قیمت نهایی در سمت سرور برای امنیت بیشتر
+        $carts = UserCart::query()
+            ->with('product')
+            ->where('user_id', auth()->id())
+            ->where('type', CartType::Main->value)
+            ->get()
+            ->filter(fn($cart) => $cart->product && $cart->product->status === ProductStatus::Approved->value);
+
+        $total_price = $carts->sum(fn($cart) => $cart->product->final_price);
+        $allowed_discount_code = min($this->discount_code_price, $total_price);
+        $allowed_gift_cart = min($this->gift_cart_price, ($total_price - $allowed_discount_code));
+        $final_price = max(($total_price - $allowed_discount_code - $allowed_gift_cart), 0);
+
         Session::put('shop_data', [
             'discount_code'  => $this->discount_code,
             'gift_cart_code' => $this->gift_cart_code,
-            'payment_type'   => 'zarinpal',
+            'payment_type'   => $final_price <= 0 ? 'free' : 'zarinpal', // 🟢 تشخیص رایگان بودن
         ]);
 
         return redirect()->route('payment');

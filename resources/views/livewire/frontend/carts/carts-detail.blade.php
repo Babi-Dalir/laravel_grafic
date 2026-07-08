@@ -66,7 +66,11 @@
                                                                         </button>
                                                                     </div>
                                                                     <div class="item-price font-numeric text-dark font-weight-black fs-5">
-                                                                        {{ number_format($cart->product->final_price) }} <small class="text-muted font-11 font-weight-normal ms-1">تومان</small>
+                                                                        @if($cart->product->final_price <= 0)
+                                                                            <span class="badge bg-success bg-opacity-10 text-white font-weight-bold font-13 px-3 py-1.5 rounded-8">رایگان!</span>
+                                                                        @else
+                                                                            {{ number_format($cart->product->final_price) }} <small class="text-muted font-11 font-weight-normal ms-1">تومان</small>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -115,16 +119,25 @@
                                         <div class="d-flex align-items-baseline justify-content-between">
                                             <span class="text-secondary font-13 font-weight-bold">مبلغ قابل پرداخت:</span>
                                             <div>
-                                                <span class="h3 font-weight-black font-numeric mb-0" style="color: #a855f7;">{{ number_format($final_price) }}</span>
-                                                <small class="text-muted ms-1 style-toman">تومان</small>
+                                                @if($final_price <= 0)
+                                                    <span class="h5 font-weight-black mb-0 px-3 py-1.5 rounded-8" style="color: #10b981; background-color: #ecfdf5;">
+                                                        رایگان!
+                                                    </span>
+                                                @else
+                                                    <span class="h3 font-weight-black font-numeric mb-0" style="color: #a855f7;">{{ number_format($final_price) }}</span>
+                                                    <small class="text-muted ms-1 style-toman">تومان</small>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
 
                                     @if($carts->isNotEmpty())
-                                        {{-- دکمه با رنگ ارغوانی ملوکانه هماهنگ با صفحه محصول --}}
                                         <button wire:click="submitPayment" class="btn btn-lg w-100 rounded-15 py-3 font-weight-bold shadow-sm d-flex align-items-center justify-content-center gap-2 call-to-action-btn-purple transition-all mt-2">
-                                            <i class="mdi mdi-credit-card-outline fs-5"></i> پرداخت و ثبت نهایی سفارش
+                                            @if($final_price <= 0)
+                                                <i class="mdi mdi-download-outline fs-5"></i> دریافت و دانلود رایگان سفارش
+                                            @else
+                                                <i class="mdi mdi-credit-card-outline fs-5"></i> پرداخت و ثبت نهایی سفارش
+                                            @endif
                                         </button>
                                     @endif
                                 </div>
@@ -232,7 +245,11 @@
                                                                         </button>
                                                                     </div>
                                                                     <div class="item-price font-numeric text-dark font-weight-black fs-5">
-                                                                        {{ number_format($cart->product->final_price) }} <small class="text-muted font-11 font-weight-normal ms-1">تومان</small>
+                                                                        @if($cart->product->final_price <= 0)
+                                                                            <span class="badge bg-success bg-opacity-10 text-white font-weight-bold font-13 px-3 py-1.5 rounded-8">رایگان!</span>
+                                                                        @else
+                                                                            {{ number_format($cart->product->final_price) }} <small class="text-muted font-11 font-weight-normal ms-1">تومان</small>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </div>

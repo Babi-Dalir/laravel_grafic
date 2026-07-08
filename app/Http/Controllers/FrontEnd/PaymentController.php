@@ -49,7 +49,10 @@ class PaymentController extends Controller
 
         foreach ($carts as $cart) {
             $product = $cart->product;
-            if (!$product) continue;
+            // واکسینه کردن محاسبات مالی در برابر محصولات فانتوم یا تایید نشده
+            if (!$product || $product->status !== \App\Enums\ProductStatus::Approved->value) {
+                continue;
+            }
 
             $total_price += $product->final_price;
             $product_discount_price += ($product->main_price - $product->final_price);
@@ -60,7 +63,7 @@ class PaymentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Discount
+        | ۱. محاسبات کد تخفیف
         |--------------------------------------------------------------------------
         */
         if (!empty($shop_data['discount_code'])) {
@@ -77,7 +80,7 @@ class PaymentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Gift Cart
+        | ۲. محاسبات کارت هدیه
         |--------------------------------------------------------------------------
         */
         if (!empty($shop_data['gift_cart_code'])) {
@@ -91,10 +94,13 @@ class PaymentController extends Controller
             $gift_cart_code_price = $result['gif_cart_code_price'];
         }
 
+        // تضمین اینکه مبلغ نهایی فاکتور به هیچ وجه منفی نشود
+        $total_price = max(0, $total_price);
+
         DB::beginTransaction();
 
         try {
-            // 🧠 اصلاح شد: ساخت مستقیم سفارش بر اساس فیلدهای Fillable مدل Order
+            // ساخت مستقیم سفارش بر اساس فیلدهای فاکتور نهایی
             $order = Order::query()->create([
                 'user_id'         => $user->id,
                 'order_code'      => 'ORD-' . now()->getTimestampMs() . '-' . Str::upper(Str::random(4)),
@@ -103,7 +109,7 @@ class PaymentController extends Controller
                 'discount_code'   => $shop_data['discount_code'] ?? null,
                 'gift_cart_price' => $gift_cart_code_price,
                 'gift_cart_code'  => $shop_data['gift_cart_code'] ?? null,
-                'status'          => OrderStatus::WaitPayment->value, // وضعیت اولیه در انتظار پرداخت
+                'status'          => OrderStatus::WaitPayment->value,
             ]);
 
             $order_details = [];
@@ -134,39 +140,39 @@ class PaymentController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Offline Payment (کیف پول یا تست آفلاین)
+        | ۳. سناریوی محصول/فاکتور رایگان (مبلغ کل صفر است) یا آفلاین
         |--------------------------------------------------------------------------
+        | این بخش به طور هوشمند جلوی ارسال رکوئست صفر تومانی به شتابیت را می‌گیرد.
         */
-        if (isset($shop_data['payment_type']) && $shop_data['payment_type'] === 'offline') {
+        if ($total_price <= 0 || (isset($shop_data['payment_type']) && $shop_data['payment_type'] === 'offline')) {
             try {
-                // 🧠 اصلاح شد: متد جدید مدل فقط خود شیء سفارش را می‌پذیرد
+                // کدهای اتمیک مدل شما: تغییر وضعیت به پرداخت شده، ساخت دانلودها، پاکسازی سبد خرید
                 Order::successPayment($order);
-                SellerWalletTransaction::registerSale($order_details);
+
+                if (!empty($order_details)) {
+                    SellerWalletTransaction::registerSale($order_details);
+                }
 
                 $result = 'success';
             } catch (\Exception $e) {
-                Log::error('Offline Payment Error: ' . $e->getMessage());
+                Log::error('Free/Offline Payment Execution Error: ' . $e->getMessage());
                 $result = 'failed';
             }
 
-            $downloads = Downloads::query()
-                ->where('user_id', $order->user_id)
-                ->whereHas('orderDetail', function ($q) use ($order) {
-                    $q->where('order_id', $order->id);
-                })
-                ->with('product')
-                ->get();
+            $downloads = $this->getDownloads($order);
 
             return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
         }
 
         /*
         |--------------------------------------------------------------------------
-        | Online Payment (درگاه آنلاین زرین‌پال یا ...)
+        | ۴. سناریوی عادی: پرداخت آنلاین (مبلغ بزرگتر از صفر)
         |--------------------------------------------------------------------------
         */
         try {
-            return Payment::via($shop_data['payment_type'])
+            $paymentType = $shop_data['payment_type'] ?? 'zarinpal';
+
+            return Payment::via($paymentType)
                 ->purchase(
                     (new Invoice)->amount((int)$total_price),
                     function ($driver, $transactionId) use ($order) {
@@ -183,98 +189,90 @@ class PaymentController extends Controller
         }
     }
 
-   public function callback(Request $request)
-{
-    $authority = $request->Authority;
+    public function callback(Request $request)
+    {
+        $authority = $request->Authority;
 
-    // پیدا کردن سفارش بر اساس توکن درگاه
-    $order = Order::query()
-        ->where('transaction_id', $authority)
-        ->first();
+        $order = Order::query()
+            ->where('transaction_id', $authority)
+            ->first();
 
-    // 🧼 راه حل ۲: تعریف پیش‌فرض متغیر دانلودها به صورت کالکشن خالی در بالای فانکشن
-    $downloads = collect();
+        $downloads = collect();
 
-    if (!$order) {
-        return view('frontend.shopping_result', [
-            'result' => 'failed',
-            'order' => null,
-            'downloads' => $downloads // پاس دادن کالکشن خالی
-        ]);
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | مدیریت ایمن رفرش صفحه (اگر قبلاً پرداخت موفق بوده است)
-    |--------------------------------------------------------------------------
-    */
-    if ($order->status === OrderStatus::Payed || $order->status === OrderStatus::Payed->value) {
-        // اورراید کردن دانلودها با استفاده از متد کمکی
-        $downloads = $this->getDownloads($order);
-
-        return view('frontend.shopping_result', [
-            'order' => $order,
-            'result' => 'success',
-            'downloads' => $downloads
-        ]);
-    }
-
-    // اگر وضعیت برگشت از بانک OK نبود
-    if ($request->Status !== 'OK') {
-        return view('frontend.shopping_result', [
-            'order' => $order,
-            'result' => 'failed',
-            'downloads' => $downloads // پاس دادن کالکشن خالی
-        ]);
-    }
-
-    try {
-        /*
-        |--------------------------------------------------------------------------
-        | تایید اصالت تراکنش (فقط برای بار اول)
-        |--------------------------------------------------------------------------
-        */
-        $payment = Payment::via($order->payment_type ?? 'zarinpal')
-            ->amount((int) $order->total_price)
-            ->transactionId($authority)
-            ->verify();
-
-        // تغییر وضعیت سفارش به پرداخت موفق
-        Order::successPayment($order);
-
-        // ثبت سهم فروشندگان
-        $order_details = OrderDetail::query()
-            ->where('order_id', $order->id)
-            ->get();
-
-        if ($order_details->isNotEmpty()) {
-            SellerWalletTransaction::registerSale($order_details);
+        if (!$order) {
+            return view('frontend.shopping_result', [
+                'result' => 'failed',
+                'order' => null,
+                'downloads' => $downloads
+            ]);
         }
 
-        $result = 'success';
+        /*
+        |--------------------------------------------------------------------------
+        | مدیریت ایمن رفرش صفحه
+        |--------------------------------------------------------------------------
+        */
+        if ($order->status === OrderStatus::Payed || $order->status === OrderStatus::Payed->value) {
+            $downloads = $this->getDownloads($order);
 
-        // اورراید کردن دانلودها پس از موفقیت تراکنش اولیه
-        $downloads = $this->getDownloads($order);
+            return view('frontend.shopping_result', [
+                'order' => $order,
+                'result' => 'success',
+                'downloads' => $downloads
+            ]);
+        }
 
-    } catch (\Exception $e) {
-        Log::error('Zarinpal Verification Error: ' . $e->getMessage());
-        $result = 'failed';
+        if ($request->Status !== 'OK') {
+            return view('frontend.shopping_result', [
+                'order' => $order,
+                'result' => 'failed',
+                'downloads' => $downloads
+            ]);
+        }
+
+        try {
+            /*
+            |--------------------------------------------------------------------------
+            | تایید اصالت تراکنش آنلاین
+            |--------------------------------------------------------------------------
+            */
+            $payment = Payment::via($order->payment_type ?? 'zarinpal')
+                ->amount((int) $order->total_price)
+                ->transactionId($authority)
+                ->verify();
+
+            Order::successPayment($order);
+
+            $order_details = OrderDetail::query()
+                ->where('order_id', $order->id)
+                ->get();
+
+            if ($order_details->isNotEmpty()) {
+                SellerWalletTransaction::registerSale($order_details);
+            }
+
+            $result = 'success';
+            $downloads = $this->getDownloads($order);
+
+        } catch (\Exception $e) {
+            Log::error('Zarinpal Verification Error: ' . $e->getMessage());
+            $result = 'failed';
+        }
+
+        return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
     }
 
-    return view('frontend.shopping_result', compact('order', 'result', 'downloads'));
-}
-
-/**
- * 🏆 متد کمکی برای جلوگیری از تکرار کد واکشی دانلودها
- */
-private function getDownloads($order)
-{
-    return Downloads::query()
-        ->where('user_id', $order->user_id)
-        ->whereHas('orderDetail', function ($q) use ($order) {
-            $q->where('order_id', $order->id);
-        })
-        ->with('product')
-        ->get();
-}
+    /**
+     * متد کمکی و ایمن برای استخراج دانلودهای مربوط به فاکتور جاری
+     */
+    private function getDownloads($order)
+    {
+        return Downloads::query()
+            ->where('user_id', $order->user_id)
+            ->whereHas('orderDetail', function ($q) use ($order) {
+                $q->where('order_id', $order->id);
+            })
+            ->with('product')
+            ->get();
+    }
 }
