@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\GiftCartStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Carbon;
 
 class GiftCart extends Model
 {
@@ -26,13 +28,22 @@ class GiftCart extends Model
     }
 
     /**
-     * 🟢 شنود تغییرات مدل برای غیرفعال‌سازی خودکار در صورت اتمام موجودی (امنیتی آنلاین)
+     * 🟢 اصلاح ساختاری: انتقال خودکار زمان انقضا به آخرین ثانیه روز
      */
+    protected function expirationDate(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) return null;
+                return Carbon::parse($value)->endOfDay();
+            }
+        );
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        // به محض اینکه فیلد balance در هر کجای پروژه آپدیت شد، این بخش اجرا می‌شود
         self::updating(function ($giftCart) {
             if ($giftCart->isDirty('balance') && $giftCart->balance <= 0) {
                 $giftCart->status = GiftCartStatus::InActive->value;
@@ -52,7 +63,8 @@ class GiftCart extends Model
             ->where('user_id', auth()->id())
             ->where('balance', '>', 0)
             ->where('status', GiftCartStatus::Active->value)
-            ->where('expiration_date', '>=', now())
+            // 🟢 اصلاح طلایی: معتبر بودن کارت تا آخرین ثانیه‌ی امروز
+            ->whereDate('expiration_date', '>=', today())
             ->first();
 
         if ($gift_cart) {
@@ -63,6 +75,8 @@ class GiftCart extends Model
                 $gif_cart_code_price = $gift_cart->balance;
                 $total_price -= $gift_cart->balance;
             }
+        } else {
+            $gif_cart_code_price = 0;
         }
 
         return [

@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Enums\DiscountStatus;
 use App\Helpers\CreateUniqueCode;
-use App\Helpers\DateManager;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Carbon;
 
 class Discount extends Model
 {
@@ -16,13 +17,25 @@ class Discount extends Model
         'expiration_date',
     ];
 
-    // فعال کردن کستینگ انوم برای همخوانی ۱۰۰ درصدی لایه دیتابیس با انوم پروژه
     protected function casts(): array
     {
         return [
             'status' => DiscountStatus::class,
             'expiration_date' => 'datetime',
         ];
+    }
+
+    /**
+     * 🟢 اصلاح ساختاری: انتقال خودکار زمان انقضا به آخرین ثانیه روز جهت پایداری سیستم
+     */
+    protected function expirationDate(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) return null;
+                return Carbon::parse($value)->endOfDay();
+            }
+        );
     }
 
     public static function createDiscount($request)
@@ -36,20 +49,16 @@ class Discount extends Model
 
     public static function calculateDiscount($shop_data, $total_price, $discount_code_price)
     {
-        // 🟢 بهینه‌سازی سرور: بررسی وضعیت فعال بودن و هماهنگ‌سازی تایم‌زون سرور با تابع bany now() لاراول
         $discount = self::query()
             ->where('code', $shop_data['discount_code'])
-            ->where('status', DiscountStatus::Active->value) // اضافه شدن بررسی فیلد وضعیت ادمین
+            ->where('status', DiscountStatus::Active->value)
             ->where('discount', '>', 0)
-            ->where('expiration_date', '>=', now()) // استفاده از now() بومی لاراول برای حل باگ اختلاف ساعت سرور
+            // 🟢 اصلاح طلایی: بررسی اینکه تاریخ انقضا بزرگتر یا مساوی امروز باشد (بدون در نظر گرفتن ساعت)
+            ->whereDate('expiration_date', '>=', today())
             ->first();
 
         if ($discount) {
-            $discount_code_price = min(
-                $discount->discount,
-                $total_price
-            );
-
+            $discount_code_price = min($discount->discount, $total_price);
             $total_price -= $discount_code_price;
         }
 

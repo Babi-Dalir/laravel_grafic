@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\DiscountCampaignStatus;
 use App\Enums\DiscountCampaignType;
 use App\Helpers\DateManager;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DiscountCampaign extends Model
@@ -18,6 +21,29 @@ class DiscountCampaign extends Model
         'expires_at',
         'status',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => DiscountCampaignStatus::class,
+            'starts_at' => 'datetime',
+            'expires_at' => 'datetime',
+        ];
+    }
+
+    protected function expiresAt(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!$value) return null;
+
+                // تبدیل تاریخ به شیء کربن و انتقال زمان به ۲۳:۵۹:۵۹
+                return Carbon::parse($value)->endOfDay();
+            }
+        );
+    }
+
+
     public function targets()
     {
         return $this->hasMany(DiscountCampaignTarget::class, 'discount_campaign_id');
@@ -105,14 +131,20 @@ class DiscountCampaign extends Model
      */
     public static function getActiveBannerCampaign()
     {
-        return self::where('status', \App\Enums\DiscountCampaignStatus::Active->value)
-            ->where('starts_at', '<=', now())
+        return self::query()
+            ->where('status', DiscountCampaignStatus::Active->value)
+
+            // گارد زمان شروع: یا شروع ندارد یا زمان شروعش فرا رسیده است
+            ->where(function ($q) {
+                $q->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', now());
+            })
+
+            // گارد زمان پایان: یا انقضا ندارد یا انقضای آن بزرگتر/مساوی امروز است
             ->where(function ($q) {
                 $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
+                    ->orWhereDate('expires_at', '>=', today());
             })
-            ->whereIn('type', [\App\Enums\DiscountCampaignType::Global->value, \App\Enums\DiscountCampaignType::Category->value]) // ⛔ حذف تخفیف محصول فردی از بنر اصلی
-            ->orderBy('priority', 'asc') // 🥇 اولویت اول: کل سایت (1)، اولویت دوم: دسته‌بندی (2)
             ->latest()
             ->first();
     }

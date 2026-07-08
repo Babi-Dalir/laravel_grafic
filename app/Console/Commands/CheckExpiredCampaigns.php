@@ -4,10 +4,14 @@ namespace App\Console\Commands;
 
 use App\Enums\DiscountCampaignStatus;
 use App\Enums\DiscountStatus;
-use App\Enums\GiftCartStatus; // 🟢 اضافه شدن انوم کارت هدیه
+use App\Enums\GiftCartStatus;
+
+// 🟢 اضافه شدن انوم کارت هدیه
 use App\Models\DiscountCampaign;
 use App\Models\Discount;
-use App\Models\GiftCart; // 🟢 اضافه شدن مدل کارت هدیه
+use App\Models\GiftCart;
+
+// 🟢 اضافه شدن مدل کارت هدیه
 use Illuminate\Console\Command;
 
 class CheckExpiredCampaigns extends Command
@@ -18,13 +22,11 @@ class CheckExpiredCampaigns extends Command
 
     public function handle()
     {
-        $now = now();
-
-        // ۱. غیرفعال کردن کمپین‌های منقضی شده
+        // ۱. غیرفعال کردن کمپین‌های منقضی شده (هر چه تاریخش قبل از امروز است)
         $updatedCampaigns = DiscountCampaign::query()
             ->where('status', DiscountCampaignStatus::Active->value)
             ->whereNotNull('expires_at')
-            ->where('expires_at', '<', $now)
+            ->whereDate('expires_at', '<', today()) // 🟢 هماهنگی ۱۰۰٪ با منطق جدید
             ->update([
                 'status' => DiscountCampaignStatus::InActive->value
             ]);
@@ -33,21 +35,21 @@ class CheckExpiredCampaigns extends Command
         $updatedDiscounts = Discount::query()
             ->where('status', DiscountStatus::Active->value)
             ->whereNotNull('expiration_date')
-            ->where('expiration_date', '<', $now)
+            ->whereDate('expiration_date', '<', today()) // 🟢 اصلاح برای یکدستی کامل
             ->update([
                 'status' => DiscountStatus::InActive->value
             ]);
 
-        // ۳. 🟢 غیرفعال کردن کارت‌های هدیه منقضی شده (سناریوی جدید شما)
+        // ۳. غیرفعال کردن کارت‌های هدیه منقضی شده
         $updatedGiftCarts = GiftCart::query()
             ->where('status', GiftCartStatus::Active->value)
             ->whereNotNull('expiration_date')
-            ->where('expiration_date', '<', $now)
+            ->whereDate('expiration_date', '<', today()) // 🟢 اصلاح برای یکدستی کامل
             ->update([
                 'status' => GiftCartStatus::InActive->value
             ]);
 
-        // چاپ گزارش در ترمینال یا لاگ سرور
+        // گزارش در ترمینال
         if ($updatedCampaigns > 0) $this->info("تعداد {$updatedCampaigns} کمپین غیرفعال شد.");
         if ($updatedDiscounts > 0) $this->info("تعداد {$updatedDiscounts} کد تخفیف غیرفعال شد.");
         if ($updatedGiftCarts > 0) $this->info("تعداد {$updatedGiftCarts} کارت هدیه منقضی شده غیرفعال شد.");

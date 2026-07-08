@@ -43,7 +43,7 @@
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" style="cursor: pointer"
                          wire:click="changeStatus({{ $campaign->id }})">
-                        @if($campaign->status === \App\Enums\DiscountCampaignStatus::Active->value)
+                        @if($campaign->status->value === \App\Enums\DiscountCampaignStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -61,7 +61,9 @@
                 <td class="text-center align-middle">
                     @if($campaign->expires_at)
                         {{ \Hekmatinasser\Verta\Verta::instance($campaign->expires_at)->format('%d %B، %Y') }}
-                        @if(\Illuminate\Support\Carbon::now()->gt($campaign->expires_at))
+
+                        {{-- گارد نمایش وضعیت منقضی بر اساس انتهای روز که در مدل اصلاح شد --}}
+                        @if(now()->greaterThan($campaign->expires_at))
                             <br><span class="badge badge-danger small">منقضی شده</span>
                         @endif
                     @else
@@ -76,7 +78,6 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    {{-- 🟢 اصلاح ۵: یکپارچه‌سازی دیسپچ به صورت snake_case جهت تطابق با هوک‌های اسکریپت پایین --}}
                     <button class="btn btn-outline-danger btn-sm"
                             wire:click="$dispatch('trigger_delete_campaign', { id: {{ $campaign->id }} })">
                         حذف
@@ -108,7 +109,6 @@
 
 @section('scripts')
     <script>
-        // 🟢 اصلاح ۶: شنود استاندارد رویداد حذف برای جلوگیری از باگ عدم واکنش دکمه در لایووایر ۳
         Livewire.on('trigger_delete_campaign', (event) => {
             Swal.fire({
                 title: "آیا از حذف این کمپین مطمئن هستید؟",
@@ -127,6 +127,15 @@
                         icon: "success"
                     });
                 }
+            });
+        });
+
+        Livewire.on('showToastError', (event) => {
+            Swal.fire({
+                title: "خطا!",
+                text: event.message,
+                icon: "error",
+                confirmButtonText: "متوجه شدم"
             });
         });
     </script>

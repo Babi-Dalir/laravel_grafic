@@ -13,17 +13,30 @@ class DiscountList extends Component
     use WithPagination;
 
     protected $paginationTheme = 'bootstrap';
-    public $search;
+
+    // 🟢 اصلاح ساختار: یکپارچه‌سازی و بهینه‌سازی سیستم لایو جستجو بدون نیاز به متد کمکی فرم
+    public $search = '';
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
 
     /**
-     * تغییر وضعیت ایمن و واکسینه شده در برابر دبل‌کلیک روی سرور آنلاین
+     * تغییر وضعیت تعاملی به همراه گارد امنیتی عدم احیای کدهای تخفیف مرده
      */
     public function changeStatus($id)
     {
         $discount = Discount::query()->findOrFail($id);
 
-        // بهینه‌سازی آنلاین: تبدیل وضعیت به صورت صریح و مستقیم بدون ریسک اجرای همزمان شروط خطی
-        $newStatus = ($discount->status === DiscountStatus::Active)
+        // 🔒 گارد امنیتی روز-محور کدهای تخفیف
+        if ($discount->expiration_date && $discount->expiration_date->isBefore(today())) {
+            $this->dispatch('showToastError', message: 'این کد تخفیف منقضی شده و قابل فعال‌سازی نیست.');
+            return;
+        }
+
+        // 🟢 اصلاح یکدستی انوم (حتی با وجود کستینگ الکونت، استفاده صریح از ->value ترجیح دارد)
+        $newStatus = ($discount->status->value === DiscountStatus::Active->value)
             ? DiscountStatus::InActive->value
             : DiscountStatus::Active->value;
 
@@ -36,25 +49,23 @@ class DiscountList extends Component
     public function destroyDiscount($id)
     {
         Discount::destroy($id);
+
+        $discounts = $this->getDiscountsQuery()->paginate(10);
+        $this->setPage(min($this->getPage(), $discounts->lastPage()));
     }
 
-    public function searchData()
+    private function getDiscountsQuery()
     {
-        $this->resetPage();
+        return Discount::query()
+            ->when(trim($this->search), function ($query) {
+                $query->where('code', 'like', '%' . $this->search . '%');
+            })
+            ->latest();
     }
 
     public function render()
     {
-        $discounts = Discount::query()
-            ->when($this->search, function ($query) {
-                $query->where(
-                    'code',
-                    'like',
-                    '%' . $this->search . '%'
-                );
-            })
-            ->latest() // بهینه‌سازی سرور: نمایش آخرین تخفیف‌های ایجاد شده در صدر جدول
-            ->paginate(10);
+        $discounts = $this->getDiscountsQuery()->paginate(10);
 
         return view('livewire.admin.discounts.discount-list', compact('discounts'));
     }

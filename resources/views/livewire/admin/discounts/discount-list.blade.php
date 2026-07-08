@@ -28,7 +28,8 @@
 
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$discount->id}})" style="cursor: pointer;">
-                        @if($discount->status === \App\Enums\DiscountStatus::Active)
+                        {{-- 🟢 اصلاح: بررسی یکدست وضعیت انوم بر اساس قالب کست شده مدل --}}
+                        @if($discount->status->value === \App\Enums\DiscountStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -43,9 +44,14 @@
                     </div>
                 </td>
                 <td class="text-center align-middle">
-                    {{\Hekmatinasser\Verta\Verta::instance($discount->expiration_date)->format('%d %B، %Y')}}
-                    @if(\Illuminate\Support\Carbon::now()->gt($discount->expiration_date))
-                        <br><span class="badge badge-danger">منقضی شده</span>
+                    @if($discount->expiration_date)
+                        {{ \Hekmatinasser\Verta\Verta::instance($discount->expiration_date)->format('%d %B، %Y') }}
+
+                        @if(now()->greaterThan($discount->expiration_date))
+                            <br><span class="badge badge-danger small">منقضی شده</span>
+                        @endif
+                    @else
+                        <span class="text-muted">بدون انقضا</span>
                     @endif
                 </td>
                 <td class="text-center align-middle">
@@ -102,6 +108,15 @@
                     });
                 }
             });
-        })
+        });
+
+        Livewire.on('showToastError', (event) => {
+            Swal.fire({
+                title: "خطا!",
+                text: event.message,
+                icon: "error",
+                confirmButtonText: "متوجه شدم"
+            });
+        });
     </script>
 @endsection

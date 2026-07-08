@@ -34,7 +34,8 @@
 
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$gift_cart->id}})" style="cursor: pointer;">
-                        @if($gift_cart->status === \App\Enums\GiftCartStatus::Active)
+                        {{-- 🟢 اصلاح: یکپارچه‌سازی بررسی رشته انوم فعال با الگوهای مدل --}}
+                        @if($gift_cart->status->value === \App\Enums\GiftCartStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -48,7 +49,19 @@
                         @endif
                     </div>
                 </td>
-                <td class="text-center align-middle">{{\Hekmatinasser\Verta\Verta::instance($gift_cart->expiration_date)->format('%d %B، %Y')}}</td>
+
+                <td class="text-center align-middle">
+                    @if($gift_cart->expiration_date)
+                        {{ \Hekmatinasser\Verta\Verta::instance($gift_cart->expiration_date)->format('%d %B، %Y') }}
+
+                        @if(now()->greaterThan($gift_cart->expiration_date))
+                            <br><span class="badge badge-danger small">منقضی شده</span>
+                        @endif
+                    @else
+                        <span class="text-muted">بدون انقضا</span>
+                    @endif
+                </td>
+
                 <td class="text-center align-middle">
                     <a class="btn btn-outline-danger"
                        wire:click="$dispatch('deleteGiftCart',{'id':{{$gift_cart->id}}})">
@@ -107,6 +120,15 @@
                     });
                 }
             });
-        })
+        });
+
+        Livewire.on('showToastError', (event) => {
+            Swal.fire({
+                title: "خطا!",
+                text: event.message,
+                icon: "error",
+                confirmButtonText: "متوجه شدم"
+            });
+        });
     </script>
 @endsection
