@@ -21,13 +21,13 @@
                     <td>{{number_format($order->total_price)}} تومان</td>
                     <td>{{number_format($order->discount_price)}} تومان</td>
                     <td>
-                        @if($order->status === \App\Enums\OrderStatus::WaitPayment->value)
+                        @if($order->status === \App\Enums\OrderStatus::WaitPayment)
                             <span class="cursor-pointer badge badge-warning">در انتظار پرداخت</span>
-                        @elseif($order->status === \App\Enums\OrderStatus::Payed->value)
+                        @elseif($order->status === \App\Enums\OrderStatus::Payed)
                             <span class="cursor-pointer badge badge-success">پرداخت شده</span>
-                        @elseif($order->status === \App\Enums\OrderStatus::Failed->value)
+                        @elseif($order->status === \App\Enums\OrderStatus::Failed)
                             <span class="cursor-pointer badge badge-danger">پرداخت ناموفق</span>
-                        @elseif($order->status === \App\Enums\OrderStatus::Cancelled->value)
+                        @elseif($order->status === \App\Enums\OrderStatus::Cancelled)
                             <span class="cursor-pointer badge badge-secondary">انصراف از پرداخت</span>
                         @endif
                     </td>

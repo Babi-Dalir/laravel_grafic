@@ -20,13 +20,13 @@
                     <td>{{ number_format($order_detail->price) }} تومان</td>
                     <td>{{ number_format($order_detail->discount) }} تومان</td>
                     <td>
-                        @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid->value)
+                        @if($order_detail->status === \App\Enums\OrderDetailStatus::Paid)
                             <span class="badge badge-success">پرداخت شده</span>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded->value)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded)
                             <span class="badge badge-info">کاملا دانلود شده</span>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded->value)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded)
                             <span class="badge badge-danger">مرجوع شده</span>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Waiting->value)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Waiting)
                             <span class="badge badge-warning">در حال انتظار</span>
                         @endif
                     </td>
