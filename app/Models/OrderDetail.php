@@ -14,10 +14,12 @@ class OrderDetail extends Model
         'main_price',
         'price',
         'discount',
+        'coupon_discount',
         'description',
         'status',
         'seller_share',
-        'site_share'
+        'site_share',
+        'platform_subsidy'
     ];
 
     protected $dispatchesEvents = [
@@ -29,7 +31,7 @@ class OrderDetail extends Model
     protected function casts(): array
     {
         return [
-            'status' => OrderDetailStatus::class, // فعال‌سازی قابلیت اکشن‌محور انوم
+            'status' => OrderDetailStatus::class,
         ];
     }
 
@@ -38,53 +40,96 @@ class OrderDetail extends Model
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * واکسینه کردن رابطه محصول در برابر حذف‌های موقت دیتابیس
-     */
     public function product()
     {
         return $this->belongsTo(Product::class)->withTrashed();
     }
 
-    /**
-     * اصلاح نام کلاس مدل از جمع به مفرد
-     */
     public function download()
     {
         return $this->hasOne(Downloads::class, 'order_detail_id');
     }
 
     /**
-     * ساخت اتمیک جزئیات سفارش با هندل کردن محصولات سافت‌دیلیت شده
+     * ساخت اتمیک جزئیات سفارش با معماری استاندارد سوبسید (Subsidy)
      */
     public static function createOrderDetail($order, $cart, Product $product)
     {
-        $price = $product->final_price;
-        $discount = $product->main_price - $product->final_price;
-
-        // دریافت مستقیم یوزر صاحب محصول (حتی اگر محصول حذف موقت شده باشد)
         $seller = $product->user;
+        $commissionPercent = $product->category?->commission?->commission_percent ?? 20;
 
-        if ($seller && $seller->hasRole('مدیر')) {
-            $siteShare = $price;
-            $sellerShare = 0;
-        } else {
-            // استفاده از آپشنال برای جلوگیری از کرش در صورت نبود کمیسیون دسته بندی
-            $commissionPercent = $product->category?->commission?->commission_percent ?? 20;
-            $siteShare = ($price * $commissionPercent) / 100;
-            $sellerShare = $price - $siteShare;
+        $mainPrice = $product->main_price;
+        $productBasePrice = $product->final_price;
+        $productInternalDiscount = $mainPrice - $productBasePrice;
+
+        // ۱. سناریوی محصولی که از ابتدا توسط فروشنده رایگان منتشر شده است
+        if ($productBasePrice <= 0) {
+            return self::query()->create([
+                'seller_id'        => $product->user_id,
+                'order_id'         => $order->id,
+                'product_id'       => $cart->product_id,
+                'main_price'       => $mainPrice,
+                'price'            => 0,
+                'discount'         => $productInternalDiscount,
+                'coupon_discount'  => 0,
+                'status'           => OrderDetailStatus::Waiting,
+                'seller_share'     => 0,
+                'site_share'       => 0,
+                'platform_subsidy' => 0,
+            ]);
         }
 
+        // ۲. محاسبه سهم‌های استاندارد بر اساس قیمت پولی محصول در سایت
+        if ($seller && $seller->hasRole('مدیر')) {
+            $siteShare = $productBasePrice;
+            $sellerShare = 0;
+        } else {
+            $siteShare = ($productBasePrice * $commissionPercent) / 100;
+            $sellerShare = $productBasePrice - $siteShare;
+        }
+
+        // --------------------------------------------------------------------------
+        // 🧠 بررسی وضعیت کوپن بر اساس منطق دقیق و اتمیک جدید شما
+        // --------------------------------------------------------------------------
+        $couponDiscountForThisItem = 0;
+
+        // اگر کل فاکتور با کوپن ۱۰۰٪ رایگان شده باشد
+        if ($order->discount_price > 0 && $order->total_price <= 0) {
+            $couponDiscountForThisItem = $productBasePrice;
+        }
+
+        // آیا این آیتم خاص به واسطه کوپن برای مشتری رایگان شده است؟
+        $isItemFreeByCoupon = ($couponDiscountForThisItem >= $productBasePrice);
+
+        if ($isItemFreeByCoupon) {
+            return self::query()->create([
+                'seller_id'        => $product->user_id,
+                'order_id'         => $order->id,
+                'product_id'       => $cart->product_id,
+                'main_price'       => $mainPrice,
+                'price'            => $productBasePrice,
+                'discount'         => $productInternalDiscount,
+                'coupon_discount'  => $couponDiscountForThisItem,
+                'status'           => OrderDetailStatus::Waiting,
+                'seller_share'     => $sellerShare,
+                'site_share'       => $siteShare,
+                'platform_subsidy' => $sellerShare, // 🟢 اصلاح اول: سایت فقط سهم فروشنده را سوبسید می‌دهد (هزینه واقعی)
+            ]);
+        }
+
+        // ۳. سناریوی فروش عادی و نقدی محصول پولی
         return self::query()->create([
-            'seller_id' => $product->user_id,
-            'order_id' => $order->id,
-            'product_id' => $cart->product_id,
-            'main_price' => $product->main_price,
-            'price' => $price,
-            'discount' => $discount,
-            'status' => OrderDetailStatus::Waiting, // استفاده مستقیم از شیء انوم
-            'seller_share' => $sellerShare,
-            'site_share' => $siteShare,
+            'seller_id'        => $product->user_id,
+            'order_id'         => $order->id,
+            'product_id'       => $cart->product_id,
+            'main_price'       => $mainPrice,
+            'price'            => $productBasePrice,
+            'discount'         => $productInternalDiscount,
+            'coupon_discount'  => 0,
+            'status'           => OrderDetailStatus::Waiting,
+            'seller_share'     => $sellerShare,
+            'site_share'       => $siteShare,
+            'platform_subsidy' => 0,
         ]);
     }
 }

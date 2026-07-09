@@ -22,7 +22,7 @@
                                  width="110" height="110" style="object-fit: cover;"
                                  alt="پروفایل فروشنده">
                         </div>
-                        <div class="col-md-10 text-left">
+                        <div class="col-md-10 text-right">
                             <h4 class="font-weight-bold text-dark mb-2">
                                 {{ $seller->first_name ? $seller->first_name . ' ' . $seller->last_name : $seller->user?->name }}
                             </h4>
@@ -42,58 +42,78 @@
                 </div>
             </div>
 
-            {{-- گریدبندی جذاب و متوازن آمار مالی عددی --}}
+            {{-- 🟢 گریدبندی آمار مالی با واحد پولی تومان --}}
             <div class="row mb-4">
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="col-xl-3 col-md-6 mb-3">
                     <div class="card bg-warning text-white h-100 shadow-xs border-0">
                         <div class="card-body text-center d-flex flex-column justify-content-center">
-                            <small class="text-uppercase font-weight-bold opacity-75">در انتظار تسویه</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($pendingBalance) }}</h4>
+                            <small class="text-uppercase font-weight-bold opacity-75">کیف پول (در انتظار تسویه)</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($pendingBalance) }} <small>تومان</small></h4>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="col-xl-3 col-md-6 mb-3">
                     <div class="card bg-success text-white h-100 shadow-xs border-0">
                         <div class="card-body text-center d-flex flex-column justify-content-center">
-                            <small class="text-uppercase font-weight-bold opacity-75">تسویه شده</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($settledBalance) }}</h4>
+                            <small class="text-uppercase font-weight-bold opacity-75">مجموع تسویه شده</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($settledBalance) }} <small>تومان</small></h4>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-                    <div class="card bg-info text-white h-100 shadow-xs border-0">
-                        <div class="card-body text-center d-flex flex-column justify-content-center">
-                            <small class="text-uppercase font-weight-bold opacity-75">تعداد کل فروش</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ $totalOrders }}</h4>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
-                    <div class="card bg-primary text-white h-100 shadow-xs border-0">
-                        <div class="card-body text-center d-flex flex-column justify-content-center">
-                            <small class="text-uppercase font-weight-bold opacity-75">تعداد محصولات</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ $totalProducts }}</h4>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="col-xl-3 col-md-6 mb-3">
                     <div class="card bg-dark text-white h-100 shadow-xs border-0">
                         <div class="card-body text-center d-flex flex-column justify-content-center">
                             <small class="text-uppercase font-weight-bold opacity-75">خالص درآمد فروشنده</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($totalSellerIncome) }}</h4>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($totalSellerIncome) }} <small>تومان</small></h4>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
+                <div class="col-xl-3 col-md-6 mb-3">
                     <div class="card bg-secondary text-white h-100 shadow-xs border-0">
                         <div class="card-body text-center d-flex flex-column justify-content-center">
-                            <small class="text-uppercase font-weight-bold opacity-75">ناخالص مجموع فروش</small>
-                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($totalSalesAmount) }}</h4>
+                            <small class="text-uppercase font-weight-bold opacity-75">ارزش دفتری کل محصولات</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($totalProductValue) }} <small>تومان</small></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-info text-white h-100 shadow-xs border-0">
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <small class="text-uppercase font-weight-bold opacity-75">کارمزد ناخالص سایت (Site Share)</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($grossSiteIncome) }} <small>تومان</small></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-danger text-white h-100 shadow-xs border-0">
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <small class="text-uppercase font-weight-bold opacity-75">سوبسید اعطایی پلتفرم (کمپین‌ها)</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($platformSubsidy) }} <small>تومان</small></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card {{ $netPlatformProfit >= 0 ? 'bg-info' : 'bg-danger' }} text-white h-100 shadow-xs border-0" style="filter: brightness(0.85)">
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <small class="text-uppercase font-weight-bold opacity-75">سود خالص پلتفرم (Platform Profit)</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ number_format($netPlatformProfit) }} <small>تومان</small></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-3">
+                    <div class="card bg-primary text-white h-100 shadow-xs border-0">
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <small class="text-uppercase font-weight-bold opacity-75">تعداد سفارشات / کل محصولات</small>
+                            <h4 class="mt-2 mb-0 font-weight-bold font-numeric">{{ $totalOrders }} <small>بار</small> / {{ $totalProducts }} <small>قلم</small></h4>
                         </div>
                     </div>
                 </div>
@@ -111,8 +131,8 @@
                             <tr>
                                 <th class="text-right">عنوان محصول ارسالی</th>
                                 <th class="text-center">کد سفارش</th>
-                                <th class="text-center">قیمت کل (ریال)</th>
-                                <th class="text-center">کارمزد سهم سایت</th>
+                                <th class="text-center">قیمت محصول (تومان)</th>
+                                <th class="text-center">کارمزد تئوریک سایت</th>
                                 <th class="text-center">سهم خالص فروشنده</th>
                                 <th class="text-center">تاریخ ثبت فروش</th>
                             </tr>
@@ -123,7 +143,7 @@
                                     <td class="text-right font-weight-bold text-secondary">{{ $sale->product?->name ?? 'محصول حذف شده' }}</td>
                                     <td class="text-center"><span class="badge badge-light font-numeric">{{ $sale->order?->order_code ?? '---' }}</span></td>
                                     <td class="text-center font-numeric">{{ number_format($sale->price) }}</td>
-                                    <td class="text-center text-danger font-numeric">{{ number_format($sale->price - $sale->seller_share) }}</td>
+                                    <td class="text-center text-danger font-numeric">{{ number_format($sale->site_share) }}</td>
                                     <td class="text-center text-success font-weight-bold font-numeric">{{ number_format($sale->seller_share) }}</td>
                                     <td class="text-center text-muted font-numeric">{{ verta($sale->created_at)->format('Y/m/d H:i') }}</td>
                                 </tr>
@@ -136,7 +156,6 @@
                         </table>
                     </div>
                 </div>
-                {{-- 🟢 حل باگ اتمیک تداخل صفحه بندی فروش ها با ضمیمه روت ابردستگاهی --}}
                 @if($sales->hasPages())
                     <div class="card-footer bg-white d-flex justify-content-center">
                         {{ $sales->appends(request()->except('sales_page'))->links() }}
@@ -155,7 +174,7 @@
                             <thead class="thead-light">
                             <tr>
                                 <th class="text-center">کد پیگیری شبا / مرجع</th>
-                                <th class="text-center">مبلغ تسویه (ریال)</th>
+                                <th class="text-center">مبلغ تسویه (تومان)</th>
                                 <th class="text-center">وضعیت پرداخت</th>
                                 <th class="text-center">کارشناس تاییدکننده</th>
                                 <th class="text-center">تاریخ و زمان واریز</th>
@@ -187,7 +206,6 @@
                         </table>
                     </div>
                 </div>
-                {{-- 🟢 حل باگ اتمیک تداخل صفحه بندی تسویه ها با ضمیمه روت ابردستگاهی --}}
                 @if($settlements->hasPages())
                     <div class="card-footer bg-white d-flex justify-content-center">
                         {{ $settlements->appends(request()->except('settlements_page'))->links() }}

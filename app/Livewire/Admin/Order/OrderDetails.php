@@ -17,7 +17,7 @@ class OrderDetails extends Component
     protected $paginationTheme = 'bootstrap';
 
     /**
-     * ماتریس مجاز تغییر وضعیت جزئیات فاکتور
+     * ماتریس مجاز تغییر وضعیت جزئیات فاکتور (State Machine)
      */
     protected const STATE_MACHINE = [
         OrderDetailStatus::Waiting->value    => ['pay' => OrderDetailStatus::Paid, 'refund' => OrderDetailStatus::Refunded],
@@ -32,7 +32,7 @@ class OrderDetails extends Component
     }
 
     /**
-     * تغییر وضعیت اکشن‌محور بدون ریسک رفتارهای ناخواسته
+     * تغییر وضعیت اکشن‌محور بدون ریسک رفتارهای ناخواسته مالی
      */
     public function changeOrderDetailStatus($id, $action)
     {
@@ -46,8 +46,9 @@ class OrderDetails extends Component
             return;
         }
 
+        // 🟢 اصلاح کستینگ انوم به صورت کاملاً تمیز و سازگار با مدل لاراول
         $orderDetail->update([
-            'status' => $nextStatus instanceof \Illuminate\Database\Eloquent\Casts\AsEnumCollection ? $nextStatus : $nextStatus->value
+            'status' => $nextStatus->value
         ]);
 
         $this->dispatch('order-detail-updated', message: 'وضعیت آیتم با موفقیت تغییر کرد.');
@@ -58,8 +59,13 @@ class OrderDetails extends Component
         $order_details = OrderDetail::query()
             ->with([
                 'download',
+                // 🟢 لود اتمیک رابطه seller به همراه رابطه زنده کاربر جهت جلوگیری از باگ N+1 در پنل ادمین
                 'product' => function($q) {
-                    $q->withTrashed()->with(['user', 'category.commission']);
+                    $q->withTrashed()->with([
+                        'seller',
+                        'user',
+                        'category.commission'
+                    ]);
                 }
             ])
             ->where('order_id', $this->order->id)

@@ -34,13 +34,11 @@ class AdminSellerController extends Controller
         return view('seller.seller_requests.list', compact('title'));
     }
 
-
     public function sellerSettlementList()
     {
         $title = "لیست تسویه حساب ها";
         return view('seller.seller_settlements.list', compact('title'));
     }
-
 
     public function adminSellerTransactionList()
     {
@@ -53,21 +51,25 @@ class AdminSellerController extends Controller
     {
         $title = 'جزئیات جامع فروشنده';
 
-        // ۱. لود اتمیک فروشنده به همراه گارد امنیتی عدم وجود
         $seller = Seller::query()->with('user')->findOrFail($seller_id);
         $sellerUserId = $seller->user_id;
 
-        // ۲. تجمیع هوشمند آمار مالی جداول OrderDetail در یک کوئری واحد (کاهش بار دیتابیس)
+        // ۲. تجمیع هوشمند آمار با اصطلاحات دقیق حسابداری
         $orderStats = OrderDetail::query()
             ->where('seller_id', $sellerUserId)
             ->selectRaw('
-            SUM(price) as total_sales_amount,
+            SUM(price) as total_product_value,
             SUM(seller_share) as total_seller_income,
+            SUM(site_share) as total_gross_site_income,
+            SUM(platform_subsidy) as total_platform_subsidy,
             COUNT(DISTINCT order_id) as total_orders
         ')
             ->first();
 
-        // ۳. تجمیع هوشمند آمار تراکنش‌های کیف پول در یک کوئری واحد
+        // 🟢 اصلاح طلایی شما: تغییر نام مفهوم درآمد به سود خالص پلتفرم از این فروشنده
+        $netPlatformProfit = ($orderStats->total_gross_site_income ?? 0) - ($orderStats->total_platform_subsidy ?? 0);
+
+        // ۳. تجمیع آمار تراکنش‌های کیف پول
         $walletStats = SellerWalletTransaction::query()
             ->where('seller_id', $seller->id)
             ->selectRaw("
@@ -76,10 +78,8 @@ class AdminSellerController extends Controller
         ", [WalletTransactionStatus::Pending->value, WalletTransactionStatus::Settled->value])
             ->first();
 
-        // ۴. شمارش سریع تعداد محصولات فروشنده
         $totalProducts = Product::query()->where('user_id', $sellerUserId)->count();
 
-        // ۵. دریافت آخرین تراکنش‌ها با متد بهینه شده فیلدها
         $transactions = SellerWalletTransaction::query()
             ->with(['order:id,order_code'])
             ->where('seller_id', $seller->id)
@@ -87,7 +87,6 @@ class AdminSellerController extends Controller
             ->take(10)
             ->get();
 
-        // ۶. پجینیشن دوقلو و ایزوله شده تسویه‌ها و فروش‌ها
         $settlements = SellerSettlement::query()
             ->with(['user:id,name'])
             ->where('seller_id', $seller->id)
@@ -101,17 +100,20 @@ class AdminSellerController extends Controller
             ->paginate(10, ['*'], 'sales_page');
 
         return view('admin.sellers.seller_detail', [
-            'title'              => $title,
-            'seller'             => $seller,
-            'totalSalesAmount'   => $orderStats->total_sales_amount ?? 0,
-            'totalSellerIncome'  => $orderStats->total_seller_income ?? 0,
-            'totalOrders'        => $orderStats->total_orders ?? 0,
-            'totalProducts'      => $totalProducts,
-            'pendingBalance'     => $walletStats->pending_balance ?? 0,
-            'settledBalance'     => $walletStats->settled_balance ?? 0,
-            'transactions'       => $transactions,
-            'settlements'        => $settlements,
-            'sales'              => $sales
+            'title'               => $title,
+            'seller'              => $seller,
+            'totalProductValue'   => $orderStats->total_product_value ?? 0,
+            'totalSellerIncome'   => $orderStats->total_seller_income ?? 0,
+            'totalOrders'         => $orderStats->total_orders ?? 0,
+            'grossSiteIncome'     => $orderStats->total_gross_site_income ?? 0,
+            'platformSubsidy'     => $orderStats->total_platform_subsidy ?? 0,
+            'netPlatformProfit'   => $netPlatformProfit, // 🟢 متغیر جدید اصلاح‌شده
+            'totalProducts'       => $totalProducts,
+            'pendingBalance'      => $walletStats->pending_balance ?? 0,
+            'settledBalance'      => $walletStats->settled_balance ?? 0,
+            'transactions'        => $transactions,
+            'settlements'         => $settlements,
+            'sales'               => $sales
         ]);
     }
 }

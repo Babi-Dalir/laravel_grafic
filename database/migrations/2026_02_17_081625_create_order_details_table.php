@@ -19,10 +19,14 @@ return new class extends Migration
             $table->decimal('main_price', 15, 2);
             $table->decimal('price', 15, 2);
             $table->double('discount')->nullable();
+            $table->unsignedBigInteger('coupon_discount')->default(0);
             $table->text('description')->nullable();
             $table->string('status')->nullable();
             $table->decimal('seller_share', 15, 2); // مبلغی که سهم فروشنده است
             $table->decimal('site_share', 15, 2);   // مبلغی که سهم سایت است
+            // افزودن ستون سوبسید سایت (یارانه تخفیف ۱۰۰ درصد)
+            $table->unsignedBigInteger('platform_subsidy')->default(0);
+
             $table->timestamps();
         });
     }

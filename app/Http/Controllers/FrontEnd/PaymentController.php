@@ -112,8 +112,6 @@ class PaymentController extends Controller
                 'status'          => OrderStatus::WaitPayment->value,
             ]);
 
-            $order_details = [];
-
             foreach ($carts as $cart) {
                 $product = Product::query()
                     ->where('id', $cart->product_id)
@@ -123,7 +121,7 @@ class PaymentController extends Controller
                     throw new \Exception('محصول یافت نشد یا غیرفعال شده است');
                 }
 
-                $order_details[] = OrderDetail::createOrderDetail(
+                OrderDetail::createOrderDetail(
                     $order,
                     $cart,
                     $product
@@ -142,17 +140,21 @@ class PaymentController extends Controller
         |--------------------------------------------------------------------------
         | ۳. سناریوی محصول/فاکتور رایگان (مبلغ کل صفر است) یا آفلاین
         |--------------------------------------------------------------------------
-        | این بخش به طور هوشمند جلوی ارسال رکوئست صفر تومانی به شتابیت را می‌گیرد.
         */
         if ($total_price <= 0 || (isset($shop_data['payment_type']) && $shop_data['payment_type'] === 'offline')) {
             try {
                 // کدهای اتمیک مدل شما: تغییر وضعیت به پرداخت شده، ساخت دانلودها، پاکسازی سبد خرید
                 Order::successPayment($order);
 
-                if (!empty($order_details)) {
-                    SellerWalletTransaction::registerSale($order_details);
+                // 🟢 تغییر مهم: واکشی مجدد و دیتابیسیِ آیتم‌ها برای ارسال اطلاعات خالص و محاسبه‌شده سوبسید به لجر
+                $freshOrderDetails = $order->orderDetails()->with('product.seller')->get();
+
+                if ($freshOrderDetails->isNotEmpty()) {
+                    SellerWalletTransaction::registerSale($freshOrderDetails);
                 }
 
+                // پاکسازی سشن خرید پس از موفقیت فاکتور رایگان
+                Session::forget('shop_data');
                 $result = 'success';
             } catch (\Exception $e) {
                 Log::error('Free/Offline Payment Execution Error: ' . $e->getMessage());
@@ -171,6 +173,9 @@ class PaymentController extends Controller
         */
         try {
             $paymentType = $shop_data['payment_type'] ?? 'zarinpal';
+
+            // ذخیره موقت گیت‌وی انتخابی در سشن برای استفاده در متد کال‌بک (چون در جدول اردرز ستونی برای آن ندارید)
+            Session::put("order_gateway_{$order->id}", $paymentType);
 
             return Payment::via($paymentType)
                 ->purchase(
@@ -236,7 +241,10 @@ class PaymentController extends Controller
             | تایید اصالت تراکنش آنلاین
             |--------------------------------------------------------------------------
             */
-            $payment = Payment::via($order->payment_type ?? 'zarinpal')
+            // 🟢 اصلاح باگ تفکیک درگاه: خواندن درگاه استفاده شده از سشن (fallback به زرین‌پال)
+            $gateway = Session::get("order_gateway_{$order->id}", 'zarinpal');
+
+            $payment = Payment::via($gateway)
                 ->amount((int) $order->total_price)
                 ->transactionId($authority)
                 ->verify();
@@ -245,17 +253,22 @@ class PaymentController extends Controller
 
             $order_details = OrderDetail::query()
                 ->where('order_id', $order->id)
+                ->with('product.seller') // لود بهینه ریلیشن‌ها برای لجر
                 ->get();
 
             if ($order_details->isNotEmpty()) {
                 SellerWalletTransaction::registerSale($order_details);
             }
 
+            // پاکسازی سشن مربوط به درگاه این سفارش
+            Session::forget("order_gateway_{$order->id}");
+            Session::forget('shop_data');
+
             $result = 'success';
             $downloads = $this->getDownloads($order);
 
         } catch (\Exception $e) {
-            Log::error('Zarinpal Verification Error: ' . $e->getMessage());
+            Log::error('Payment Verification Error: ' . $e->getMessage());
             $result = 'failed';
         }
 

@@ -35,7 +35,7 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">مشخصات فروشنده</th>
             <th class="text-center align-middle text-primary">نام برند</th>
-            <th class="text-center align-middle text-primary">مبلغ تسویه (ریال)</th>
+            <th class="text-center align-middle text-primary">مبلغ تسویه (تومان)</th>
             <th class="text-center align-middle text-primary">وضعیت فاکتور</th>
             <th class="text-center align-middle text-primary">شناسه پیگیری / مرجع</th>
             <th class="text-center align-middle text-primary">تاییدکننده / واریزکننده</th>
@@ -74,7 +74,7 @@
 
                 {{-- مبلغ --}}
                 <td class="text-center align-middle font-weight-bold text-success font-numeric">
-                    {{ number_format($settlement->amount) }}
+                    {{ number_format($settlement->amount) }} <small style="font-size: 11px">تومان</small>
                 </td>
 
                 {{-- وضعیت فاکتور تسویه (سازگار با مقدار انوم و رشته خام دیتابیس) --}}

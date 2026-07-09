@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TransactionType;
+use App\Enums\WalletTransactionStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +46,9 @@ class SellerWalletTransaction extends Model
     /**
      * 🧠 REGISTER SALE (SAFE LEDGER ENTRY)
      */
+    /**
+     * 🧠 REGISTER SALE (SAFE LEDGER ENTRY) - EXCLUSIVELY FOR DIGITAL PLATFORM
+     */
     public static function registerSale($orderDetails): void
     {
         DB::transaction(function () use ($orderDetails) {
@@ -52,25 +56,35 @@ class SellerWalletTransaction extends Model
             foreach ($orderDetails as $detail) {
 
                 $product = $detail->product;
-                if (!$product?->seller) continue;
+                if (!$product) continue;
 
-                $referenceId = "order_{$detail->order_id}_product_{$product->id}";
+                // 🟢 واکشی زنده و امن فروشنده بر اساس مدل Seller
+                $sellerId = null;
+                if ($product->seller) {
+                    $sellerId = $product->seller->id;
+                } elseif ($product->user_id) {
+                    $sellerId = Seller::query()->where('user_id', $product->user_id)->value('id');
+                }
 
-                // 🛑 جلوگیری از duplicate
+                if (!$sellerId) continue;
+
+                // استفاده از شناسه یونیک آیتم سفارش
+                $referenceId = "order_detail_{$detail->id}";
+
+                // گارد بررسی لایه اپلیکیشن (چک اول)
                 $exists = self::where('reference_id', $referenceId)->exists();
-
                 if ($exists) continue;
 
+                // 🟢 اختصاصی فروشگاه دیجیتال: آزادسازی آنی و بدون تاخیر (Instant Release)
+                // چون محصول فایل است و همان لحظه دانلود شده، پول فورا در دیتابیس آزاد و آماده تسویه است.
                 self::create([
-                    'seller_id' => $product->seller->id,
-                    'order_id' => $detail->order_id,
-                    'amount' => $detail->seller_share,
-                    'type' => TransactionType::Sale->value,
-                    'description' => "فروش محصول {$product->name}",
-                    'status' => 'pending',
-                    'release_at' => now()->addDays(30),
-
-                    // 🧠 مهم‌ترین بخش
+                    'seller_id'    => $sellerId,
+                    'order_id'     => $detail->order_id,
+                    'amount'       => $detail->seller_share, // واریز سهم خالص فروشنده
+                    'type'         => TransactionType::Sale->value,
+                    'description'  => "فروش محصول دیجیتال «{$product->name}» بابت آیتم فاکتور #{$detail->id}",
+                    'status'       => WalletTransactionStatus::Pending->value,
+                    'release_at'   => now(), // 🚀 آنی و بدون بلوکه شدن ۷ یا ۳۰ روزه
                     'reference_id' => $referenceId,
                 ]);
             }

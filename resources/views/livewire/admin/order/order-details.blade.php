@@ -17,7 +17,7 @@
         <thead class="thead-light">
         <tr>
             <th class="text-center align-middle text-primary">ردیف</th>
-            <th class="text-center align-middle text-primary">نام فروشنده</th>
+            <th class="text-center align-middle text-primary">مشخصات فروشنده</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
             <th class="text-center align-middle text-primary">قیمت</th>
             <th class="text-center align-middle text-primary">تخفیف</th>
@@ -31,44 +31,59 @@
         </thead>
         <tbody>
         @forelse($order_details as $index => $order_detail)
-            <tr>
-                <td class="text-center align-middle font-weight-bold">{{ $order_details->firstItem() + $index }}</td>
+            @php
+                $product = $order_detail->product;
+                // 🟢 واکشی هوشمند نام فروشنده یا نام برند از مدل مستقل حسابداری پروژه
+                $sellerName = '---';
+                $sellerMobile = '---';
+
+                if ($product?->seller) {
+                    $sellerName = $product->seller->brand_name ?? ($product->seller->first_name . ' ' . $product->seller->last_name);
+                    $sellerMobile = $product->seller->user?->mobile ?? '---';
+                } elseif ($product?->user) {
+                    $sellerName = $product->user->name;
+                    $sellerMobile = $product->user->mobile;
+                }
+            @endphp
+            <tr wire:key="order-detail-row-{{ $order_detail->id }}">
+                <td class="text-center align-middle font-weight-bold font-numeric">{{ $order_details->firstItem() + $index }}</td>
                 <td class="text-center align-middle">
                     <div>
-                        <strong>
-                            {{ $order_detail->product?->user?->name ?? 'بدون فروشنده/حذف شده' }}
+                        <strong class="text-dark">
+                            {{ $sellerName }}
                         </strong>
-
                         <br>
-
-                        <small class="text-muted">
-                            {{ $order_detail->product?->user?->mobile }}
+                        <small class="text-muted font-numeric">
+                            {{ $sellerMobile }}
                         </small>
-
                     </div>
                 </td>
-                <td class="text-center align-middle font-weight-bold">
-                    {{ $order_detail->product?->name }}
-                    @if($order_detail->product?->trashed())
+                <td class="text-center align-middle font-weight-bold text-right">
+                    {{ $product?->name ?? 'محصول حذف شده' }}
+                    @if($product?->trashed())
                         <span class="badge badge-danger small">حذف شده</span>
                     @endif
                 </td>
-                <td class="text-center align-middle text-success font-weight-bold">{{ number_format($order_detail->price) }}
-                    تومان
+                <td class="text-center align-middle text-success font-weight-bold font-numeric">
+                    {{ number_format($order_detail->price) }} تومان
                 </td>
-                <td class="text-center align-middle text-danger">{{ number_format($order_detail->discount) }} تومان</td>
-                <td class="text-center align-middle text-secondary">
-                    {{ number_format($order_detail->product?->category?->commission?->commission_percent ?? 20) }} %
+                <td class="text-center align-middle text-danger font-numeric">
+                    {{ number_format($order_detail->discount) }} تومان
                 </td>
-                <td class="text-center align-middle text-info">{{ number_format($order_detail->site_share) }} تومان</td>
-                <td class="text-center align-middle text-primary font-weight-bold">{{ number_format($order_detail->seller_share) }}
-                    تومان
+                <td class="text-center align-middle text-secondary font-numeric">
+                    {{ number_format($product?->category?->commission?->commission_percent ?? 20) }} %
+                </td>
+                <td class="text-center align-middle text-info font-numeric">
+                    {{ number_format($order_detail->site_share) }} تومان
+                </td>
+                <td class="text-center align-middle text-primary font-weight-bold font-numeric">
+                    {{ number_format($order_detail->seller_share) }} تومان
                 </td>
 
                 {{-- مدیریت وضعیت بر پایه دکمه‌های تفکیک شده دراپ‌داون --}}
                 <td class="text-center align-middle">
                     <div class="btn-group">
-                        @if($order_detail->status === \App\Enums\OrderDetailStatus::Waiting)
+                        @if($order_detail->status === \App\Enums\OrderDetailStatus::Waiting || $order_detail->status->value === 'waiting')
                             <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
                                 در حال انتظار
@@ -83,7 +98,7 @@
                                         class="ti-back-left ml-1"></i> مرجوع کردن آیتم
                                 </button>
                             </div>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Paid)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Paid || $order_detail->status->value === 'paid')
                             <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
                                 پرداخت شده
@@ -98,7 +113,7 @@
                                         class="ti-back-left ml-1"></i> مرجوع کردن آیتم
                                 </button>
                             </div>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Downloaded || $order_detail->status->value === 'downloaded')
                             <button type="button" class="btn btn-info btn-sm dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
                                 کاملا دانلود شده
@@ -109,7 +124,7 @@
                                         class="ti-back-left ml-1"></i> مرجوع کردن آیتم
                                 </button>
                             </div>
-                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded)
+                        @elseif($order_detail->status === \App\Enums\OrderDetailStatus::Refunded || $order_detail->status->value === 'refunded')
                             <button type="button" class="btn btn-danger btn-sm dropdown-toggle" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
                                 مرجوع شده
@@ -124,11 +139,11 @@
                     </div>
                 </td>
 
-                <td class="text-center align-middle font-weight-bold text-secondary">
+                <td class="text-center align-middle font-weight-bold text-secondary font-numeric">
                     {{ $order_detail->download?->download_count ?? 0 }}
                     / {{ $order_detail->download?->max_download ?? 0 }}
                 </td>
-                <td class="text-center align-middle text-muted small">
+                <td class="text-center align-middle text-muted small font-numeric">
                     {{ \Hekmatinasser\Verta\Verta::instance($order_detail->created_at)->format('%d %B، %Y') }}
                 </td>
             </tr>
