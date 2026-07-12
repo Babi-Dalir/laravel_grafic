@@ -66,8 +66,8 @@ class Order extends Model
 
             $currentOrder = self::query()
                 ->lockForUpdate()
-                ->with(['orderDetails' => fn($q) => $q->withTrashed()
-                    ->with(['product' => fn($p) => $p->withTrashed()
+                ->with(['orderDetails' => fn($q) => $q->with([
+                    'product' => fn($p) => $p->withTrashed()
                         ->with('seller')])])
                 ->findOrFail($order->id);
 

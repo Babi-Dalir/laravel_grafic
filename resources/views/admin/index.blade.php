@@ -28,47 +28,74 @@
             </div>
         </div>
 
-        {{-- KPI CARDS --}}
+        {{-- KPI CARDS - تفکیک هوشمند جریان مالی مارکت‌پلیس و درآمد پلتفرم --}}
         <div class="row g-3">
+
+            {{-- کارت اول: سفارشات --}}
             <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 border-right border-primary" style="border-right-width: 4px !important;">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <small class="text-muted font-weight-bold">سفارشات ثبت‌شده امروز</small>
-                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-dark">{{ number_format($kpis['today_orders']) }} <small style="font-size: 14px">سفارش</small></h3>
+                        <small class="text-muted font-weight-bold">
+                            <i class="ti-shopping-cart mr-1 text-primary"></i> تعداد تراکنش‌های موفق امروز
+                        </small>
+                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-dark">
+                            {{ number_format($kpis['today_orders']) }} <small style="font-size: 14px">سفارش</small>
+                        </h3>
                     </div>
                 </div>
             </div>
 
+            {{-- کارت دوم: حجم فروش روزانه فروشندگان --}}
             <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 border-right border-info" style="border-right-width: 4px !important;">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <small class="text-muted font-weight-bold">حجم فروش امروز بازار</small>
-                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-primary">{{ number_format($kpis['today_sales']) }} <small style="font-size: 14px">تومان</small></h3>
+                        <small class="text-muted font-weight-bold">
+                            <i class="ti-user mr-1 text-info"></i> فروش محصولات فروشندگان (امروز)
+                        </small>
+                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-info">
+                            {{ number_format($kpis['today_sales']) }} <small style="font-size: 14px">تومان</small>
+                        </h3>
                     </div>
                 </div>
             </div>
 
+            {{-- کارت سوم: گردش مالی ماهانه فروشندگان --}}
             <div class="col-md-3">
-                <div class="card shadow-sm border-0 h-100">
+                <div class="card shadow-sm border-0 h-100 border-right border-secondary" style="border-right-width: 4px !important;">
                     <div class="card-body d-flex flex-column justify-content-center">
-                        <small class="text-muted font-weight-bold">حجم کل فروش ماه جاری</small>
-                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-dark">{{ number_format($kpis['month_sales']) }} <small style="font-size: 14px">تومان</small></h3>
+                        <small class="text-muted font-weight-bold">
+                            <i class="ti-bar-chart mr-1 text-secondary"></i> کل فروش فروشندگان (ماه جاری)
+                        </small>
+                        <h3 class="mt-2 mb-0 font-weight-bold font-numeric text-dark">
+                            {{ number_format($kpis['month_sales']) }} <small style="font-size: 14px">تومان</small>
+                        </h3>
                     </div>
                 </div>
             </div>
 
+            {{-- کارت چهارم: درآمد و سود خالص خودِ سایت --}}
             <div class="col-md-3">
-                <div class="card shadow-sm border-0 bg-dark text-white">
+                <div class="card shadow-sm border-0 bg-dark text-white border-right border-success" style="border-right-width: 4px !important;">
                     <div class="card-body border-bottom border-secondary py-3">
-                        <small class="opacity-75">سود خالص پلتفرم (این ماه)</small>
-                        <h4 class="mt-1 mb-0 font-weight-bold font-numeric text-success">{{ number_format($kpis['site_income_month']) }} <small style="font-size: 12px">تومان</small></h4>
+                        <small class="text-success font-weight-bold">
+                            <i class="ti-wallet mr-1"></i> درآمد خالص سایت (این ماه)
+                        </small>
+                        <p class="text-muted small mb-1" style="font-size: 10px;">(کمیسیون فروش + فروش مستقیم محصولات سایت)</p>
+                        <h4 class="mt-1 mb-0 font-weight-bold font-numeric text-success">
+                            {{ number_format($kpis['site_income_month']) }} <small style="font-size: 12px">تومان</small>
+                        </h4>
                     </div>
                     <div class="card-body py-3">
-                        <small class="opacity-75">کل سود خالص تاریخی پلتفرم</small>
-                        <h4 class="mt-1 mb-0 font-weight-bold font-numeric text-warning">{{ number_format($kpis['total_site_income']) }} <small style="font-size: 12px">تومان</small></h4>
+                        <small class="text-warning font-weight-bold">
+                            <i class="ti-server mr-1"></i> کل درآمد تاریخی پلتفرم (از ابتدا)
+                        </small>
+                        <h4 class="mt-1 mb-0 font-weight-bold font-numeric text-warning">
+                            {{ number_format($kpis['total_site_income']) }} <small style="font-size: 12px">تومان</small>
+                        </h4>
                     </div>
                 </div>
             </div>
+
         </div>
 
         {{-- SELLERS --}}

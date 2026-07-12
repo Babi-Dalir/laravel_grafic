@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Enums\SellerStatus;
 use App\Enums\WalletTransactionStatus;
+use App\Enums\OrderStatus; // 🟢 انوم وضعیت سفارش اضافه شد
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Seller;
@@ -17,25 +18,48 @@ class PanelDashboardService
     {
         return Cache::remember('admin.panel.kpis', 60, function () {
             $now = now();
+            $payedStatus = OrderStatus::Payed->value;
 
-            $todayOrders = Order::whereDate('created_at', $now)->count();
-            $todaySales = OrderDetail::whereDate('created_at', $now)->sum('price');
+            // 🟢 پچ سفارشات امروز: فقط سفارشات پرداخت‌شده امروز
+            $todayOrders = Order::where('status', $payedStatus)
+                ->whereDate('created_at', $now)
+                ->count();
 
-            // مجموع فروش ناخالص ماه (ارزش دفتری محصولات)
-            $monthSales = OrderDetail::whereMonth('created_at', $now->month)
-                ->whereYear('created_at', $now->year)
+            // 🟢 پچ فروش امروز بازار: فقط اقلامی که سفارش آنها پرداخت موفق بوده است
+            $todaySales = OrderDetail::whereDate('created_at', $now)
+                ->where('seller_share', '>', 0)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
                 ->sum('price');
 
-            // 🟢 اصلاح طلایی ۱: سود خالص ماهانه سایت (کارمزد ناخالص منهای سوبسید نقدی همان ماه)
+            // 🟢 پچ فروش ماه جاری بازار: منوط به پرداخت موفق سفارش
+            $monthSales = OrderDetail::whereMonth('created_at', $now->month)
+                ->whereYear('created_at', $now->year)
+                ->where('seller_share', '>', 0)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
+                ->sum('price');
+
+            // 🟢 پچ محاسبات سود ماهانه سایت: فقط فاکتورهای پرداخت موفق
             $monthStats = OrderDetail::whereMonth('created_at', $now->month)
                 ->whereYear('created_at', $now->year)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
                 ->selectRaw('SUM(site_share) as gross_share, SUM(platform_subsidy) as subsidy')
                 ->first();
+
             $siteIncomeMonth = ($monthStats->gross_share ?? 0) - ($monthStats->subsidy ?? 0);
 
-            // 🟢 اصلاح طلایی ۲: کل سود خالص تاریخی سایت از ابتدا تاکنون
-            $totalStats = OrderDetail::selectRaw('SUM(site_share) as gross_share, SUM(platform_subsidy) as subsidy')
+            // 🟢 پچ کل سود تاریخی سایت: فقط فاکتورهای پرداخت موفق تاریخ سایت
+            $totalStats = OrderDetail::whereHas('order', function ($q) use ($payedStatus) {
+                $q->where('status', $payedStatus);
+            })
+                ->selectRaw('SUM(site_share) as gross_share, SUM(platform_subsidy) as subsidy')
                 ->first();
+
             $totalSiteIncome = ($totalStats->gross_share ?? 0) - ($totalStats->subsidy ?? 0);
 
             return [
@@ -62,13 +86,17 @@ class PanelDashboardService
     public function latest(): array
     {
         return Cache::remember('admin.panel.latest', 30, function () {
+            $payedStatus = OrderStatus::Payed->value;
+
             return [
-                'latest_settlements' => SellerSettlement::with(['seller.user']) // 🟢 لود اتمیک ریلیشن‌ها برای جلوگیری از N+1 Query
-                ->latest()
+                'latest_settlements' => SellerSettlement::with(['seller.user'])
+                    ->latest()
                     ->take(10)
                     ->get(),
 
+                // 🟢 پچ جدول آخرین سفارش‌ها: فقط نمایش آخرین سفارش‌های "پرداخت‌شده"
                 'latest_orders' => Order::with('user')
+                    ->where('status', $payedStatus)
                     ->latest()
                     ->take(10)
                     ->get(),
@@ -80,12 +108,17 @@ class PanelDashboardService
     {
         return Cache::remember('admin.panel.monthly_sales', 120, function () {
             $year = now()->year;
+            $payedStatus = OrderStatus::Payed->value;
 
+            // 🟢 پچ نمودار سالانه: فقط مبالغِ فاکتورهای پرداخت موفق روی نمودار بروند
             $rows = OrderDetail::selectRaw('
                     MONTH(created_at) as month,
                     SUM(price) as total
                 ')
                 ->whereYear('created_at', $year)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
                 ->groupBy('month')
                 ->pluck('total', 'month');
 
@@ -104,15 +137,25 @@ class PanelDashboardService
         });
     }
 
-    // 🟢 لود بهینه لایه تحلیل روزانه و کش اختصاصی آن
     public function insights(): array
     {
         return Cache::remember('admin.panel.insights', 60, function () {
             $today = now();
             $yesterday = now()->subDay();
+            $payedStatus = OrderStatus::Payed->value;
 
-            $todaySales = OrderDetail::whereDate('created_at', $today)->sum('price');
-            $yesterdaySales = OrderDetail::whereDate('created_at', $yesterday)->sum('price');
+            // 🟢 پچ ویجت رشد روزانه: مبنا قرار دادن سفارشات موفق امروز و دیروز
+            $todaySales = OrderDetail::whereDate('created_at', $today)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
+                ->sum('price');
+
+            $yesterdaySales = OrderDetail::whereDate('created_at', $yesterday)
+                ->whereHas('order', function ($q) use ($payedStatus) {
+                    $q->where('status', $payedStatus);
+                })
+                ->sum('price');
 
             $growth = $yesterdaySales > 0
                 ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100
@@ -132,7 +175,7 @@ class PanelDashboardService
             'sellers'  => $this->sellers(),
             'latest'   => $this->latest(),
             'chart'    => $this->monthlySalesChart(),
-            'insights' => $this->insights(), // 🟢 به خروجی نهایی اضافه شد
+            'insights' => $this->insights(),
         ];
     }
 
@@ -142,6 +185,6 @@ class PanelDashboardService
         Cache::forget('admin.panel.sellers');
         Cache::forget('admin.panel.latest');
         Cache::forget('admin.panel.monthly_sales');
-        Cache::forget('admin.panel.insights'); // 🟢 اضافه شد
+        Cache::forget('admin.panel.insights');
     }
 }
