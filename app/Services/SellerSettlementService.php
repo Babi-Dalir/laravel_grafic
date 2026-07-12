@@ -19,7 +19,7 @@ class SellerSettlementService
                 $q->where('type', TransactionType::Sale->value)
                     ->where('status', WalletTransactionStatus::Pending->value)
                     ->where('release_at', '<=', now())
-                    ->whereNull('settlement_id');
+                    ->whereNull('settlement_id'); // 🟢 گارد اصلی: فقط تراکنش‌های متصل‌نشده
             })
             ->chunkById(100, function ($sellers) {
 
@@ -33,12 +33,13 @@ class SellerSettlementService
                             ->lockForUpdate()
                             ->first();
 
+                        // 🔐 قفل اتمیک ردیف‌های ولت کاندیدای تسویه
                         $transactions = SellerWalletTransaction::query()
                             ->where('seller_id', $seller->id)
                             ->where('type', TransactionType::Sale->value)
                             ->where('status', WalletTransactionStatus::Pending->value)
                             ->where('release_at', '<=', now())
-                            ->whereNull('settlement_id')
+                            ->whereNull('settlement_id') // 🟢 فقط آن‌هایی که فاکتور نشده‌اند
                             ->lockForUpdate()
                             ->get();
 
@@ -48,34 +49,40 @@ class SellerSettlementService
 
                         $totalAmount = $transactions->sum('amount');
 
+                        // حد نصاب تسویه پلتفرم شما
                         if ($totalAmount < 100000) {
                             return;
                         }
 
-                        // 🧠 reference پایدار (مهم‌ترین اصلاح)
-                        $period = now()->format('Y-m'); // ماهانه مثل مکتب‌خونه
-
+                        $period = now()->format('Y-m');
                         $referenceId = "seller_{$seller->id}_{$period}";
 
-                        $settlement = SellerSettlement::query()->firstOrCreate(
-                            [
+                        // 🧠 پچ طلایی: استفاده از قفل لایه دیتابیس برای جلوگیری از اور-اینکرمنت (بزرگترین باگ موازی)
+                        $settlement = SellerSettlement::query()
+                            ->where('reference_id', $referenceId)
+                            ->where('status', SettlementStatus::Pending->value)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if (! $settlement) {
+                            // اگر برای این ماه هنوز فاکتور معلقی وجود ندارد، ساخته می‌شود
+                            $settlement = SellerSettlement::query()->create([
                                 'reference_id' => $referenceId,
-                            ],
-                            [
                                 'seller_id' => $seller->id,
                                 'amount' => 0,
                                 'status' => SettlementStatus::Pending->value,
-                            ]
-                        );
+                            ]);
+                        }
 
-                        // 🔥 جمع کردن مبلغ (idempotent safe)
+                        // 🔥 افزایش اتمیک موجودی فاکتور تسویه ادمین
                         $settlement->increment('amount', $totalAmount);
 
-                        // 🔥 اتصال تراکنش‌ها
+                        // 🔥 قفل کردن تراکنش‌ها درون این فاکتور (اتصال شناسه فاکتور)
                         SellerWalletTransaction::query()
-                        ->whereIn('id', $transactions->pluck('id'))
+                            ->whereIn('id', $transactions->pluck('id'))
                             ->update([
                                 'settlement_id' => $settlement->id,
+                                // وضعیت تا زمان پرداخت ادمین همان Pending می‌ماند اما چون settlement_id دارد امن است.
                             ]);
                     });
                 }

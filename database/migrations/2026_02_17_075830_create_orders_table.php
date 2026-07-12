@@ -17,6 +17,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('order_code')->unique();
             $table->string('transaction_id')->nullable();
+
+            $table->string('gateway_token')->nullable();
+            $table->string('payment_reference')->nullable();
+
             $table->decimal('total_price', 15, 2);
 
             $table->double('discount_price')->nullable();

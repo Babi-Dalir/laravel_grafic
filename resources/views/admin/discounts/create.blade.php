@@ -16,6 +16,14 @@
                         </div>
 
                         <div class="form-group row">
+                            <label  class="col-sm-2 col-form-label">ظرفیت استفاده (تعداد)</label>
+                            <div class="col-sm-10">
+                                <input type="number" class="form-control text-left" dir="rtl" name="remaining_count" placeholder="مثلا 50" min="1">
+                                <small class="text-muted">تعداد دفعاتی که این کد قابل استفاده خواهد بود.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label"> تاریخ انقضای کد تخفیف</label>
 
                             <div class="col-sm-10">

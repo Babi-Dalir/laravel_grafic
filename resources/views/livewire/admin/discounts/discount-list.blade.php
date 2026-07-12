@@ -13,6 +13,7 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">کد تخفیف</th>
             <th class="text-center align-middle text-primary">میزان تخفیف</th>
+            <th class="text-center align-middle text-primary">ظرفیت باقی‌مانده</th>
             <th class="text-center align-middle text-primary">وضعیت</th>
             <th class="text-center align-middle text-primary"> تاریخ انقضا</th>
             <th class="text-center align-middle text-primary">حذف</th>
@@ -25,6 +26,16 @@
                 <td class="text-center align-middle">{{$discounts->firstItem()+$index}}</td>
                 <td class="text-center align-middle">{{$discount->code}}</td>
                 <td class="text-center align-middle">{{number_format($discount->discount)}} تومان</td>
+
+                <td class="text-center align-middle">
+                    @if($discount->remaining_count <= 0)
+                        <span class="badge badge-danger">پایان یافته (0)</span>
+                    @elseif($discount->remaining_count <= 5)
+                        <span class="badge badge-warning text-dark">رو به اتمام ({{ $discount->remaining_count }})</span>
+                    @else
+                        <span class="badge badge-info">{{ $discount->remaining_count }} بار</span>
+                    @endif
+                </td>
 
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$discount->id}})" style="cursor: pointer;">

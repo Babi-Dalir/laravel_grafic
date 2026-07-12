@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Enums\TransactionType;
 use App\Enums\WalletTransactionStatus;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
 
 class SellerWalletTransaction extends Model
 {
@@ -44,50 +43,40 @@ class SellerWalletTransaction extends Model
     }
 
     /**
-     * 🧠 REGISTER SALE (SAFE LEDGER ENTRY)
-     */
-    /**
-     * 🧠 REGISTER SALE (SAFE LEDGER ENTRY) - EXCLUSIVELY FOR DIGITAL PLATFORM
+     * ثبت تراکنش ولت فروشندگان (همخوان با امنیت تراکنش مادر پلتفرم دیجیتال)
      */
     public static function registerSale($orderDetails): void
     {
-        DB::transaction(function () use ($orderDetails) {
+        // 🟢 نکته ایمنی: تراکنش درونی به دلیل اجرای مستقیم داخل تراکنش اصلی Order حذف شد تا هم‌راستا عمل کنند.
+        foreach ($orderDetails as $detail) {
 
-            foreach ($orderDetails as $detail) {
+            // پچ طلایی: لود امن محصول حتی در صورت پاک شدن موقت یا دائم از پنل
+            $product = Product::withTrashed()->find($detail->product_id);
+            if (!$product) continue;
 
-                $product = $detail->product;
-                if (!$product) continue;
-
-                // 🟢 واکشی زنده و امن فروشنده بر اساس مدل Seller
-                $sellerId = null;
-                if ($product->seller) {
-                    $sellerId = $product->seller->id;
-                } elseif ($product->user_id) {
-                    $sellerId = Seller::query()->where('user_id', $product->user_id)->value('id');
-                }
-
-                if (!$sellerId) continue;
-
-                // استفاده از شناسه یونیک آیتم سفارش
-                $referenceId = "order_detail_{$detail->id}";
-
-                // گارد بررسی لایه اپلیکیشن (چک اول)
-                $exists = self::where('reference_id', $referenceId)->exists();
-                if ($exists) continue;
-
-                // 🟢 اختصاصی فروشگاه دیجیتال: آزادسازی آنی و بدون تاخیر (Instant Release)
-                // چون محصول فایل است و همان لحظه دانلود شده، پول فورا در دیتابیس آزاد و آماده تسویه است.
-                self::create([
-                    'seller_id'    => $sellerId,
-                    'order_id'     => $detail->order_id,
-                    'amount'       => $detail->seller_share, // واریز سهم خالص فروشنده
-                    'type'         => TransactionType::Sale->value,
-                    'description'  => "فروش محصول دیجیتال «{$product->name}» بابت آیتم فاکتور #{$detail->id}",
-                    'status'       => WalletTransactionStatus::Pending->value,
-                    'release_at'   => now(), // 🚀 آنی و بدون بلوکه شدن ۷ یا ۳۰ روزه
-                    'reference_id' => $referenceId,
-                ]);
+            $sellerId = null;
+            if ($product->user_id) {
+                $sellerId = Seller::query()->where('user_id', $product->user_id)->value('id');
             }
-        });
+
+            if (!$sellerId) continue;
+
+            $referenceId = "order_detail_{$detail->id}";
+
+            // گارد بررسی دوگانه پایداری برای جلوگیری از رکوردهای کامپلکس تکراری
+            $exists = self::where('reference_id', $referenceId)->exists();
+            if ($exists) continue;
+
+            self::create([
+                'seller_id'    => $sellerId,
+                'order_id'     => $detail->order_id,
+                'amount'       => $detail->seller_share,
+                'type'         => TransactionType::Sale->value,
+                'description'  => "فروش محصول دیجیتال «{$product->name}» بابت آیتم فاکتور #{$detail->id}",
+                'status'       => WalletTransactionStatus::Pending->value,
+                'release_at'   => now()->addDays(30),
+                'reference_id' => $referenceId,
+            ]);
+        }
     }
 }

@@ -19,10 +19,12 @@
             <th class="text-center align-middle text-primary">ردیف</th>
             <th class="text-center align-middle text-primary">مشخصات فروشنده</th>
             <th class="text-center align-middle text-primary">نام محصول</th>
-            <th class="text-center align-middle text-primary">قیمت</th>
-            <th class="text-center align-middle text-primary">تخفیف</th>
+            <th class="text-center align-middle text-primary">قیمت پرداختی</th>
+            <th class="text-center align-middle text-primary">تخفیف محصول</th>
+            <th class="text-center align-middle text-primary">کد تخفیف (کوپن)</th> <!-- 🟢 اضافه شد -->
             <th class="text-center align-middle text-primary">درصد کمیسیون</th>
             <th class="text-center align-middle text-primary">سهم سایت</th>
+            <th class="text-center align-middle text-primary">سوبسید پلتفرم</th> <!-- 🟢 اضافه شد -->
             <th class="text-center align-middle text-primary">سهم فروشنده</th>
             <th class="text-center align-middle text-primary">وضعیت و عملیات</th>
             <th class="text-center align-middle text-primary">تعداد دانلود</th>
@@ -33,7 +35,6 @@
         @forelse($order_details as $index => $order_detail)
             @php
                 $product = $order_detail->product;
-                // 🟢 واکشی هوشمند نام فروشنده یا نام برند از مدل مستقل حسابداری پروژه
                 $sellerName = '---';
                 $sellerMobile = '---';
 
@@ -70,12 +71,34 @@
                 <td class="text-center align-middle text-danger font-numeric">
                     {{ number_format($order_detail->discount) }} تومان
                 </td>
+
+                <!-- 🟢 نمایش فیلد کد تخفیف اعمال شده روی آیتم -->
+                <td class="text-center align-middle text-danger font-numeric">
+                    @if($order_detail->coupon_discount > 0)
+                        <span class="text-danger font-weight-bold">{{ number_format($order_detail->coupon_discount) }} تومان</span>
+                    @else
+                        <span class="text-muted">0</span>
+                    @endif
+                </td>
+
                 <td class="text-center align-middle text-secondary font-numeric">
                     {{ number_format($product?->category?->commission?->commission_percent ?? 20) }} %
                 </td>
                 <td class="text-center align-middle text-info font-numeric">
                     {{ number_format($order_detail->site_share) }} تومان
                 </td>
+
+                <!-- 🟢 نمایش سوبسید با استایل برجسته برای هوشیاری مدیر سایت -->
+                <td class="text-center align-middle font-numeric">
+                    @if($order_detail->platform_subsidy > 0)
+                        <span class="badge badge-danger p-2 shadow-sm" style="animation: pulse 2s infinite;">
+                            {{ number_format($order_detail->platform_subsidy) }} تومان سوبسید
+                        </span>
+                    @else
+                        <span class="text-muted">0</span>
+                    @endif
+                </td>
+
                 <td class="text-center align-middle text-primary font-weight-bold font-numeric">
                     {{ number_format($order_detail->seller_share) }} تومان
                 </td>
@@ -149,7 +172,8 @@
             </tr>
         @empty
             <tr>
-                <td colspan="11" class="text-center py-5 bg-light text-muted">
+                <!-- 🟢 تغییر تعداد colspan به 13 ستون -->
+                <td colspan="13" class="text-center py-5 bg-light text-muted">
                     هیچ جزئیاتی برای این سفارش یافت نشد.
                 </td>
             </tr>

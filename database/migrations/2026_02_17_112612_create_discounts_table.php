@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->integer('discount');
+            $table->integer('remaining_count')->default(100);
             $table->string('status')->default(\App\Enums\DiscountStatus::Active->value);
             $table->timestamp('expiration_date');
             $table->timestamps();

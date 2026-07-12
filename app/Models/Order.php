@@ -4,24 +4,27 @@ namespace App\Models;
 
 use App\Enums\CartType;
 use App\Enums\DiscountStatus;
+use App\Enums\DiscountUsageStatus;
 use App\Enums\DownloadStatus;
 use App\Enums\GiftCartStatus;
 use App\Enums\OrderDetailStatus;
 use App\Enums\OrderStatus;
 use App\Events\OrderPaidEvent;
+use App\Services\FinancialLedgerService;
+
+// 🟢 لود سرویس مالی جدید
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Order extends Model
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'user_id',
         'order_code',
         'transaction_id',
+        'gateway_token',
+        'payment_reference',
         'total_price',
         'discount_price',
         'discount_code',
@@ -55,133 +58,130 @@ class Order extends Model
     }
 
     /**
-     * ثبت پرداخت موفق با ساختار تفکیک‌شده، رویدادمحور و هماهنگ با انوم کستینگ دانلودها
+     * ثبت پرداخت موفق اتمیک با تفکیک لایه حسابداری
      */
-    public static function successPayment(Order $order): void
+    public static function successPayment(Order $order, string $paymentReference): void
     {
-        $isPaidNow = DB::transaction(function () use ($order) {
+        $lockedOrder = DB::transaction(function () use ($order, $paymentReference) {
 
-            $lockedOrder = self::query()
+            $currentOrder = self::query()
                 ->lockForUpdate()
-                ->with('orderDetails')
+                ->with(['orderDetails' => fn($q) => $q->withTrashed()
+                    ->with(['product' => fn($p) => $p->withTrashed()
+                        ->with('seller')])])
                 ->findOrFail($order->id);
 
-            // مکانیزم سخت‌گیرانه Idempotency
-            if ($lockedOrder->status !== OrderStatus::Payed) {
-                // پایبندی کامل به شیءگرایی انوم بدون تداخل با مقدار خام
-                $lockedOrder->update([
-                    'status' => OrderStatus::Payed,
-                    'paid_at' => now(),
-                ]);
-            } else {
-                return false;
+            if ($currentOrder->status === OrderStatus::Payed->value) {
+                return $currentOrder;
             }
 
-            foreach ($lockedOrder->orderDetails as $detail) {
-                // آپدیت وضعیت جزئیات سفارش با مقدار رشته‌ای انوم ارسالی شما
+            // ۱. تغییر وضعیت پایه سفارش
+            $currentOrder->update([
+                'status' => OrderStatus::Payed->value,
+                'payment_reference' => $paymentReference,
+                'paid_at' => now(),
+            ]);
+
+            // ۲. 🚀 واگذاری تمام کارهای ریز حسابداری به سرویس مالی اختصاصی (خلوت شدن چشمگیر کد)
+            FinancialLedgerService::recordOrderMetrics($currentOrder, $paymentReference);
+
+            // ۳. فرآیند توزیع فایل دانلود و آپدیت وضعیت آیتم‌ها
+            foreach ($currentOrder->orderDetails as $detail) {
                 $detail->update([
                     'status' => OrderDetailStatus::Paid->value
                 ]);
 
-                Product::query()
-                    ->whereKey($detail->product_id)
-                    ->increment('sold');
+                $product = $detail->product;
+                if ($product) {
+                    Product::query()->whereKey($product->id)->increment('sold');
+                }
 
                 Downloads::firstOrCreate([
                     'order_detail_id' => $detail->id
                 ], [
-                    'user_id' => $lockedOrder->user_id,
+                    'user_id' => $currentOrder->user_id,
                     'product_id' => $detail->product_id,
                     'token' => Str::random(100),
                     'max_download' => 5,
                     'expire_at' => now()->addYear(),
-                    'status' => DownloadStatus::Active->value // استفاده از ->value برای جلوگیری از خطای همخوانی رشتۀ انوم
+                    'status' => DownloadStatus::Active->value
                 ]);
             }
 
+            // ۴. واریز سهم ولت فروشندگان در کیف پول
+            SellerWalletTransaction::registerSale($currentOrder->orderDetails);
+
+            // ۵. رفتارهای نهایی کوپن و کارت هدیه
+            $discountUsage = DB::table('discount_usages')
+                ->where('order_id', $currentOrder->id)
+                ->where('status', DiscountUsageStatus::Reserved->value)
+                ->first();
+
+            if ($discountUsage) {
+                DB::table('discount_usages')
+                    ->where('id', $discountUsage->id)
+                    ->update([
+                        'status' => DiscountUsageStatus::Used->value
+                    ]);
+
+                $affected = Discount::query()
+                    ->where('id', $discountUsage->discount_id)
+                    ->where('remaining_count', '>', 0)
+                    ->decrement('remaining_count');
+                if ($affected) {
+                    $freshDiscount = Discount::query()->find($discountUsage->discount_id);
+                    if ($freshDiscount && $freshDiscount->remaining_count <= 0) {
+                        $freshDiscount->update(['status' => DiscountStatus::InActive->value]);
+                    }
+                }
+            }
+
             UserCart::query()
-                ->where('user_id', $lockedOrder->user_id)
+                ->where('user_id', $currentOrder->user_id)
                 ->where('type', CartType::Main->value)
                 ->delete();
 
-            self::handleDiscount($lockedOrder->discount_code);
-            self::handleGiftCart($lockedOrder->gift_cart_code, $lockedOrder);
+            if ($currentOrder->gift_cart_code) {
+                self::confirmGiftCart($currentOrder);
+            }
 
-            return true;
+            return $currentOrder;
         });
 
-        // شلیک رویداد ناهمزمان برای صف پیامک ملی‌پایامک
-        if ($isPaidNow) {
-            event(new OrderPaidEvent($order));
+        if ($lockedOrder && $lockedOrder->wasChanged('status')) {
+            event(new OrderPaidEvent($lockedOrder->fresh()));
         }
     }
 
-    /**
-     * مدیریت تخفیف موازی (Concurrency-Safe)
-     */
-    private static function handleDiscount($discount_code)
+    private static function confirmGiftCart($order)
     {
-        if (!$discount_code) {
-            return;
-        }
-
-        $discount = Discount::query()
-            ->where('code', $discount_code)
-            ->where('status', DiscountStatus::Active->value)
-            ->first();
-
-        if (!$discount) {
-            return;
-        }
-
-        $affected = Discount::query()
-            ->whereKey($discount->id)
-            ->where('remaining_count', '>', 0)
-            ->decrement('remaining_count');
-
-        if ($affected && $discount->fresh()->remaining_count <= 0) {
-            $discount->update(['status' => DiscountStatus::InActive->value]);
-        }
-    }
-
-    /**
-     * مدیریت اتمیک کارت هدیه
-     */
-    private static function handleGiftCart($gift_cart_code, $order)
-    {
-        if (!$gift_cart_code) {
-            return;
-        }
-
         $gift_cart = GiftCart::query()
-            ->where('code', $gift_cart_code)
+            ->where('code', $order->gift_cart_code)
             ->where('user_id', $order->user_id)
+            ->lockForUpdate()
             ->first();
-
-        if (!$gift_cart) {
-            return;
-        }
-
-        $amountToDeduct = $order->gift_cart_price;
-
-        if ($amountToDeduct > 0) {
-            if ($gift_cart->balance >= $amountToDeduct) {
-                $gift_cart->decrement('balance', $amountToDeduct);
-            } else {
-                $gift_cart->update(['balance' => 0]);
+        if ($gift_cart && $order->gift_cart_price > 0) {
+            $gift_cart->decrement('balance', $order->gift_cart_price);
+            if ($gift_cart->fresh()->balance <= 0) {
+                $gift_cart->update([
+                    'status' => GiftCartStatus::InActive->value
+                ]);
             }
         }
-
-        if ($gift_cart->fresh()->balance <= 0) {
-            $gift_cart->update(['status' => GiftCartStatus::InActive->value]);
-        }
     }
 
-    /**
-     * ساخت کد پیگیری منحصر به فرد
-     */
-    private static function generateOrderCode()
+    public static function releaseReservations(Order $order): void
     {
-        return 'ORD-' . now()->getTimestampMs() . '-' . Str::upper(Str::random(4));
+        DB::transaction(function () use ($order) {
+            DB::table('discount_usages')
+                ->where('order_id', $order->id)
+                ->where('status', DiscountUsageStatus::Reserved->value)
+                ->update([
+                    'status' => DiscountUsageStatus::Cancelled->value
+                ]);
+            $order->update([
+                'status' => OrderStatus::Cancelled->value
+            ]);
+        });
     }
 }

@@ -27,9 +27,6 @@ class GiftCart extends Model
         ];
     }
 
-    /**
-     * 🟢 اصلاح ساختاری: انتقال خودکار زمان انقضا به آخرین ثانیه روز
-     */
     protected function expirationDate(): Attribute
     {
         return Attribute::make(
@@ -40,30 +37,17 @@ class GiftCart extends Model
         );
     }
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        self::updating(function ($giftCart) {
-            if ($giftCart->isDirty('balance') && $giftCart->balance <= 0) {
-                $giftCart->status = GiftCartStatus::InActive->value;
-            }
-        });
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public static function calculateGiftCart($shop_data, $total_price, $gif_cart_code_price)
+    /**
+     * محاسبه و اعمال گارد اتمیک سخت‌گیرانه برای کنترل موجودی کارت هدیه در گام نهایی سبد خرید
+     */
+    public static function calculateGiftCart($shop_data, $total_price, &$gif_cart_code_price, $userId)
     {
         $gift_cart = self::query()
+            ->lockForUpdate()
             ->where('code', $shop_data['gift_cart_code'])
-            ->where('user_id', auth()->id())
+            ->where('user_id', $userId)
             ->where('balance', '>', 0)
             ->where('status', GiftCartStatus::Active->value)
-            // 🟢 اصلاح طلایی: معتبر بودن کارت تا آخرین ثانیه‌ی امروز
             ->whereDate('expiration_date', '>=', today())
             ->first();
 
@@ -81,7 +65,7 @@ class GiftCart extends Model
 
         return [
             'total_price' => $total_price,
-            'gif_cart_code_price' => $gif_cart_code_price,
+            'gift_cart_code_price' => $gif_cart_code_price,
             'gift_cart_id' => $gift_cart ? $gift_cart->id : null
         ];
     }

@@ -35,6 +35,12 @@ class DiscountList extends Component
             return;
         }
 
+        // 🔒 گارد جلوگیری از فعال‌سازی کد بدون ظرفیت
+        if ($discount->remaining_count <= 0) {
+            $this->dispatch('showToastError', message: 'ظرفیت استفاده از این کد تخفیف به پایان رسیده است.');
+            return;
+        }
+
         // 🟢 اصلاح یکدستی انوم (حتی با وجود کستینگ الکونت، استفاده صریح از ->value ترجیح دارد)
         $newStatus = ($discount->status->value === DiscountStatus::Active->value)
             ? DiscountStatus::InActive->value

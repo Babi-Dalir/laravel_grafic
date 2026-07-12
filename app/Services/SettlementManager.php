@@ -13,7 +13,7 @@ class SettlementManager
     {
         DB::transaction(function () use ($settlement, $adminId) {
 
-            // 🧠 قفل واقعی دیتابیس
+            // 🧠 قفل واقعی دیتابیس برای جلوگیری از دبل کلیک ادمین
             $settlement = SellerSettlement::query()
                 ->where('id', $settlement->id)
                 ->where('status', SettlementStatus::Pending->value)
@@ -24,14 +24,14 @@ class SettlementManager
                 return;
             }
 
-            // 1. آپدیت تسویه
+            // 1. آپدیت تسویه حساب به پرداخت شده
             $settlement->update([
                 'status' => SettlementStatus::Paid->value,
                 'paid_at' => now(),
                 'paid_by' => $adminId,
             ]);
 
-            // 2. آپدیت تراکنش‌ها
+            // 2. آپدیت اتمیک وضعیت تراکنش‌های ولت به تسویه شده نهایی
             $settlement->transactions()->update([
                 'status' => WalletTransactionStatus::Settled->value,
                 'settled_at' => now(),
