@@ -54,9 +54,15 @@ class AdminSellerController extends Controller
         $seller = Seller::query()->with('user')->findOrFail($seller_id);
         $sellerUserId = $seller->user_id;
 
-        // ۲. تجمیع هوشمند آمار با اصطلاحات دقیق حسابداری
+        // 🟢 انوم وضعیت سفارش موفق جهت گاردگذاری محاسبات
+        $payedStatus = \App\Enums\OrderStatus::Payed->value;
+
+        // ۲. تجمیع هوشمند آمار با اصطلاحات دقیق حسابداری (فقط سفارشات پرداخت موفق)
         $orderStats = OrderDetail::query()
             ->where('seller_id', $sellerUserId)
+            ->whereHas('order', function ($q) use ($payedStatus) {
+                $q->where('status', $payedStatus);
+            })
             ->selectRaw('
             SUM(price) as total_product_value,
             SUM(seller_share) as total_seller_income,
@@ -66,10 +72,10 @@ class AdminSellerController extends Controller
         ')
             ->first();
 
-        // 🟢 اصلاح طلایی شما: تغییر نام مفهوم درآمد به سود خالص پلتفرم از این فروشنده
+        // تغییر نام مفهوم درآمد به سود خالص پلتفرم از این فروشنده
         $netPlatformProfit = ($orderStats->total_gross_site_income ?? 0) - ($orderStats->total_platform_subsidy ?? 0);
 
-        // ۳. تجمیع آمار تراکنش‌های کیف پول
+        // ۳. تجمیع آمار تراکنش‌های کیف پول (این بخش خودکار درست است چون تراکنش‌ها زمان پرداخت موفق متولد می‌شوند)
         $walletStats = SellerWalletTransaction::query()
             ->where('seller_id', $seller->id)
             ->selectRaw("
@@ -93,9 +99,13 @@ class AdminSellerController extends Controller
             ->latest()
             ->paginate(10, ['*'], 'settlements_page');
 
+        // 🟢 پچ جدول لیست فروش‌ها: فقط اقلامی که فاکتور مادر آنها با موفقیت پرداخت شده است
         $sales = OrderDetail::query()
             ->with(['product:id,name', 'order:id,order_code'])
             ->where('seller_id', $sellerUserId)
+            ->whereHas('order', function ($q) use ($payedStatus) {
+                $q->where('status', $payedStatus);
+            })
             ->latest()
             ->paginate(10, ['*'], 'sales_page');
 
@@ -107,7 +117,7 @@ class AdminSellerController extends Controller
             'totalOrders'         => $orderStats->total_orders ?? 0,
             'grossSiteIncome'     => $orderStats->total_gross_site_income ?? 0,
             'platformSubsidy'     => $orderStats->total_platform_subsidy ?? 0,
-            'netPlatformProfit'   => $netPlatformProfit, // 🟢 متغیر جدید اصلاح‌شده
+            'netPlatformProfit'   => $netPlatformProfit,
             'totalProducts'       => $totalProducts,
             'pendingBalance'      => $walletStats->pending_balance ?? 0,
             'settledBalance'      => $walletStats->settled_balance ?? 0,

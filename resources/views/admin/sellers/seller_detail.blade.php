@@ -22,7 +22,7 @@
                                  width="110" height="110" style="object-fit: cover;"
                                  alt="پروفایل فروشنده">
                         </div>
-                        <div class="col-md-10 text-right">
+                        <div class="col-md-10 text-left">
                             <h4 class="font-weight-bold text-dark mb-2">
                                 {{ $seller->first_name ? $seller->first_name . ' ' . $seller->last_name : $seller->user?->name }}
                             </h4>
