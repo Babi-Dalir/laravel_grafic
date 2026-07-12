@@ -223,6 +223,17 @@
                     </ul>
                 </li>
 
+                <li>
+                    <a href="#">مدیریت مالی کلان</a>
+                    <ul>
+                        <li>
+                            <a href="{{ route('admin.financial.ledger') }}">
+                                 دفتر کل (جعبه سیاه مالی)
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
             </ul>
         @endcan
 

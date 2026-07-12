@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\SellerController;
+use App\Livewire\Admin\Financial\FinancialLedgerList;
 use Illuminate\Support\Facades\Route;
 
 
@@ -126,3 +127,4 @@ Route::get('seller_transaction',[AdminSellerController::class,'adminSellerTransa
 //Seller Detail Route
 Route::get('seller_detail/{seller_id}',[AdminSellerController::class,'adminSellerDetail'])->name('admin.seller.detail');
 
+Route::get('financial-ledger', FinancialLedgerList::class)->name('admin.financial.ledger');
