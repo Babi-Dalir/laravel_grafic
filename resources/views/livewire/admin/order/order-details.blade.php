@@ -32,33 +32,51 @@
         </tr>
         </thead>
         <tbody>
+        <tbody>
         @forelse($order_details as $index => $order_detail)
             @php
                 $product = $order_detail->product;
+                $productOwner = $product?->user; // واکشی مستقیم کاربرِ ایجادکننده محصول
+
+                // 🟢 بررسی هوشمند و دقیق ساختار مالکیت محصول بر اساس منطق مارکت‌پلیس شما
+                $isWebsiteProduct = ($productOwner && $productOwner->hasRole('مدیر'));
+
                 $sellerName = '---';
                 $sellerMobile = '---';
 
-                if ($product?->seller) {
-                    $sellerName = $product->seller->brand_name ?? ($product->seller->first_name . ' ' . $product->seller->last_name);
-                    $sellerMobile = $product->seller->user?->mobile ?? '---';
-                } elseif ($product?->user) {
-                    $sellerName = $product->user->name;
-                    $sellerMobile = $product->user->mobile;
+                if (!$isWebsiteProduct) {
+                    if ($product?->seller) {
+                        $sellerName = $product->seller->brand_name ?? ($product->seller->first_name . ' ' . $product->seller->last_name);
+                        $sellerMobile = $product->seller->user?->mobile ?? '---';
+                    } elseif ($productOwner) {
+                        $sellerName = $productOwner->name;
+                        $sellerMobile = $productOwner->mobile;
+                    }
                 }
             @endphp
             <tr wire:key="order-detail-row-{{ $order_detail->id }}">
                 <td class="text-center align-middle font-weight-bold font-numeric">{{ $order_details->firstItem() + $index }}</td>
+
+                {{-- 🎯 ستون مشخصات فروشنده یا محصول مستقیم سایت --}}
                 <td class="text-center align-middle">
-                    <div>
-                        <strong class="text-dark">
-                            {{ $sellerName }}
-                        </strong>
-                        <br>
-                        <small class="text-muted font-numeric">
-                            {{ $sellerMobile }}
-                        </small>
-                    </div>
+                    @if($isWebsiteProduct)
+                        <span class="badge badge-primary p-2 shadow-sm"
+                              style="font-size: 11px; font-weight: bold; border-radius: 6px;">
+                            <i class="ti-world mr-1"></i> محصول سایت
+                        </span>
+                    @else
+                        <div>
+                            <strong class="text-dark">
+                                {{ $sellerName }}
+                            </strong>
+                            <br>
+                            <small class="text-muted font-numeric d-block mt-1">
+                                <i class="ti-mobile mr-1"></i> {{ $sellerMobile }}
+                            </small>
+                        </div>
+                    @endif
                 </td>
+
                 <td class="text-center align-middle font-weight-bold text-right">
                     {{ $product?->name ?? 'محصول حذف شده' }}
                     @if($product?->trashed())

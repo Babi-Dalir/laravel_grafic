@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\DB;
 
 class Orders extends Component
 {
@@ -57,27 +58,34 @@ class Orders extends Component
             return;
         }
 
-        $data = ['status' => $nextStatus];
-
+        // 🟢 پچ طلایی: مدیریت اتمیک اکشن پرداخت دستی ادمین
         if ($nextStatus === OrderStatus::Payed) {
-            $data['paid_at'] = now();
+            try {
+                // صدا زدن مستقیم متد جامع موفقیت آمیز فاکتور که تمام لجرها و سهم‌ها را اتمیک ثبت می‌کند
+                Order::successPayment($order, 'MANUAL_ADMIN_CONFIRM_' . auth()->id());
+
+                $this->dispatch('order-status-updated', message: 'سفارش با موفقیت به صورت دستی تایید و اسناد مالی صادر شدند.');
+            } catch (\Exception $e) {
+                $this->dispatch('order-status-error', message: 'خطا در ثبت اسناد مالی: ' . $e->getMessage());
+            }
+            return;
         }
 
-        $order->update($data);
-
-        // 🟢 بهینه‌سازی سرور: اگر وضعیت به پرداخت شده تغییر کرد، متد پردازش تراکنش موفق خودت را صدا می‌زنیم
-        if ($nextStatus === OrderStatus::Payed) {
-            Order::successPayment($order);
-        }
+        // 🔵 مدیریت سایر اکشن‌ها (لغو، تلاش مجدد و...) خارج از جریان واریز نهایی
+        DB::transaction(function () use ($order, $nextStatus) {
+            $order->update([
+                'status' => $nextStatus
+            ]);
+        });
 
         $this->dispatch('order-status-updated', message: 'وضعیت سفارش با موفقیت به روز رسانی شد.');
     }
 
     public function render()
     {
-        // 🟢 بهینه‌سازی آنلاین: جلوگیری از قفل شدن دیتابیس با لود بهینه ریلیشن‌ها
+        // 🚀 بهینه‌سازی نهایی دیتابیس با لود همزمان تمام ریلیشن‌های مورد نیاز در لایه نمایش
         $orders = Order::query()
-            ->with(['user', 'orderDetails', 'sellerWalletTransactions'])
+            ->with(['user', 'orderDetails'])
             ->when($this->search, function ($query) {
                 $query->where(function ($mainQuery) {
                     $mainQuery->where('order_code', 'like', "%{$this->search}%")
