@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DownloadStatus;
+use App\Enums\OrderDetailStatus;
 use App\Exceptions\DownloadLimitException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,16 @@ class Downloads extends Model
         }
 
         $this->refresh();
+
+        if ($this->download_count >= $this->max_download) {
+            $orderDetail = $this->orderDetail; // استفاده از رابطه تعریف شده در مدل
+
+            if ($orderDetail && $orderDetail->status === OrderDetailStatus::Paid) {
+                $orderDetail->update([
+                    'status' => OrderDetailStatus::Downloaded->value
+                ]);
+            }
+        }
     }
 
     /**
