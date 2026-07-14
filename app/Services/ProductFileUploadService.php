@@ -2,54 +2,71 @@
 
 namespace App\Services;
 
-use Exception;
-use App\Models\Product;
 use App\Models\ProductFile;
-use App\Helpers\FileManager;
-use App\Events\ProductFileUploaded;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class ProductFileUploadService
 {
-    public function uploadBinaryChunk(
-        $file,
-        string $fileUuid,
-        int $chunkIndex,
-        int $totalChunks,
-        string $originalName,
-        Product $product,
-        ?string $title = null
-    ): bool {
+    /**
+     * 🗑️ متد حذف فیزیکی فایل از استوریج دیجیتال (بر اساس تنظیمات دیسک شما)
+     */
+    public function delete(ProductFile $file): void
+    {
+        $finalPath = "products/{$file->product_id}/{$file->stored_name}";
 
-        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-        $allowedExtensions = config('uploads.allowed_extensions', [
-            'dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff',
-            'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf'
-        ]);
+        // دیسک دیجیتال شما طبق کدهای موجود 'digital_files' است
+        $disk = 'digital_files';
 
-        if (!in_array($extension, $allowedExtensions, true)) {
-            throw new Exception('فرمت فایل انتخاب شده مجاز نیست.');
+        if (Storage::disk($disk)->exists($finalPath)) {
+            Storage::disk($disk)->delete($finalPath);
         }
 
-        // ذخیره فیزیکی موقت چانک باینری روی سرور محلی
-        FileManager::storeChunkTemp($file, $fileUuid, $chunkIndex);
-
-        // اگر هنوز چانک‌های بعدی باقی مانده است، سیگنال موفقیت پارت را بفرست
-        if ($chunkIndex + 1 < $totalChunks) {
-            return false;
-        }
-
-        // کامباین کردن سریع چانک‌ها روی دیسک لوکال در آخرین پارت رسیده
-        $tempName = FileManager::combineChunks($fileUuid, $totalChunks, $extension);
-
-        // 🚀 شلیک رویداد معماری رویدادمحور جهت پردازش ناهمگام در صف و آزادسازی فوری کلاینت
-        // خط زیر در آخرین متد کامباین آپلود بدین شکل بهینه‌سازی شد:
-        event(new ProductFileUploaded($product->id, $tempName, $originalName, $title, $fileUuid));
-
-        return true; // نشان‌دهنده اتمام دریافت کل چانک‌ها است
+        $file->delete();
     }
 
+    /**
+     * بررسی انطباق مایم‌تایپ واقعی استخراج‌شده با پسوند ادعایی فایل
+     */
     public function isValidMimeForExtension(string $extension, string $mime): bool
     {
+        $extension = strtolower(trim($extension));
+        $mime = strtolower(trim($mime));
+
+        $corelMimes = [
+            'application/vnd.corel-draw',
+            'application/x-vnd.corel.draw.document+zip',
+            'application/x-vnd.corel.zcf.draw.document+zip',
+            'application/cdr',
+            'application/coreldraw',
+            'image/cdr',
+            'application/x-cdr',
+            'application/vnd.coreldraw',
+            'application/x-coreldraw',
+            'zz-application/zz-winassoc-cdr',
+            'application/x-riff',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/octet-stream',
+            'image/x-cmx',
+            'application/x-cmx',
+            'image/x-cpt',
+            'application/x-cpt',
+            'application/x-cdt',
+            'audio/x-riff'
+        ];
+
+        $corelExtensions = ['cdr', 'cdt', 'cmx', 'cpt'];
+
+        if (in_array($extension, $corelExtensions, true)) {
+            $corelKeywords = ['corel', 'coreldraw', 'zcf', 'vnd.corel', 'draw'];
+            foreach ($corelKeywords as $keyword) {
+                if (str_contains($mime, $keyword)) {
+                    return true;
+                }
+            }
+        }
+
         $validMimes = [
             'jpg'  => ['image/jpeg', 'image/pjpeg'],
             'jpeg' => ['image/jpeg', 'image/pjpeg'],
@@ -58,38 +75,32 @@ class ProductFileUploadService
             'tiff' => ['image/tiff', 'image/x-tiff'],
             'svg'  => ['image/svg+xml', 'application/xml', 'text/xml'],
             'pdf'  => ['application/pdf', 'application/x-pdf'],
-            'zip'  => ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'multipart/x-zip'],
+            'zip'  => [
+                'application/zip',
+                'application/x-zip-compressed',
+                'application/x-zip',
+                'multipart/x-zip',
+                'application/x-compressed'
+            ],
             'psd'  => ['image/vnd.adobe.photoshop', 'application/x-photoshop', 'image/psd', 'application/photoshop'],
-
-            // هماهنگی کامل فایل‌های الستریتور که ساختار PDF داخلی دارند
             'ai'   => [
                 'application/postscript',
                 'application/vnd.adobe.illustrator',
                 'application/pdf',
-                'application/x-pdf'
+                'application/x-pdf',
+                'application/illustrator'
             ],
-
-            'eps'  => ['application/postscript', 'image/x-eps', 'image/eps', 'application/eps', 'application/x-eps'],
-
-            // 🟢 اصلاح نهایی و قطعی کورل دراو بر اساس خروجی سنسور لاگ مارکت شما
-            'cdr'  => [
-                'application/vnd.corel-draw', // 🎯 مایم‌تایپ کشف شده در لوکال شما
-                'application/cdr',
-                'application/coreldraw',
-                'image/cdr',
-                'application/x-cdr',
-                'application/vnd.coreldraw',
-                'application/x-coreldraw',
-                'zz-application/zz-winassoc-cdr',
-                'application/x-riff',
-                'application/zip',
-                'application/x-zip-compressed',
-                'application/octet-stream',
-                'application/x-zip',
-                'application/x-7z-compressed',
-                'application/x-rar-compressed'
+            'eps'  => [
+                'application/postscript',
+                'image/x-eps',
+                'image/eps',
+                'application/eps',
+                'application/x-eps'
             ],
-
+            'cdr'  => $corelMimes,
+            'cdt'  => $corelMimes,
+            'cmx'  => $corelMimes,
+            'cpt'  => $corelMimes,
             'art'  => ['image/x-jg'],
             'dxf'  => ['image/vnd.dxf', 'image/x-dxf', 'application/dxf', 'text/plain', 'text/csv'],
             'stl'  => ['application/sla', 'application/stl', 'text/plain', 'application/octet-stream'],
@@ -105,19 +116,16 @@ class ProductFileUploadService
             return false;
         }
 
-        // ۱. تطابق صریح با آرایه جامع امنیتی بالا
         if (in_array($mime, $validMimes[$extension], true)) {
             return true;
         }
 
-        // ۲. مکانیزم Fallback فوق امنیتی اصلاح‌شده (بدون اوررایت ناخواسته متغیر)
-        $binaryFallbackAllowed = [
-            'cdr', 'ai', 'psd', 'eps', 'obj', 'stl', '3ds', 'stp', 'step', 'dxf'
-        ];
+        $binaryFallbackAllowed = array_merge(['ai', 'psd', 'eps', 'obj', 'stl', '3ds', 'stp', 'step', 'dxf'], $corelExtensions);
 
         $genericBinaryMimes = [
             'application/octet-stream',
             'application/x-riff',
+            'audio/x-riff',
             'application/zip',
             'application/x-zip-compressed',
             'application/x-zip',
@@ -125,18 +133,12 @@ class ProductFileUploadService
         ];
 
         if (
-            in_array($mime, $genericBinaryMimes, true) &&
-            in_array($extension, $binaryFallbackAllowed, true)
+            in_array($extension, $binaryFallbackAllowed, true) &&
+            (in_array($mime, $genericBinaryMimes, true) || str_contains($mime, 'zip'))
         ) {
             return true;
         }
 
         return false;
-    }
-
-    public function delete(ProductFile $file)
-    {
-        FileManager::deleteDigitalFile($file->product_id, $file->stored_name);
-        $file->delete();
     }
 }

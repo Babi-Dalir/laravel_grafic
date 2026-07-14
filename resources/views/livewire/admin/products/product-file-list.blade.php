@@ -60,10 +60,11 @@
 
             {{-- بخش فرمت‌ها و دکمه شروع آپلود در یک ردیف ریسپانسیو --}}
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 style-gap">
+                {{-- بخش فرمت‌ها در یک ردیف ریسپانسیو --}}
                 <div class="text-left w-100 mb-3 mb-md-0">
                     <small class="formats-label">پسوندهای ساختاری مجاز سیستم:</small>
                     <div class="badge-container">
-                        @foreach(config('uploads.allowed_extensions', ['dxf', 'png', 'jpg', 'jpeg', 'cdr', 'art', 'svg', 'webp', 'tiff', 'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf']) as $extension)
+                        @foreach(config('uploads.allowed_extensions', ['dxf', 'png', 'jpg', 'jpeg', 'cdr', 'cdt', 'cmx', 'cpt', 'art', 'svg', 'webp', 'tiff', 'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf']) as $extension)
                             <span class="badge-format">{{ strtoupper($extension) }}</span>
                         @endforeach
                     </div>
@@ -247,12 +248,16 @@
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
+    // 🟢 کدهای جدید را دقیقاً اینجا بگذارید:
+    const allowedExts = {!! json_encode(config('uploads.allowed_extensions', ['dxf', 'png', 'jpg', 'jpeg', 'cdr', 'cdt', 'cmx', 'cpt', 'art', 'svg', 'webp', 'tiff', 'stl', 'obj', '3ds', 'stp', 'step', 'zip', 'psd', 'ai', 'eps', 'pdf', 'ttf', 'otf'])) !!};
+
     const r = new Resumable({
         target: '{{ route("product.upload-chunk", $product->id) }}',
         chunkSize: 2 * 1024 * 1024,
         forceChunkSize: true,
         simultaneousUploads: 1,
         testChunks: false,
+        fileType: allowedExts, // 👈 اعمال محدودیت انتخاب فایل در ویندوز/مک/اندروید
         headers: {
             'X-CSRF-TOKEN': csrfToken
         }

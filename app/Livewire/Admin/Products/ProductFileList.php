@@ -50,9 +50,11 @@ class ProductFileList extends Component
             $wasDefault = $file->is_default;
 
             DB::transaction(function () use ($file, $wasDefault) {
+                // ۱. فرخوانی متد احیا شده حذف فیزیکی و دیتابیسی
                 $service = app(ProductFileUploadService::class);
                 $service->delete($file);
 
+                // ۲. اگر فایل پیش‌فرض حذف شد، اولین فایل باقی‌مانده را پیش‌فرض کن
                 if ($wasDefault) {
                     $nextDefault = ProductFile::where('product_id', $this->productId)->first();
                     if ($nextDefault) {
@@ -65,7 +67,7 @@ class ProductFileList extends Component
             $this->dispatch('swal-success', title: 'فایل با موفقیت حذف شد.');
 
         } catch (\Throwable $e) {
-            session()->flash('error', 'خطا در حذف فایل رخ داده است.');
+            session()->flash('error', 'خطا در حذف فایل رخ داده است: ' . $e->getMessage());
         }
     }
 

@@ -34,8 +34,7 @@ class ProcessUploadedProductFile implements ShouldQueue
         FileAssemblerService     $assembler,
         DigitalStorageService    $storageService,
         ProductFileUploadService $uploadValidation
-    )
-    {
+    ) {
         $this->zipScanner = $zipScanner;
         $this->assembler = $assembler;
         $this->storageService = $storageService;
@@ -44,7 +43,6 @@ class ProcessUploadedProductFile implements ShouldQueue
 
     public function handle(ProductFileUploaded $event): void
     {
-        // ۱. جلوگیری از Race Condition با Atomic Lock
         $lockKey = "lock:process_file:{$event->fileUuid}";
         $lock = Cache::lock($lockKey, 600);
 
@@ -61,7 +59,6 @@ class ProcessUploadedProductFile implements ShouldQueue
                 return;
             }
 
-            // 🟢 اصلاح اول شما: استفاده از trim و تبدیل مطمئن پسوند اصلی
             $extension = strtolower(trim(pathinfo($event->originalName, PATHINFO_EXTENSION)));
             $localPath = $this->storageService->getLocalPath($event->tempName);
 
@@ -71,12 +68,58 @@ class ProcessUploadedProductFile implements ShouldQueue
 
             $actualFileSize = filesize($localPath);
 
-            // استخراج مایم‌تایپ واقعی از باینری فایل چسبانده شده
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($actualFileSize <= 0) {
+                throw new Exception('فایل منتقل شده خالی و فاقد اطلاعات است.');
+            }
+
+            $maxLimit = 3 * 1024 * 1024 * 1024; // سقف مجاز ۳ گیگابایت
+            if ($actualFileSize > $maxLimit) {
+                throw new Exception('حجم فایل فرستاده شده فراتر از سقف مجاز سیستم پردازش است.');
+            }
+
+            // هش‌گیری سریع از روی دیسک لوکال
+            $hash = hash_file('sha256', $localPath);
+
+            // ۱. 🟢 انتقال ثبت و بروزرسانی دیتابیس به اولِ خط برای رفع دائم خطای Duplicate Entry
+            $productFile = DB::transaction(function () use ($product, $event, $extension, $actualFileSize, $hash) {
+                return ProductFile::updateOrCreate(
+                    ['stored_name' => $event->tempName],
+                    [
+                        'product_id' => $product->id,
+                        'title' => $event->title,
+                        'original_name' => $event->originalName,
+                        'extension' => $extension,
+                        'sha256' => $hash, // فیلد هش بلافاصله مقدار واقعی و یکتا می‌گیرد
+                        'size' => $actualFileSize,
+                        'is_default' => !$product->files()->where('status', UploadFileStatus::Ready->value)->exists(),
+                        'status' => UploadFileStatus::Processing->value,
+                    ]
+                );
+            });
+
+            // جلوگیری از ثبت مجدد فایل تکراری با هش یکسان (غیر از رکوردی که همین الان آپدیت کردیم)
+            $duplicateExists = ProductFile::where('product_id', $product->id)
+                ->where('sha256', $hash)
+                ->where('id', '!=', $productFile->id)
+                ->where('status', UploadFileStatus::Ready->value)
+                ->exists();
+
+            if ($duplicateExists) {
+                throw new Exception('این فایل دقیقاً قبلاً آپلود شده و در مخزن موجود است.');
+            }
+
+            // تشخیص مایم‌تایپ
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+            if (!$finfo) {
+                throw new Exception('امکان بارگذاری اکستنشن تشخیص مایم‌تایپ سرور (finfo) وجود ندارد.');
+            }
             $realMime = finfo_file($finfo, $localPath);
             finfo_close($finfo);
 
-            // 🟢 اصلاح دوم شما: ثبت دقیق لاگ پیش از وقوع هرگونه Exception برای دباگ ۱۰۰٪ قطعی
+            if (!$realMime) {
+                throw new Exception('مایم‌تایپ باینری فایل قابل تشخیص نیست.');
+            }
+
             Log::info('MIME CHECK', [
                 'original'  => $event->originalName,
                 'extension' => $extension,
@@ -84,40 +127,24 @@ class ProcessUploadedProductFile implements ShouldQueue
                 'size'      => $actualFileSize,
             ]);
 
-            if (!$this->uploadValidation->isValidMimeForExtension($extension, $realMime)) {
+            // بروزرسانی نوع مایم در مدل دیتابیس
+            // بروزرسانی نوع مایم در مدل دیتابیس
+            $productFile->update(['mime_type' => $realMime]);
+
+            // ۲. 🟢 اعتبارسنجی هوشمند مایم‌تایپ با نادیده گرفتن استثنایی فایل‌های مهندسی/طراحی (بدون چک کردن RAR)
+            $bypassMimeCheck = in_array($extension, ['cdr', 'cdt', 'cmx', 'cpt', 'stl', 'obj', '3ds', 'stp', 'step', 'dxf']);
+
+            if (!$bypassMimeCheck && !$this->uploadValidation->isValidMimeForExtension($extension, $realMime)) {
                 throw new Exception('محتوای باینری فایل با پسوند آن همخوانی ندارد.');
             }
 
-            // 🟢 اصلاح سوم شما: پاس دادن پسوند اصلی به اسکنر جهت رهایی از وابستگی به فرمت هارد
-            if ($extension === 'zip' || $extension === 'cdr') {
-                $this->zipScanner->scan($localPath, $extension);
-            }
+            // اسکن عمیق امضای باینری برای فایل‌های فشرده (ZIP / CDR)
+            $this->zipScanner->scan($localPath, $extension);
 
-            $hash = hash_file('sha256', $localPath);
-            if (ProductFile::where(['product_id' => $product->id, 'sha256' => $hash])->where('status', UploadFileStatus::Ready->value)->exists()) {
-                throw new Exception('این فایل دقیقاً قبلاً آپلود شده و در مخرن موجود است.');
-            }
-
-            // ۳. ایجاد اولیه رکورد در دیتابیس
-            $productFile = ProductFile::updateOrCreate(
-                ['stored_name' => $event->tempName],
-                [
-                    'product_id' => $product->id,
-                    'title' => $event->title,
-                    'original_name' => $event->originalName,
-                    'extension' => $extension,
-                    'mime_type' => $realMime,
-                    'size' => $actualFileSize,
-                    'sha256' => $hash,
-                    'is_default' => !$product->files()->where('status', UploadFileStatus::Ready->value)->exists(),
-                    'status' => UploadFileStatus::Processing->value,
-                ]
-            );
-
-            // ۴. انتقال استریم باینری خارج از تراکنش دیتابیس
+            // انتقال استریم فایل به استوریج نهایی
             $this->storageService->streamToFinalStorage($event->tempName, $product->id);
 
-            // ۵. ارتقای نهایی وضعیت سند
+            // به روز رسانی موفقیت‌آمیز وضعیت در دیتابیس
             $productFile->update(['status' => UploadFileStatus::Ready->value]);
 
             $this->storageService->deleteFromTemp($event->tempName);
@@ -148,7 +175,6 @@ class ProcessUploadedProductFile implements ShouldQueue
             'failure_reason' => 'سیستم پس از ۳ بار تلاش متوالی نتوانست فایل را پردازش کند.'
         ]);
 
-        // 🔥 اصلاح فیکس متغیرها: فراخوانی از بدنه آبجکت $event
         $this->storageService->deleteFromTemp($event->tempName);
         $this->assembler->cleanChunks($event->fileUuid);
     }
