@@ -40,7 +40,7 @@
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$discount->id}})" style="cursor: pointer;">
                         {{-- 🟢 اصلاح: بررسی یکدست وضعیت انوم بر اساس قالب کست شده مدل --}}
-                        @if($discount->status->value === \App\Enums\DiscountStatus::Active->value)
+                        @if($discount->status === \App\Enums\DiscountStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>

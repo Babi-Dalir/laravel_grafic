@@ -38,13 +38,18 @@ class GiftCartList extends Component
     {
         $gift_cart = GiftCart::query()->findOrFail($id);
 
-        // 🔒 گارد امنیتی روز-محور کارت‌های هدیه
+        // جلوگیری از فعال‌سازی کارت هدیه منقضی شده
         if ($gift_cart->expiration_date && $gift_cart->expiration_date->isBefore(today())) {
-            $this->dispatch('showToastError', message: 'این کارت هدیه منقضی شده و قابل فعال‌سازی نیست.');
+            $this->dispatch('showToastGiftError', message: 'این کارت هدیه منقضی شده و قابل فعال‌سازی نیست.');
             return;
         }
 
-        // 🟢 اصلاح یکدستی انوم
+        // جلوگیری از فعال‌سازی کارت هدیه با موجودی صفر
+        if ($gift_cart->balance <= 0) {
+            $this->dispatch('showToastGiftError', message: 'موجودی این کارت هدیه به پایان رسیده و قابل فعال‌سازی نیست.');
+            return;
+        }
+
         $newStatus = ($gift_cart->status->value === GiftCartStatus::Active->value)
             ? GiftCartStatus::InActive->value
             : GiftCartStatus::Active->value;
@@ -56,7 +61,7 @@ class GiftCartList extends Component
 
     private function getGiftCartsQuery()
     {
-        return GiftCart::query()
+        return GiftCart::query()->with('user')
             ->when(trim($this->search), function($query) {
                 $query->where(function ($q) {
                     $q->where('code', 'like', '%' . $this->search . '%')

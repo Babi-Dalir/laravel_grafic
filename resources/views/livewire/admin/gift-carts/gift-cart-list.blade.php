@@ -35,7 +35,7 @@
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$gift_cart->id}})" style="cursor: pointer;">
                         {{-- 🟢 اصلاح: یکپارچه‌سازی بررسی رشته انوم فعال با الگوهای مدل --}}
-                        @if($gift_cart->status->value === \App\Enums\GiftCartStatus::Active->value)
+                        @if($gift_cart->status === \App\Enums\GiftCartStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -122,7 +122,7 @@
             });
         });
 
-        Livewire.on('showToastError', (event) => {
+        Livewire.on('showToastGiftError', (event) => {
             Swal.fire({
                 title: "خطا!",
                 text: event.message,
