@@ -253,8 +253,7 @@
 
                                 <div class="text-left mt-4">
                                     <button type="submit" class="btn-modern btn-modern-primary px-5">
-                                        <i class="mdi mdi-credit-card-check-outline"></i>
-                                        تلاش مجدد برای پرداخت آنلاین
+                                        <a href="{{route('user.cart')}}" class="mdi mdi-credit-card-check-outline" style="color: snow">تلاش مجدد برای پرداخت آنلاین</a>
                                     </button>
                                 </div>
                             </form>
