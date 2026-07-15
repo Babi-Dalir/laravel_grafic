@@ -31,13 +31,19 @@ class DiscountCampaign extends Model
         ];
     }
 
+    /**
+     * 🟢 تضمین ذخیره‌سازی انقضا در آخرین ثانیه روز مشخص شده
+     */
     protected function expiresAt(): Attribute
     {
         return Attribute::make(
             get: function ($value) {
                 if (!$value) return null;
-
-                // تبدیل تاریخ به شیء کربن و انتقال زمان به ۲۳:۵۹:۵۹
+                return Carbon::parse($value);
+            },
+            set: function ($value) {
+                if (!$value) return null;
+                // تبدیل تاریخ ورودی به شیء کربن و انتقال به آخرین ثانیه آن روز (23:59:59) جهت حل مشکل تایمر
                 return Carbon::parse($value)->endOfDay();
             }
         );
@@ -94,28 +100,59 @@ class DiscountCampaign extends Model
         });
     }
 
-    public static function updateCampaign($request,$id)
+    public static function updateCampaign($request, $id)
     {
-        return DB::transaction(function () use ($request,$id) {
-            // ۱. آپدیت کردن اطلاعات اصلی
+        return DB::transaction(function () use ($request, $id) {
             $campaign = self::findOrFail($id);
+
+            // ۱. استخراج تاریخ انقضای جدید به میلادی
+            $expiresAt = $request->filled('expires_at')
+                ? DateManager::shamsi_to_miladi_campain($request->expires_at)
+                : $campaign->expires_at;
+
+            // ۲. تعیین وضعیت هوشمند و منعطف
+            $status = $campaign->status->value; // وضعیت فعلی کمپین را به عنوان پیش‌فرض نگه می‌داریم
+
+            if ($request->filled('expires_at')) {
+                // الف) اگر مدیر تاریخ انقضای جدیدی ثبت کرده است:
+                $carbonExpires = Carbon::parse($expiresAt);
+
+                if ($carbonExpires->greaterThanOrEqualTo(now())) {
+                    $status = DiscountCampaignStatus::Active->value;
+                } else {
+                    $status = DiscountCampaignStatus::InActive->value;
+                }
+            } else {
+                // ب) اگر تاریخ انقضا ویرایش نشده و خالی مانده است:
+                // اگر کمپین فعال بوده، بگذار فعال بماند.
+                // فقط اگر تاریخ انقضای قبلی رد شده باشد، آن را غیرفعال کن.
+                if ($expiresAt) {
+                    $carbonExpires = Carbon::parse($expiresAt);
+                    if ($carbonExpires->lessThan(now())) {
+                        $status = DiscountCampaignStatus::InActive->value;
+                    }
+                }
+            }
+
+            // ۳. آپدیت اطلاعات اصلی
             $campaign->update([
                 'name' => $request->input('name'),
                 'type' => $request->input('type'),
                 'percent' => $request->input('percent'),
+                'status' => $status, // اعمال وضعیت هوشمند اصلاح‌شده
                 'priority' => self::determinePriority($request->input('type')),
                 'starts_at' => $request->filled('starts_at') ? DateManager::shamsi_to_miladi_campain($request->starts_at) : $campaign->starts_at,
-                'expires_at' => $request->filled('expires_at') ? DateManager::shamsi_to_miladi_campain($request->expires_at) : $campaign->expires_at,
+                'expires_at' => $expiresAt,
             ]);
 
-            // ۲. پاک کردن محصولات/دسته‌های قبلی و ثبت موارد جدید
+            // ۴. پاک کردن محصولات/دسته‌های قبلی و ثبت موارد جدید
             $campaign->targets()->delete();
 
             if ($request->input('type') !== DiscountCampaignType::Global->value) {
                 if ($request->filled('target_ids')) {
-                    foreach ($request->input('target_ids') as $id) {
+                    foreach ($request->input('target_ids') as $targetId) {
                         $campaign->targets()->create([
-                            'target_id' => $id,
+                            'target_id' => $targetId,
                             'target_type' => $request->input('type'),
                         ]);
                     }
@@ -127,7 +164,7 @@ class DiscountCampaign extends Model
     }
 
     /**
-     * 🚀 واکشی کمپین فعالِ جاری برای نمایش بنر فوقانی سایت
+     * 🚀 واکشی کمپین فعالِ جاری با دقت ثانیه‌ای
      */
     public static function getActiveBannerCampaign()
     {
@@ -140,10 +177,10 @@ class DiscountCampaign extends Model
                     ->orWhere('starts_at', '<=', now());
             })
 
-            // گارد زمان پایان: یا انقضا ندارد یا انقضای آن بزرگتر/مساوی امروز است
+            // 🟢 اصلاح شد: گارد زمان پایان با مقایسه دقیق ساعت و ثانیه جاری سرور
             ->where(function ($q) {
                 $q->whereNull('expires_at')
-                    ->orWhereDate('expires_at', '>=', today());
+                    ->orWhere('expires_at', '>=', now()); // استفاده از now() به جای today()
             })
             ->latest()
             ->first();

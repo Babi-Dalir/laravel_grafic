@@ -41,13 +41,25 @@
                             </div>
                         </div>
 
-                        {{-- بخش انتخاب دسته‌بندی (قابل سرچ) --}}
+                        {{-- انتخاب دسته‌بندی‌ها --}}
                         <div id="category_selection" class="form-group row" style="display: none;">
                             <label class="col-sm-2 col-form-label">انتخاب دسته‌بندی‌ها</label>
                             <div class="col-sm-10">
                                 <select name="target_ids[]" id="category_select" class="form-control select2-multiple" multiple>
-                                    @foreach($categories as $key => $value)
-                                        <option value="{{$key}}">{{$value}}</option>
+                                    @foreach($categories as $mainCategory)
+                                        <optgroup label="{{ $mainCategory->name }}">
+                                            @foreach($mainCategory->childCategory as $subCategory)
+                                                <option value="{{ $subCategory->id }}">
+                                                    - {{ $subCategory->name }}
+                                                </option>
+
+                                                @foreach($subCategory->childCategory as $childCategory)
+                                                    <option value="{{ $childCategory->id }}">
+                                                        -- {{ $childCategory->name }}
+                                                    </option>
+                                                @endforeach
+                                            @endforeach
+                                        </optgroup>
                                     @endforeach
                                 </select>
                             </div>

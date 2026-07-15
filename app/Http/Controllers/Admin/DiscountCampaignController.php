@@ -25,7 +25,7 @@ class DiscountCampaignController extends Controller
     public function create()
     {
         $title = "ایجاد کمپین";
-        $categories = Category::getCategories();
+        $categories = Category::getHierarchicalCategories();
         $products = Product::query()->pluck('name','id');
         return view('admin.discount_campaigns.create',compact('title','categories','products'));
     }
@@ -54,7 +54,7 @@ class DiscountCampaignController extends Controller
     public function edit(string $id)
     {
         $title ="ویرایش کمپین";
-        $categories = Category::getCategories();
+        $categories = Category::getHierarchicalCategories();
         $products = Product::query()->pluck('name','id');
         $discount_campaign = DiscountCampaign::findOrfail($id);
         // این متغیر حیاتیه برای اینکه در ویو بفهمیم کدوم محصولا قبلا انتخاب شدن

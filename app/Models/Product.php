@@ -107,7 +107,6 @@ class Product extends Model
 
     /**
      * 🟢 متد جدید و انترپرایز برای واکشی لایوِ بالاترین کمپین فعال متصل به محصول
-     * این متد هر سه حالت (محصول، دسته‌بندی و کل سایت) را با در نظر گرفتن اولویت بررسی می‌کند.
      */
     public function getActiveCampaign()
     {
@@ -115,9 +114,13 @@ class Product extends Model
 
         return DiscountCampaign::query()
             ->where('status', DiscountCampaignStatus::Active->value)
-            ->where('starts_at', '<=', $now)
             ->where(function ($query) use ($now) {
-                $query->whereNull('expires_at')->orWhere('expires_at', '>=', $now);
+                $query->whereNull('starts_at')
+                    ->orWhere('starts_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>=', $now);
             })
             ->where(function ($query) {
                 $query->whereHas('targets', function ($q) {
@@ -128,8 +131,9 @@ class Product extends Model
                     })
                     ->orWhere('type', DiscountCampaignType::Global->value);
             })
-            ->orderBy('priority', 'ASC')
+            // 🟢 تغییر جادویی اینجاست: ابتدا بیشترین درصد تخفیف اعمال شود، بدون توجه به اینکه نوع کمپین چیست!
             ->orderByDesc('percent')
+            ->orderBy('priority', 'DESC')
             ->first();
     }
 

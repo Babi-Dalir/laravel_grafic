@@ -22,11 +22,13 @@ class CheckExpiredCampaigns extends Command
 
     public function handle()
     {
-        // ۱. غیرفعال کردن کمپین‌های منقضی شده (هر چه تاریخش قبل از امروز است)
+        $now = now();
+
+        // ۱. غیرفعال کردن کمپین‌های منقضی شده (هر چه تاریخ انقضای آن از زمان فعلی گذشته است)
         $updatedCampaigns = DiscountCampaign::query()
             ->where('status', DiscountCampaignStatus::Active->value)
             ->whereNotNull('expires_at')
-            ->whereDate('expires_at', '<', today()) // 🟢 هماهنگی ۱۰۰٪ با منطق جدید
+            ->where('expires_at', '<', $now) // 🟢 مقایسه دقیق با ثانیه جاری سرور
             ->update([
                 'status' => DiscountCampaignStatus::InActive->value
             ]);
@@ -35,7 +37,7 @@ class CheckExpiredCampaigns extends Command
         $updatedDiscounts = Discount::query()
             ->where('status', DiscountStatus::Active->value)
             ->whereNotNull('expiration_date')
-            ->whereDate('expiration_date', '<', today()) // 🟢 اصلاح برای یکدستی کامل
+            ->where('expiration_date', '<', $now) // 🟢 مقایسه دقیق
             ->update([
                 'status' => DiscountStatus::InActive->value
             ]);
@@ -44,7 +46,7 @@ class CheckExpiredCampaigns extends Command
         $updatedGiftCarts = GiftCart::query()
             ->where('status', GiftCartStatus::Active->value)
             ->whereNotNull('expiration_date')
-            ->whereDate('expiration_date', '<', today()) // 🟢 اصلاح برای یکدستی کامل
+            ->where('expiration_date', '<', $now) // 🟢 مقایسه دقیق
             ->update([
                 'status' => GiftCartStatus::InActive->value
             ]);

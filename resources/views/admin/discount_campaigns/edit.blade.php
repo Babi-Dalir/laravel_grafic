@@ -52,10 +52,20 @@
                             <label class="col-sm-2 col-form-label">انتخاب دسته‌بندی‌ها</label>
                             <div class="col-sm-10">
                                 <select name="target_ids[]" class="form-control select2-multiple" multiple>
-                                    @foreach($categories as $key => $value)
-                                        <option value="{{$key}}" {{ in_array($key, $selectedTargets) ? 'selected' : '' }}>
-                                            {{$value}}
-                                        </option>
+                                    @foreach($categories as $mainCategory)
+                                        <optgroup label="{{ $mainCategory->name }}">
+                                            @foreach($mainCategory->childCategory as $subCategory)
+                                                <option value="{{ $subCategory->id }}" {{ in_array($subCategory->id, $selectedTargets) ? 'selected' : '' }}>
+                                                    - {{ $subCategory->name }}
+                                                </option>
+
+                                                @foreach($subCategory->childCategory as $childCategory)
+                                                    <option value="{{ $childCategory->id }}" {{ in_array($childCategory->id, $selectedTargets) ? 'selected' : '' }}>
+                                                        -- {{ $childCategory->name }}
+                                                    </option>
+                                                @endforeach
+                                            @endforeach
+                                        </optgroup>
                                     @endforeach
                                 </select>
                             </div>

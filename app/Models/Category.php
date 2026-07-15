@@ -137,7 +137,7 @@ class Category extends Model
         }
         return $array;
     }
-
+    //برای کنترلر گروه ویژگی ها
     public static function getLeafCategories()
     {
         return self::query()
@@ -146,7 +146,7 @@ class Category extends Model
             ->toArray();
     }
 
-
+    //برای کنترلر گروه ویژگی ها
     public static function getLeafCategoriesWithParent()
     {
         return self::query()
@@ -156,6 +156,16 @@ class Category extends Model
             ->groupBy(function ($category) {
                 return $category->parentCategory ? $category->parentCategory->name : 'دسته‌بندی‌های عمومی';
             });
+    }
+
+    //برای کنترلر کمپین ها
+    public static function getHierarchicalCategories()
+    {
+        // واکشی دسته‌های لایه اول همراه با فرزندان (لایه ۲) و نوه‌ها (لایه ۳)
+        return self::query()
+            ->with('childCategory.childCategory')
+            ->where('parent_id', 0)
+            ->get();
     }
 
     protected static function booted()

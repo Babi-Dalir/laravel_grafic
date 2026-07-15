@@ -85,4 +85,4 @@ Schedule::call(function () {
 
 
 // اجرای کامند بررسی انقضای کمپین‌ها به صورت هر ساعت
-Schedule::command('campaigns:check-expiry')->hourly();
+Schedule::command('campaigns:check-expiry')->everyMinute();
