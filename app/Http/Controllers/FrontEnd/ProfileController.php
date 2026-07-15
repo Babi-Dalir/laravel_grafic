@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\FrontEnd;
 
+use App\Enums\SellerRequestStatus;
 use App\Helpers\FileManager;
 use App\Helpers\ImageManager;
 use App\Http\Controllers\Controller;
@@ -150,20 +151,46 @@ class ProfileController extends Controller
     public function profileStoreRequestSeller(ProfileSellerRequest $request)
     {
         $user = auth()->user();
+        $sellerRequest = $user->sellerRequest;
 
-        if ($user->sellerRequest) {
-            return back()->with(
-                'error',
-                'شما قبلا درخواست ثبت کرده اید'
-            );
+        // ۱. اگر کاربر از قبل درخواستی دارد که تایید شده یا در حال بررسی است، اجازه ثبت مجدد ندهید
+        if ($sellerRequest) {
+            if ($sellerRequest->status === SellerRequestStatus::Approved->value) {
+                return back()->with('error', 'حساب کاربری شما قبلاً به عنوان طراح تایید شده است.');
+            }
+
+            if ($sellerRequest->status === SellerRequestStatus::Pending->value) {
+                return back()->with('error', 'درخواست شما در حال بررسی است و امکان ارسال مجدد وجود ندارد.');
+            }
         }
 
+        // ۲. اگر درخواستی از قبل نبود یا درخواست قبلی رد شده بود (Rejected)، اجازه بروزرسانی و ارسال مجدد بدهید
+        if ($sellerRequest && $sellerRequest->status === SellerRequestStatus::Rejected->value) {
+
+            // اینجا به جای ساخت رکورد جدید، رکورد قبلی را بروزرسانی کرده و وضعیت را ریست می‌کنیم
+            $sellerRequest->update([
+                'brand_name'  => $request->input('brand_name'),
+                'portfolio'   => $request->input('portfolio'),
+                'reason'      => $request->input('reason'),
+                'status'      => SellerRequestStatus::Pending->value, // 🟢 تغییر وضعیت مجدد به در حال بررسی
+                'admin_note'  => null, // پاک کردن دلیل رد قبلی
+                'reviewed_at' => null, // پاک کردن تاریخ بررسی قبلی
+            ]);
+
+            // مدیریت فایل رزومه جدید در صورت آپلود
+            if ($request->hasFile('resume')) {
+                // در صورت نیاز فیلد رزومه قبلی را حذف کنید و رزومه جدید را ذخیره کنید
+                $resumePath = FileManager::saveFile('resumes', $request->resume);
+                $sellerRequest->update(['resume' => $resumePath]);
+            }
+
+            return back()->with('message', 'درخواست اصلاح‌شده شما با موفقیت ثبت شد و مجدداً در صف بررسی قرار گرفت.');
+        }
+
+        // ۳. اگر اولین بار است که درخواست می‌دهد:
         SellerRequest::createSellerRequest($request);
 
-        return back()->with(
-            'message',
-            'درخواست شما با موفقیت ثبت شد'
-        );
+        return back()->with('message', 'درخواست همکاری شما با موفقیت ثبت شد.');
     }
 
     public function profileVerificationSeller()
