@@ -86,10 +86,6 @@
                                     <a class="dropdown-item" href="{{ route('register') }}">
                                         <i class="mdi mdi-account-card-details-outline"></i>ثبت نام
                                     </a>
-                                    <div class="dropdown-divider" role="presentation"></div>
-                                    <a class="dropdown-item" href="{{ route('logout') }}">
-                                        <i class="mdi mdi-logout-variant"></i>خروج
-                                    </a>
                                 </div>
                             @endguest
                         </li>
