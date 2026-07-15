@@ -14,7 +14,7 @@ class SellerVerificationRequest extends FormRequest
         return true;
     }
 
-    // 🟢 تبدیل خودکار اعداد فارسی/عربی به انگلیسی پیش از بررسی ولیدیشن
+    // 🟢 تبدیل خودکار اعداد فارسی/عربی به انگلیسی و استانداردسازی شماره شبا
     protected function prepareForValidation()
     {
         $fields = ['national_code', 'card_number', 'account_number', 'iban'];
@@ -27,10 +27,19 @@ class SellerVerificationRequest extends FormRequest
 
         foreach ($fields as $field) {
             if ($this->has($field) && is_string($this->input($field))) {
-                // تبدیل اعداد
+                // تبدیل اعداد فارسی به انگلیسی
                 $cleanValue = strtr($this->input($field), $replacements);
                 // حذف فاصله‌های خالی احتمالی که کاربر وارد کرده
                 $cleanValue = str_replace(' ', '', $cleanValue);
+
+                // 🟢 منطق هوشمند برای شماره شبا (iban):
+                if ($field === 'iban') {
+                    // حذف حروف IR یا ir از ابتدا (اگر کاربر وارد کرده بود)
+                    $cleanValue = preg_replace('/^(IR|ir)/i', '', $cleanValue);
+
+                    // اضافه کردن مجدد پیشوند استاندارد IR به ۲۴ رقم عددی باقی‌مانده
+                    $cleanValue = 'IR' . $cleanValue;
+                }
 
                 $input[$field] = $cleanValue;
             }
@@ -55,11 +64,11 @@ class SellerVerificationRequest extends FormRequest
             // شماره حساب
             'account_number' => ['required', 'string', 'min:6', 'max:30'],
 
-            // 🟢 اصلاح ریجکس شبا برای پذیرش حروف کوچک و بزرگ (Case-Insensitive)
+            // 🟢 حالا شبا همیشه با IR بزرگ شروع شده و در ادامه دقیقاً ۲۴ رقم عدد می‌پذیرد
             'iban' => [
                 'required',
                 'string',
-                'regex:/^(IR|ir)[0-9]{24}$/',
+                'regex:/^IR[0-9]{24}$/',
             ],
         ];
     }
@@ -79,7 +88,7 @@ class SellerVerificationRequest extends FormRequest
             'account_number.required' => 'شماره حساب الزامی است',
 
             'iban.required' => 'شماره شبا الزامی است',
-            'iban.regex' => 'فرمت شبا صحیح نیست (مثال: IRxxxxxxxxxxxxxxxxxxxxxx)',
+            'iban.regex' => 'فرمت شبا صحیح نیست (باید ۲۴ رقم عددی بعد از IR باشد)',
         ];
     }
 }

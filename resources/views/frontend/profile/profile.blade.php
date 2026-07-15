@@ -163,7 +163,7 @@
                 }
             });
 
-            // ۲. اعتبارسنجی آنی در حین خروج از فیلدها (Blur)
+            // ۲. اعتبارسنجی آنی در حین خروج از فیلدها (Blur) + پاک کردن ارور هنگام شروع تایپ (Input)
             $form.find('input, textarea').on('blur', function () {
                 const $input = $(this);
                 const fieldName = $input.attr('name');
@@ -193,6 +193,10 @@
                         }
                     }
                 });
+            }).on('input', function() {
+                // 🟢 به محض اینکه کاربر شروع به تایپ در هر فیلد کند، ارور مربوط به آن بلافاصله پاک می‌شود
+                const fieldName = $(this).attr('name');
+                $('#error-' + fieldName).text('');
             });
 
             // ۳. ثبت نهایی کل فرم با Ajax بدون رفرش
@@ -221,16 +225,15 @@
                         $alert.removeClass('d-none alert-danger').addClass('alert-success').text(response.message || "اطلاعات شما با موفقیت ثبت شد");
                         $('html, body').animate({ scrollTop: 0 }, 'slow');
 
-                        // 🟢 بروزرسانی نام کاربر در سایدبار بدون نیاز به رفرش
+                        // بروزرسانی نام کاربر در سایدبار بدون نیاز به رفرش
                         if (response.new_name) {
                             $('.js-profile-name').text(response.new_name);
                             console.log("Profile name updated to: " + response.new_name);
                         }
 
-                        // 🟢 بروزرسانی عکس کاربر در سایدبار و هدر بدون نیاز به رفرش
+                        // بروزرسانی عکس کاربر در سایدبار و هدر بدون نیاز به رفرش
                         if (response.new_image_url) {
                             console.log("Updating avatar source across page to: " + response.new_image_url);
-                            // هدف قرار دادن تصویر پروفایل سایدبار و عکس‌های آواتار در هدر
                             $('.profile-avatar img, .user-avatar img').attr('src', response.new_image_url);
                         }
                     },

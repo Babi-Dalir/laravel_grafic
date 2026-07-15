@@ -54,7 +54,7 @@ class SellerRequestList extends Component
                     Seller::query()->create([
                         'user_id'    => $user->id,
                         'first_name' => $user->name,
-                        'status'     => SellerStatus::Pending->value,
+                        'status'     => SellerStatus::Rejected->value,
                     ]);
                 }
 

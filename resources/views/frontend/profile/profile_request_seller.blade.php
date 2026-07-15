@@ -15,6 +15,9 @@
                 {{-- Content --}}
                 <div class="col-xl-9 col-lg-8 col-md-8 col-sm-12">
 
+                    <!-- باکس نمایش پیام‌های موفقیت یا خطا با اژاکس -->
+                    <div id="ajax-alert" class="alert d-none mb-3"></div>
+
                     @if(session()->has('message'))
                         <div class="alert alert-info mb-3">
                             {{ session('message') }}
@@ -30,7 +33,8 @@
                             </p>
                         </div>
 
-                        <form action="{{ route('profile.store.request.seller') }}"
+                        <form id="seller-request-form"
+                              action="{{ route('profile.store.request.seller') }}"
                               method="POST"
                               enctype="multipart/form-data">
 
@@ -103,9 +107,7 @@
                                            value="{{ old('brand_name',$sellerRequest?->brand_name) }}"
                                            placeholder="مثال: Graphic Master">
 
-                                    @error('brand_name')
-                                    <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                    <small class="text-danger" id="error-brand_name"></small>
 
                                 </div>
 
@@ -122,9 +124,7 @@
                                            value="{{ old('portfolio',$sellerRequest?->portfolio) }}"
                                            placeholder="https://behance.net/...">
 
-                                    @error('portfolio')
-                                    <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                    <small class="text-danger" id="error-portfolio"></small>
 
                                 </div>
 
@@ -141,9 +141,7 @@
                                         class="form-control input-ui"
                                         placeholder="خودتان را معرفی کنید و درباره تخصص‌ها و تجربیات خود توضیح دهید...">{{ old('reason',$sellerRequest?->reason) }}</textarea>
 
-                                    @error('reason')
-                                    <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                    <small class="text-danger" id="error-reason"></small>
 
                                 </div>
 
@@ -158,9 +156,7 @@
                                            name="resume"
                                            class="form-control input-ui">
 
-                                    @error('resume')
-                                    <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                    <small class="text-danger" id="error-resume"></small>
 
                                 </div>
 
@@ -268,11 +264,12 @@
                                 <div class="form-actions">
 
                                     <button type="submit"
+                                            id="submit-btn"
                                             class="btn-save">
 
                                         <i class="mdi mdi-account-check-outline"></i>
 
-                                        ارسال درخواست همکاری
+                                        <span>ارسال درخواست همکاری</span>
 
                                     </button>
 
@@ -292,3 +289,100 @@
     </main>
 
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function () {
+            const $form = $('#seller-request-form');
+            const $submitBtn = $('#submit-btn');
+            const $alert = $('#ajax-alert');
+
+            // ۱. اعتبارسنجی آنی فیلدها هنگام خارج شدن از فیلد (Blur)
+            // ۱. اعتبارسنجی آنی فیلدها هنگام خارج شدن از فیلد (Blur) + پاک کردن ارور هنگام تایپ (Input)
+            $form.find('input, textarea').not('[type="file"]').on('blur', function () {
+                const $input = $(this);
+                const fieldName = $input.attr('name');
+
+                if (!fieldName || fieldName === '_token') return;
+
+                const formData = new FormData();
+                formData.append(fieldName, $input.val());
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('only_validate', fieldName);
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        $('#error-' + fieldName).text('');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            if (errors && errors[fieldName]) {
+                                $('#error-' + fieldName).text(errors[fieldName][0]);
+                            }
+                        }
+                    }
+                });
+            }).on('input', function() {
+                // 🟢 به محض اینکه کاربر شروع به تایپ کرد، ارور قرمز فوراً پاک می‌شود
+                const fieldName = $(this).attr('name');
+                $('#error-' + fieldName).text('');
+            });
+
+            // ۲. ثبت نهایی فرم به صورت Ajax
+            $form.on('submit', function (e) {
+                e.preventDefault();
+
+                // ریست کردن خطاها و الرت‌ها
+                $('small.text-danger').text('');
+                $alert.addClass('d-none').removeClass('alert-success alert-danger').text('');
+
+                // غیرفعال کردن دکمه و قرار دادن حالت لودینگ
+                $submitBtn.attr('disabled', true);
+                $submitBtn.find('span').text('در حال ارسال درخواست...');
+
+                const formData = new FormData(this);
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $alert.removeClass('d-none alert-danger').addClass('alert-success').text(response.message || "درخواست شما با موفقیت ثبت شد و در حال بررسی است.");
+                        $('html, body').animate({ scrollTop: 0 }, 'slow');
+
+                        // رفرش بعد از ۲ ثانیه برای بروزرسانی وضعیت نمایش تاییدیه یا وضعیت انتظار در صفحه
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    },
+                    error: function (xhr) {
+                        $submitBtn.removeAttr('disabled');
+                        $submitBtn.find('span').text('ارسال درخواست همکاری');
+
+                        $alert.removeClass('d-none alert-success').addClass('alert-danger');
+
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            $.each(errors, function (key, value) {
+                                $('#error-' + key).text(value[0]);
+                            });
+                            $alert.text("لطفاً خطاهای فرم را برطرف نمایید.");
+                        } else {
+                            $alert.text("خطایی در ثبت اطلاعات رخ داد. لطفاً مجدداً تلاش کنید.");
+                        }
+
+                        $('html, body').animate({ scrollTop: 0 }, 'slow');
+                    }
+                });
+            });
+        });
+    </script>
+@endpush
