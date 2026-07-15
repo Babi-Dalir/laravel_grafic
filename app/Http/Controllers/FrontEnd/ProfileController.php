@@ -34,12 +34,14 @@ class ProfileController extends Controller
 
     public function profileUpdate(ProfileUpdate $request)
     {
+        // 🟢 پچ واکنش‌گرا: اگر صرفاً درخواست اعتبارسنجی آنی فیلد بود، پاسخ 200 بدهد
+        if ($request->has('only_validate')) {
+            return response()->json(['valid' => true]);
+        }
+
         $user = auth()->user();
-
-        // 🟢 ۱. ذخیره نام عکس قدیمی دقیقاً همین‌جا (قبل از هرگونه آپدیت)
         $oldImage = $user->image;
-
-        $imageName = $oldImage; // مقدار پیش‌فرض تصویر، همان تصویر قبلی است
+        $imageName = $oldImage;
         $newImageSaved = false;
 
         try {
@@ -50,7 +52,6 @@ class ProfileController extends Controller
                 $newImageSaved = true;
             }
 
-            // ۲. بروزرسانی اطلاعات اصلی کاربر
             $user->update([
                 'name'      => $request->input('name'),
                 'user_name' => $request->input('user_name'),
@@ -59,7 +60,6 @@ class ProfileController extends Controller
                 'image'     => $imageName
             ]);
 
-            // ۳. بروزرسانی یا ایجاد اطلاعات پروفایل فرعی
             $user->userProfile()->updateOrCreate(
                 ['user_id' => $user->id],
                 [
@@ -73,14 +73,24 @@ class ProfileController extends Controller
 
             DB::commit();
 
-            // 🟢 ۴. همگام‌سازی آنی سشن با اطلاعات جدید برای سایدبار
             auth()->setUser($user);
 
-            // 🟢 ۵. حذف عکس قدیمی واقعی بدون آسیب زدن به عکس جدید
             if ($newImageSaved && $oldImage) {
                 ImageManager::unlinkImage(
                     'users', (object)['image' => $oldImage]
                 );
+            }
+
+            // 🟢 پچ واکنش‌گرا: ارسال پاسخ JSON برای Ajax
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'اطلاعات شما با موفقیت ثبت شد',
+                    'new_name' => $user->name, // نام کاربری جدید را هم ارسال می‌کنیم
+                    'new_image_url' => $newImageSaved
+                        ? url('images/users/small/' . $imageName)
+                        : null
+                ]);
             }
 
             return redirect()->back()->with('message', "اطلاعات شما با موفقیت ثبت شد");
@@ -93,6 +103,14 @@ class ProfileController extends Controller
             }
 
             report($e);
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'خطایی در ثبت اطلاعات رخ داد. لطفاً مجدداً تلاش کنید.'
+                ], 500);
+            }
+
             return redirect()->back()->with('error', "خطایی در ثبت اطلاعات رخ داد. لطفاً مجدداً تلاش کنید.");
         }
     }

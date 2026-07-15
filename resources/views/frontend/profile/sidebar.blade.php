@@ -13,7 +13,7 @@
                 <div class="profile-avatar">
                     <img src="{{ $userImage }}" alt="{{auth()->user()->name}}">
                 </div>
-                <h5 class="profile-name">{{auth()->user()->name}}</h5>
+                <h5 class="profile-name js-profile-name">{{ auth()->user()->name }}</h5>
                 <p class="profile-mobile">{{auth()->user()->mobile}}</p>
 
                 <div class="profile-actions">

@@ -15,7 +15,8 @@ class ProfileUpdate extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        // ۱. تعریف تمام قوانین ولیدیشن در یک آرایه واحد
+        $rules = [
             // user table
             'name' => [
                 'required',
@@ -76,6 +77,20 @@ class ProfileUpdate extends FormRequest
                 'max:2048',
             ],
         ];
+
+        // 🟢 ۲. هک هوشمند اژاکس: اگر درخواست ولیدیشن تکی (Blur) بود، فقط قانون همان فیلد را برگردان
+        if ($this->has('only_validate')) {
+            $fieldName = $this->input('only_validate');
+
+            if (array_key_exists($fieldName, $rules)) {
+                return [
+                    $fieldName => $rules[$fieldName]
+                ];
+            }
+            return [];
+        }
+
+        return $rules;
     }
 
     public function messages(): array
