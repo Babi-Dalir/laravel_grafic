@@ -57,7 +57,7 @@ class SliderList extends Component
                 $query->where('link', 'like', '%' . $this->search . '%');
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.admin.sliders.slider-list', compact('sliders'));
     }

@@ -62,7 +62,7 @@ class SellerWalletTransactionList extends Component
                 $q->where('type', $this->type);
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.seller.wallet.seller-wallet-transaction-list', [
             'transactions' => $transactions,

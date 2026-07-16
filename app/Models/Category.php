@@ -307,7 +307,7 @@ class Category extends Model
             ->orderBy($column, $orderBy);
 
         return $page
-            ? $query->paginate(1, ['*'], $paginationName, $page)
+            ? $query->paginate(15, ['*'], $paginationName, $page)
             : $query->get();
     }
 
@@ -327,7 +327,7 @@ class Category extends Model
             ->orderBy($column, $orderBy);
 
         return $page
-            ? $query->paginate(1, ['*'], $paginationName, $page)
+            ? $query->paginate(15, ['*'], $paginationName, $page)
             : $query->get();
     }
 
@@ -342,7 +342,7 @@ class Category extends Model
 
         // تعداد ۲ پجینیشن شما برای تست بوده، آن را به ۲۰ یا مقدار دلخواه تغییر دهید (یا بگذارید ۲ بماند)
         return $page
-            ? $query->paginate(1, ['*'], $paginationName, $page)
+            ? $query->paginate(15, ['*'], $paginationName, $page)
             : $query->get();
     }
 }

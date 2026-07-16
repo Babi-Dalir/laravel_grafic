@@ -97,7 +97,7 @@ class Orders extends Component
                 });
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.admin.order.orders', compact('orders'));
     }

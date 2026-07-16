@@ -142,7 +142,7 @@ class SellerRequestList extends Component
             });
         }
 
-        $seller_requests = $query->latest()->paginate(10);
+        $seller_requests = $query->latest()->paginate(15);
 
         return view('livewire.seller.seller-requests.seller-request-list', compact('seller_requests'));
     }

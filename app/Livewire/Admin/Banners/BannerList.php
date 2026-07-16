@@ -44,7 +44,7 @@ class BannerList extends Component
                 $query->where('type', 'like', '%' . $this->search . '%');
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.admin.banners.banner-list', compact('banners'));
     }

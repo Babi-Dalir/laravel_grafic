@@ -127,7 +127,7 @@ class ProductFileList extends Component
 
     public function render()
     {
-        $files = ProductFile::where('product_id', $this->productId)->latest()->paginate(10);
+        $files = ProductFile::where('product_id', $this->productId)->latest()->paginate(15);
 
         return view('livewire.admin.products.product-file-list', [
             'files' => $files,

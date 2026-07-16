@@ -14,7 +14,7 @@ class OrderList extends Component
         $user = auth()->user();
         $orders = Order::query()->where('user_id', $user->id)
             ->latest()
-            ->paginate(1);
+            ->paginate(15);
         return view('livewire.frontend.profiles.order-list',compact('orders'));
     }
 }

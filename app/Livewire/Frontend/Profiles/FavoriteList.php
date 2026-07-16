@@ -24,7 +24,7 @@ class FavoriteList extends Component
             ->whereHas('product', function ($query) {
                 $query->where('status', '!=', ProductStatus::Archived->value);
             })
-            ->paginate(1);
+            ->paginate(15);
 
         if ($this->getPage() > $favorites->lastPage()) {
             $this->setPage(max($favorites->lastPage(), 1));
@@ -39,7 +39,7 @@ class FavoriteList extends Component
             ->whereHas('product', function ($query) {
                 $query->where('status', '!=', ProductStatus::Archived->value);
             })
-            ->paginate(1);
+            ->paginate(15);
 
         return view('livewire.frontend.profiles.favorite-list', compact('favorites'));
     }

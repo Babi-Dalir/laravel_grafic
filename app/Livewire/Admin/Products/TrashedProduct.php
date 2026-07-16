@@ -64,7 +64,7 @@ class TrashedProduct extends Component
             $query->where('user_id', auth()->id());
         }
 
-        $products = $query->latest('deleted_at')->paginate(10);
+        $products = $query->latest('deleted_at')->paginate(15);
 
         return view('livewire.admin.products.trashed-product', compact('products'));
     }

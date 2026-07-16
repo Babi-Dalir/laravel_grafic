@@ -77,7 +77,7 @@ class GiftCartList extends Component
 
     public function render()
     {
-        $gift_carts = $this->getGiftCartsQuery()->paginate(10);
+        $gift_carts = $this->getGiftCartsQuery()->paginate(15);
 
         return view('livewire.admin.gift-carts.gift-cart-list', compact('gift_carts'));
     }

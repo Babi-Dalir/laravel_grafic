@@ -94,7 +94,7 @@ class SellerList extends Component
                 });
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(20);
 
         return view('livewire.admin.sellers.seller-list', compact('sellers'));
     }

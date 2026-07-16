@@ -26,7 +26,7 @@ class RoleList extends Component
     {
         $roles = Role::query()
             ->where('name','like','%'.$this->search.'%')
-            ->paginate(10);
+            ->paginate(15);
         return view('livewire.admin.roles.role-list',compact('roles'));
     }
 }

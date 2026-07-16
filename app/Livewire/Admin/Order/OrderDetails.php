@@ -75,7 +75,7 @@ class OrderDetails extends Component
                 });
             })
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.admin.order.order-details', compact('order_details'));
     }

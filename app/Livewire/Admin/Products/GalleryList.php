@@ -41,7 +41,7 @@ class GalleryList extends Component
         $galleries = Gallery::query()
             ->where('product_id',$this->product->id)
             ->orderBy('position',"DESC")
-            ->paginate(10);
+            ->paginate(15);
         return view('livewire.admin.products.gallery-list',compact('galleries'));
     }
 }

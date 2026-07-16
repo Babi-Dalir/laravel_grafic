@@ -56,7 +56,7 @@ class DiscountList extends Component
     {
         Discount::destroy($id);
 
-        $discounts = $this->getDiscountsQuery()->paginate(10);
+        $discounts = $this->getDiscountsQuery()->paginate(15);
         $this->setPage(min($this->getPage(), $discounts->lastPage()));
     }
 
@@ -71,7 +71,7 @@ class DiscountList extends Component
 
     public function render()
     {
-        $discounts = $this->getDiscountsQuery()->paginate(10);
+        $discounts = $this->getDiscountsQuery()->paginate(15);
 
         return view('livewire.admin.discounts.discount-list', compact('discounts'));
     }

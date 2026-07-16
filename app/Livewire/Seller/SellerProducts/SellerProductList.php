@@ -69,7 +69,7 @@ class SellerProductList extends Component
             ->withSum('downloads as total_download_count', 'download_count') // محاسبه مجموع دانلودها در یک کوئری مستقل
             ->where('name', 'like', "%{$this->search}%")
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.seller.seller-products.seller-product-list', compact('products'));
     }

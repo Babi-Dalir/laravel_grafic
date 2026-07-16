@@ -26,7 +26,7 @@ class TagList extends Component
     {
         $tags = Tag::query()
             ->where('name','like','%'.$this->search.'%')
-            ->paginate(10);
+            ->paginate(15);
         return view('livewire.admin.tags.tag-list',compact('tags'));
     }
 }

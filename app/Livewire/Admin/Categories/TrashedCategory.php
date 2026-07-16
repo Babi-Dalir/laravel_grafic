@@ -53,7 +53,7 @@ class TrashedCategory extends Component
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('e_name', 'like', '%' . $this->search . '%');
             })
-            ->paginate(10);
+            ->paginate(15);
 
         return view('livewire.admin.categories.trashed-category', compact('categories'));
     }

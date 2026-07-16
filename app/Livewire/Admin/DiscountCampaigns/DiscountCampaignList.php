@@ -63,7 +63,7 @@ class DiscountCampaignList extends Component
 
     public function render()
     {
-        $campaigns = $this->getCampaignsQuery()->paginate(10);
+        $campaigns = $this->getCampaignsQuery()->paginate(15);
 
         return view('livewire.admin.discount-campaigns.discount-campaign-list', compact('campaigns'));
     }

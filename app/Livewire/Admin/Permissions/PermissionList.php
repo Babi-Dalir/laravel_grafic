@@ -27,7 +27,7 @@ class PermissionList extends Component
     {
         $permissions = Permission::query()
             ->where('name','like','%'.$this->search.'%')
-            ->paginate(10);
+            ->paginate(15);
         return view('livewire.admin.permissions.permission-list',compact('permissions'));
     }
 }

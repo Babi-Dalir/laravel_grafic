@@ -115,7 +115,7 @@ class ProductList extends Component
             $query->where('user_id', auth()->id());
         }
 
-        $products = $query->latest()->paginate(10);
+        $products = $query->latest()->paginate(15);
 
         return view('livewire.admin.products.product-list', compact('products'));
     }

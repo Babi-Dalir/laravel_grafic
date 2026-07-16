@@ -16,7 +16,7 @@ class DownloadList extends Component
             ->where('user_id', auth()->id())
             ->with('product')
             ->latest()
-            ->paginate(1);
+            ->paginate(15);
         return view('livewire.frontend.profiles.download-list',compact('downloads'));
     }
 }
