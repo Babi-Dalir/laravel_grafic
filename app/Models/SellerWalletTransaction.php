@@ -50,6 +50,9 @@ class SellerWalletTransaction extends Model
         // 🟢 نکته ایمنی: تراکنش درونی به دلیل اجرای مستقیم داخل تراکنش اصلی Order حذف شد تا هم‌راستا عمل کنند.
         foreach ($orderDetails as $detail) {
 
+            if (!$detail->seller_id || $detail->seller_share <= 0) {
+                continue;
+            }
             // پچ طلایی: لود امن محصول حتی در صورت پاک شدن موقت یا دائم از پنل
             $product = Product::withTrashed()->find($detail->product_id);
             if (!$product) continue;
