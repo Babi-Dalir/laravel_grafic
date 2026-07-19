@@ -32,7 +32,7 @@ class SliderRequest extends FormRequest
                 $this->isMethod('post') ? 'required' : 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
-                'max:2048',
+                'max:3048',
             ],
         ];
     }
