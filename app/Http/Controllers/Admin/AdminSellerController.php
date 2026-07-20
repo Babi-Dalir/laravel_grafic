@@ -17,8 +17,22 @@ class AdminSellerController extends Controller
 {
     public function downloadResume(SellerRequest $request)
     {
-        $path = Storage::disk('files')->path($request->resume);
-        return response()->download($path);
+        // 🔒 ۱. چک کردن خالی بودن مسیر در دیتابیس
+        if (empty($request->resume)) {
+            session()->flash('message', 'فایل رزومه‌ای برای این درخواست ثبت نشده است.');
+            return redirect()->back();
+        }
+
+        // 🔒 ۲. بررسی وجود فیزیکی فایل روی دیسک files (یا public بر اساس کانفیگ شما)
+        $disk = Storage::disk('files');
+
+        if (!$disk->exists($request->resume)) {
+            session()->flash('message', 'فایل رزومه مورد نظر پیدا نشد یا از روی سرور پاک شده است.');
+            return redirect()->back();
+        }
+
+        // 🟢 ۳. دانلود امن و بی‌دردسر فایل
+        return response()->download($disk->path($request->resume));
     }
 
     public function sellerList()

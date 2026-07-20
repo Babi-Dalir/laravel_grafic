@@ -73,9 +73,13 @@
                 </td>
 
                 <td class="text-center align-middle">
-                    <a class="btn btn-sm btn-outline-info" href="{{ route('download.resume', $request->id) }}">
-                        <i class="ti-download"></i> دانلود
-                    </a>
+                    @if(!empty($request->resume))
+                        <a class="btn btn-sm btn-outline-info" href="{{ route('download.resume', $request->id) }}">
+                            <i class="ti-download"></i> دانلود
+                        </a>
+                    @else
+                        <span class="text-muted">---</span>
+                    @endif
                 </td>
 
                 {{-- 🟢 پچ امنیتی: جلوگیری از خطای کرش صفحه در صورت خالی بودن پروفایل کاربر با استفاده از ?-> --}}
