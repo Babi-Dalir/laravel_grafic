@@ -10,14 +10,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Http\Requests\SellerProductRequest;
 use App\Http\Requests\SellerVerificationRequest;
-use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Gallery;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerRequest;
 use App\Models\Tag;
-use App\Models\UserTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -136,7 +134,7 @@ class SellerController extends Controller
             'national_code'  => $request->national_code,
             'card_number'    => $request->card_number,
             'account_number' => $request->account_number,
-            'iban'           => strtoupper($request->iban),
+            'iban'           => $request->iban, // توسط prepareForValidation کاملاً استاندارد شده است
 
             // ارسال برای بررسی ادمین
             'status' => SellerStatus::Pending->value,

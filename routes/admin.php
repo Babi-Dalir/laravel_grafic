@@ -104,6 +104,9 @@ Route::get('download_resume/{request}', [AdminSellerController::class, 'download
 //Seller List Route
 Route::get('seller_list', [AdminSellerController::class, 'sellerList'])->name('seller.list');
 
+Route::get('edit_seller_by_admin/{id}', [AdminSellerController::class, 'editSellerByAdmin'])->name('admin.edit.seller');
+Route::put('update_seller_by_admin/{id}', [AdminSellerController::class, 'updateSellerByAdmin'])->name('admin.update.seller');
+
 //Seller Request Route
 Route::get('seller_requests', [AdminSellerController::class,'sellerRequestsList'])->name('seller.requests.list');
 

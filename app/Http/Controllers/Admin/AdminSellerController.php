@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\WalletTransactionStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SellerVerificationRequest;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Seller;
@@ -39,6 +40,36 @@ class AdminSellerController extends Controller
     {
         $title = "لیست فروشندگان";
         return view('admin.sellers.list', compact('title'));
+    }
+
+    // ۱. نمایش فرم ویرایش اطلاعات فروشنده توسط ادمین
+    public function editSellerByAdmin($id)
+    {
+        $title = 'ویرایش اطلاعات فروشنده توسط مدیریت';
+        $seller = Seller::query()->findOrFail($id);
+
+        return view('admin.sellers.edit', compact('title', 'seller'));
+    }
+
+// ۲. به‌روزرسانی اطلاعات فروشنده توسط ادمین
+
+    public function updateSellerByAdmin(SellerVerificationRequest $request, $id)
+    {
+        $seller = Seller::query()->findOrFail($id);
+
+        $seller->update([
+            'first_name'     => $request->first_name,
+            'last_name'      => $request->last_name,
+            'brand_name'     => $request->brand_name,
+            'national_code'  => $request->national_code,
+            'card_number'    => $request->card_number,
+            'account_number' => $request->account_number,
+            'iban'           => $request->iban, // توسط prepareForValidation کاملاً استاندارد شده است
+        ]);
+
+        return redirect()
+            ->route('seller.list')
+            ->with('message', 'اطلاعات فروشنده با موفقیت ویرایش شد.');
     }
 
     public function sellerRequestsList()

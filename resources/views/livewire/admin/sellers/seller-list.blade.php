@@ -32,6 +32,7 @@
             <th class="text-center align-middle text-primary">کد ملی</th>
             <th class="text-center align-middle text-primary">وضعیت دسترسی و بانک</th>
             <th class="text-center align-middle text-primary">جزئیات پروژه‌ای</th>
+            <th class="text-center align-middle text-primary">ویرایش</th>
             <th class="text-center align-middle text-primary">تاریخ ثبت‌نام</th>
         </tr>
         </thead>
@@ -104,6 +105,11 @@
                 <td class="text-center align-middle">
                     <a class="btn btn-sm btn-outline-info" href="{{ route('admin.seller.detail', $seller->id) }}">
                         <i class="ti-id-badge mr-1"></i> جزئیات فروشنده
+                    </a>
+                </td>
+                <td class="text-center align-middle">
+                    <a class="btn btn-outline-info" href="{{route('admin.edit.seller', $seller->id)}}">
+                        ویرایش
                     </a>
                 </td>
                 <td class="text-center align-middle text-muted">
