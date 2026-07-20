@@ -2,34 +2,23 @@
 
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\CityController;
-use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CommentController;
 use App\Http\Controllers\Admin\CommissionController;
-use App\Http\Controllers\Admin\DepotController;
 use App\Http\Controllers\Admin\DiscountCampaignController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\GalleryController;
 use App\Http\Controllers\Admin\GiftCartController;
-use App\Http\Controllers\Admin\GuarantyController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PanelController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductFileController;
-use App\Http\Controllers\Admin\ProductPriceController;
 use App\Http\Controllers\Admin\PropertyGroupController;
-use App\Http\Controllers\Admin\ProvinceController;
-use App\Http\Controllers\Admin\QuestionController;
-use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SliderController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Seller\SellerController;
 use App\Livewire\Admin\Financial\FinancialLedgerList;
 use Illuminate\Support\Facades\Route;
 

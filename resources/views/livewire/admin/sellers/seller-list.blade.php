@@ -30,7 +30,7 @@
             <th class="text-center align-middle text-primary">موبایل</th>
             <th class="text-center align-middle text-primary">نام برند</th>
             <th class="text-center align-middle text-primary">کد ملی</th>
-            <th class="text-center align-middle text-primary">وضعیت دسترسی</th>
+            <th class="text-center align-middle text-primary">وضعیت دسترسی و بانک</th>
             <th class="text-center align-middle text-primary">جزئیات پروژه‌ای</th>
             <th class="text-center align-middle text-primary">تاریخ ثبت‌نام</th>
         </tr>
@@ -60,7 +60,8 @@
                 <td class="text-center align-middle font-numeric">{{ $seller->national_code ?? '--' }}</td>
 
                 <td class="text-center align-middle">
-                    <div wire:click="changeStatus({{ $seller->id }})" style="cursor: pointer;" class="status-interactive-wrapper">
+                    {{-- ۱. تغییر وضعیت حساب فروشنده --}}
+                    <div wire:click="changeStatus({{ $seller->id }})" style="cursor: pointer;" class="status-interactive-wrapper mb-2" title="جهت تغییر وضعیت کلیک کنید">
                         @if($seller->status === \App\Enums\SellerStatus::Active->value)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
@@ -83,6 +84,19 @@
                                 <i class="ti-na mr-1"></i>
                                 <span>غیر مجاز</span>
                             </div>
+                        @endif
+                    </div>
+
+                    {{-- ۲. وضعیت تاییدیه حساب بانکی جهت تسویه‌حساب (منطق ۳۰ روزه) --}}
+                    <div>
+                        @if($seller->bank_verified)
+                            <span class="badge badge-success-light font-weight-normal px-2 py-1" style="font-size: 11px; border: 1px solid #28a74533;" title="اطلاعات بانکی تایید شده است">
+                                <i class="ti-credit-card mr-1 text-success"></i> بانک: تایید شده
+                            </span>
+                        @else
+                            <span class="badge badge-danger-light font-weight-normal px-2 py-1" style="font-size: 11px; border: 1px solid #dc354533;" title="اطلاعات بانکی تایید نشده است">
+                                <i class="ti-credit-card mr-1 text-danger"></i> بانک: تایید نشده
+                            </span>
                         @endif
                     </div>
                 </td>

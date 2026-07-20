@@ -42,6 +42,84 @@
                 </div>
             </div>
 
+            {{-- 💳 کارت اختصاصی اطلاعات بانکی جهت واریز و تسویه‌حساب --}}
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 font-weight-bold text-dark">
+                        <i class="ti-credit-card text-primary mr-2"></i> مشخصات حساب بانکی (جهت واریز و تسویه)
+                    </h5>
+                    @if($seller->bank_verified)
+                        <span class="badge badge-success p-2">
+                            <i class="ti-check-box mr-1"></i> حساب بانکی تایید شده
+                        </span>
+                    @else
+                        <span class="badge badge-warning p-2">
+                            <i class="ti-time mr-1"></i> در انتظار بررسی / تایید نشده
+                        </span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        {{-- نام صاحب حساب --}}
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block mb-1">نام و نام خانوادگی صاحب حساب:</small>
+                            <strong class="text-dark font-weight-bold">
+                                {{ $seller->first_name && $seller->last_name ? $seller->first_name . ' ' . $seller->last_name : ($seller->user?->name ?? 'ثبت نشده') }}
+                            </strong>
+                        </div>
+
+                        {{-- کد ملی --}}
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block mb-1">کد ملی صاحب حساب:</small>
+                            <strong class="text-dark font-numeric">
+                                {{ $seller->national_code ?? 'ثبت نشده' }}
+                            </strong>
+                        </div>
+
+                        {{-- شماره کارت --}}
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block mb-1">شماره کارت ۱۶ رقمی:</small>
+                            <div class="d-flex align-items-center">
+                                <strong class="text-dark font-numeric dir-ltr mr-2">
+                                    {{ $seller->card_number ? implode('-', str_split($seller->card_number, 4)) : 'ثبت نشده' }}
+                                </strong>
+                                @if($seller->card_number)
+                                    <button type="button" class="btn btn-xs btn-outline-secondary py-0 px-1" onclick="copyToClipboard('{{ $seller->card_number }}', 'شماره کارت')" title="کپی شماره کارت">
+                                        <i class="ti-files"></i>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- شماره حساب --}}
+                        <div class="col-md-3 mb-3">
+                            <small class="text-muted d-block mb-1">شماره حساب:</small>
+                            <strong class="text-dark font-numeric dir-ltr">
+                                {{ $seller->account_number ?? 'ثبت نشده' }}
+                            </strong>
+                        </div>
+
+                        {{-- شماره شبا (IR) --}}
+                        <div class="col-md-12 mt-2">
+                            <div class="p-3 bg-light rounded d-flex align-items-center justify-content-between flex-wrap">
+                                <div class="d-flex align-items-center mb-2 mb-md-0">
+                                    <i class="ti-wallet text-info font-size-20 mr-2"></i>
+                                    <span class="text-muted mr-2">شماره شبا (IBAN):</span>
+                                    <strong class="text-primary font-numeric dir-ltr font-size-18">
+                                        {{ $seller->iban ? (str_starts_with($seller->iban, 'IR') ? $seller->iban : 'IR' . $seller->iban) : 'ثبت نشده' }}
+                                    </strong>
+                                </div>
+                                @if($seller->iban)
+                                    <button type="button" class="btn btn-sm btn-info" onclick="copyToClipboard('{{ $seller->iban }}', 'شماره شبا')">
+                                        <i class="ti-files mr-1"></i> کپی شماره شبا
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- 🟢 گریدبندی آمار مالی با واحد پولی تومان --}}
             <div class="row mb-4">
                 <div class="col-xl-3 col-md-6 mb-3">
@@ -214,4 +292,16 @@
             </div>
         </div>
     </main>
+
+    <script>
+        function copyToClipboard(text, title) {
+            if (!text) return;
+            let cleanText = text.replace(/[\s-]/g, '');
+            navigator.clipboard.writeText(cleanText).then(function() {
+                alert(title + ' با موفقیت کپی شد: ' + cleanText);
+            }).catch(function(err) {
+                console.error('خطا در کپی: ', err);
+            });
+        }
+    </script>
 @endsection

@@ -23,11 +23,9 @@ class SellerList extends Component
         $this->resetPage();
     }
 
+
     /**
-     * تغییر وضعیت هوشمند بر اساس استیت ماشین بهینه شده
-     */
-    /**
-     * تغییر وضعیت هوشمند بر اساس استیت ماشین بهینه شده به همراه پیام‌های فارسی
+     * تغییر وضعیت هوشمند فروشنده به همراه همگام‌سازی تاییدیه بانکی و پیام‌های فارسی
      */
     public function changeStatus($id)
     {
@@ -38,7 +36,7 @@ class SellerList extends Component
             return;
         }
 
-        // ۱. پیدا کردن وضعیت بعدی
+        // ۱. پیدا کردن وضعیت بعدی (چرخه استیت ماشین)
         $nextStatus = match ($seller->status) {
             SellerStatus::Pending->value   => SellerStatus::Active->value,
             SellerStatus::Active->value    => SellerStatus::Rejected->value,
@@ -47,22 +45,26 @@ class SellerList extends Component
             default                        => SellerStatus::Pending->value,
         };
 
-        // ۲. مشخص کردن عنوان فارسی وضعیت جدید برای نمایش در پیام موفقیت
+        // ۲. تعیین وضعیت تاییدیه حساب بانکی و تاریخ تایید
+        $isActivating = ($nextStatus === SellerStatus::Active->value);
+
+        // ۳. به‌روزرسانی اتمیک فروشنده
+        $seller->update([
+            'status'        => $nextStatus,
+            'bank_verified' => $isActivating ? true : false, // 👈 اگر فعال شد تایید بانک true می‌شود، در غیر این صورت false
+            'verified_at'   => $isActivating ? now() : $seller->verified_at,
+        ]);
+
+        // ۴. عنوان فارسی وضعیت جهت نمایش در پیام
         $statusLabel = match ($nextStatus) {
-            SellerStatus::Active->value    => 'فعال',
+            SellerStatus::Active->value    => 'فعال (و تایید حساب بانکی)',
             SellerStatus::Pending->value   => 'در حال بررسی (معلق)',
             SellerStatus::Rejected->value  => 'رد شده (غیرفعال)',
             SellerStatus::Suspended->value => 'تعلیق شده (غیرمجاز)',
             default                        => 'نامشخص',
         };
 
-        // ۳. به‌روزرسانی در دیتابیس
-        $seller->update([
-            'status' => $nextStatus,
-            'verified_at' => $nextStatus === SellerStatus::Active->value ? now() : $seller->verified_at
-        ]);
-
-        // 🟢 ارسال پیام کاملاً فارسی و روان به قالب سیستم
+        // 🟢 ارسال پیام کاملاً فارسی و شفاف
         session()->flash('message', "وضعیت حساب فروشنده با موفقیت به «{$statusLabel}» تغییر یافت.");
     }
 
