@@ -50,7 +50,7 @@ class GiftCartList extends Component
             return;
         }
 
-        $newStatus = ($gift_cart->status->value === GiftCartStatus::Active->value)
+        $newStatus = ($gift_cart->status === GiftCartStatus::Active)
             ? GiftCartStatus::InActive->value
             : GiftCartStatus::Active->value;
 

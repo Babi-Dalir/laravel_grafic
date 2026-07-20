@@ -46,7 +46,7 @@ class SliderRequest extends FormRequest
             'image.required' => 'تصویر اسلایدر الزامی است',
             'image.image' => 'فایل باید تصویر باشد',
             'image.mimes' => 'فرمت تصویر باید jpg, jpeg, png یا webp باشد',
-            'image.max' => 'حجم تصویر نباید بیشتر از 2 مگابایت باشد',
+            'image.max' => 'حجم تصویر نباید بیشتر از 3 مگابایت باشد',
         ];
     }
 }

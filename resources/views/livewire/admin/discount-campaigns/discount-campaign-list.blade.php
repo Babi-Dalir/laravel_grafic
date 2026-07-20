@@ -43,7 +43,8 @@
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" style="cursor: pointer"
                          wire:click="changeStatus({{ $campaign->id }})">
-                        @if($campaign->status->value === \App\Enums\DiscountCampaignStatus::Active->value)
+                        {{-- 🟢 مقایسه مستقیم Enum با Enum --}}
+                        @if($campaign->status === \App\Enums\DiscountCampaignStatus::Active)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -62,7 +63,6 @@
                     @if($campaign->expires_at)
                         {{ \Hekmatinasser\Verta\Verta::instance($campaign->expires_at)->format('%d %B، %Y') }}
 
-                        {{-- گارد نمایش وضعیت منقضی بر اساس انتهای روز که در مدل اصلاح شد --}}
                         @if(now()->greaterThan($campaign->expires_at))
                             <br><span class="badge badge-danger small">منقضی شده</span>
                         @endif
@@ -130,7 +130,7 @@
             });
         });
 
-        Livewire.on('showToastError', (event) => {
+        Livewire.on('showToastCampaignError', (event) => {
             Swal.fire({
                 title: "خطا!",
                 text: event.message,

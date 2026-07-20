@@ -30,20 +30,18 @@ class DiscountCampaignList extends Component
         $this->setPage(min($this->getPage(), $campaigns->lastPage()));
     }
 
-    /**
-     * تغییر وضعیت تعاملی به همراه گارد سخت امنیتی زمان انقضا
-     */
     public function changeStatus($id)
     {
         $discount_campaign = DiscountCampaign::query()->findOrFail($id);
 
-        // 🔒 گارد امنیتی روز-محور: اگر تاریخ انقضا قبل از امروز باشد، اجازه فعال‌سازی مجدد داده نمی‌شود
-        if ($discount_campaign->expires_at && $discount_campaign->expires_at->isBefore(today())) {
-            $this->dispatch('showToastError', message: 'این کمپین منقضی شده است و امکان فعال‌سازی مجدد وجود ندارد.');
+        // 🔒 گارد امنیتی: جلوگیری از فعال‌سازی کمپین‌های منقضی شده با دقت ثانیه‌ای
+        if ($discount_campaign->expires_at && $discount_campaign->expires_at->isBefore(now())) {
+            $this->dispatch('showToastCampaignError', message: 'این کمپین منقضی شده است و امکان فعال‌سازی مجدد وجود ندارد.');
             return;
         }
 
-        $newStatus = $discount_campaign->status->value === DiscountCampaignStatus::Active->value
+        // 🟢 تغییر وضعیت استاندارد بر اساس Enum Cast
+        $newStatus = ($discount_campaign->status === DiscountCampaignStatus::Active)
             ? DiscountCampaignStatus::InActive->value
             : DiscountCampaignStatus::Active->value;
 

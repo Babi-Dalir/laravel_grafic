@@ -40,7 +40,7 @@
                 <td class="text-center align-middle">
                     <div class="status-interactive-wrapper" wire:click="changeStatus({{$discount->id}})" style="cursor: pointer;">
                         {{-- 🟢 اصلاح: بررسی یکدست وضعیت انوم بر اساس قالب کست شده مدل --}}
-                        @if($discount->status === \App\Enums\DiscountStatus::Active->value)
+                        @if($discount->status === \App\Enums\DiscountStatus::Active)
                             <div class="modern-status-btn active">
                                 <div class="status-glow"></div>
                                 <i class="ti-check-box mr-1"></i>
@@ -74,7 +74,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="7" class="text-center py-5" style="background-color: #f9f9f966;">
+                <td colspan="8" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"
                              stroke-linecap="round" stroke-linejoin="round" class="mb-3">
@@ -121,7 +121,7 @@
             });
         });
 
-        Livewire.on('showToastError', (event) => {
+        Livewire.on('showToastDiscountError', (event) => {
             Swal.fire({
                 title: "خطا!",
                 text: event.message,

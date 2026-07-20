@@ -9,7 +9,7 @@
                     <form method="POST" action="{{route('discounts.store')}}" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group row">
-                            <label  class="col-sm-2 col-form-label">میزان تخفیف</label>
+                            <label  class="col-sm-2 col-form-label">میزان تخفیف (تومان)</label>
                             <div class="col-sm-10">
                                 <input type="text" class="form-control text-left" dir="rtl" name="discount">
                             </div>

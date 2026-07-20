@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\DiscountStatus;
+use App\Enums\DiscountUsageStatus;
 use App\Helpers\CreateUniqueCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -73,7 +74,7 @@ class Discount extends Model
                 ],
                 [
                     'user_id' => $userId,
-                    'status' => 'reserved',
+                    'status' => DiscountUsageStatus::Reserved->value,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]
