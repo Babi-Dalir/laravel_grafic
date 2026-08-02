@@ -5,7 +5,7 @@
             <div class="row">
                 <div class="col-xl-4 col-lg-5 col-md-7 col-12 mx-auto">
                     <div class="logo-area text-center mb-3">
-                        <a href="#"><img src="{{url('frontend/img/logo.png')}}" class="img-fluid" alt="logo"></a>
+                        <a href="{{ route('home') }}"><img src="{{url('frontend/img/logo.png')}}" class="img-fluid" alt="logo"></a>
                     </div>
 
                     {{-- باکس لاگین هماهنگ با ثبت‌نام --}}
@@ -13,6 +13,15 @@
                         <div class="section-title title-wide mb-1 no-after-title-wide">
                             <h2 class="font-weight-bold text-gradient">ورود به حساب کاربری</h2>
                         </div>
+
+                        {{-- نمایش پیام موفقیت تغییر رمز عبور یا سشن‌های عمومی --}}
+
+                        @if(session('success'))
+                            <div class="alert alert-success text-center mb-3">
+                                <i class="mdi mdi-check-circle-outline ml-1"></i>
+                                {{ session('success') }}
+                            </div>
+                        @endif
 
                         <form method="POST" action="{{ route('login') }}" id="babi-login-form">
                             @csrf
@@ -40,12 +49,18 @@
                                 <span class="babi-error-text">رمز عبور خود را وارد کنید</span>
                             </div>
 
-                            <div class="form-row mt-2">
-                                <div class="custom-control custom-checkbox float-right mt-2">
+                            {{-- اضافه شدن لینک فراموشی رمز عبور روبه‌روی مرا به خاطر بسپار --}}
+                            <div class="form-row mt-2 d-flex align-items-center justify-content-between">
+                                <div class="custom-control custom-checkbox float-right">
                                     <input type="checkbox" class="custom-control-input" name="remember" id="customCheck3" {{ old('remember') ? 'checked' : '' }}>
                                     <label class="custom-control-label text-muted" for="customCheck3">
                                         مرا به خاطر بسپار
                                     </label>
+                                </div>
+                                <div>
+                                    <a href="{{ route('password.request.otp') }}" class="text-link font-weight-bold font-size-13">
+                                        فراموشی رمز عبور؟
+                                    </a>
                                 </div>
                             </div>
 

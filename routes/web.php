@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ProductFileController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\FrontEnd\DownloadController;
 use App\Http\Controllers\FrontEnd\HomeController;
 use App\Http\Controllers\FrontEnd\PaymentController;
@@ -60,4 +61,21 @@ Route::middleware('auth')->group(function () {
     //Seller verification Route
     Route::get('create_seller_verification',[SellerController::class,'createSellerVerification'])->name('create.seller.verification');
     Route::post('store_seller_verification',[SellerController::class,'storeSellerVerification'])->name('store.seller.verification');
+});
+
+
+
+Route::middleware('guest')->group(function () {
+    // ۱. فرم درخواست کد (ورود شماره)
+    Route::get('forgot-password', [ForgotPasswordController::class, 'showRequestForm'])->name('password.request.otp');
+    Route::post('forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.send.otp');
+
+    // ۲. فرم تایید کد OTP
+    Route::get('forgot-password/verify', [ForgotPasswordController::class, 'showVerifyForm'])->name('password.verify.form.otp');
+    Route::post('forgot-password/verify', [ForgotPasswordController::class, 'verifyOtp'])->name('password.verify.otp');
+    Route::post('forgot-password/resend', [ForgotPasswordController::class, 'resendOtp'])->name('password.resend.otp');
+
+    // ۳. فرم ثبت رمز عبور جدید
+    Route::get('reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset.form.otp');
+    Route::post('reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update.otp');
 });
