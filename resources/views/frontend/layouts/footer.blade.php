@@ -48,12 +48,12 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="widget-menu widget card">
                         <header class="card-header">
-                            <h3 class="card-title">راهنمای دانلود و خرید</h3>
+                            <h3 class="card-title">مزایای خرید از ما</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li><a href="#">نحوه خرید و دانلود فایل</a></li>
-                            <li><a href="#">فرمت فایل‌ها (PSD, AI, PNG)</a></li>
-                            <li><a href="#">شرایط استفاده از طرح‌ها</a></li>
+                            <li><a href="#">کیفیت تضمین شده</a></li>
+                            <li><a href="#">قیمت مناسب</a></li>
+                            <li><a href="#">تنوع در انواع فایل</a></li>
                         </ul>
                     </div>
                 </div>
@@ -65,7 +65,6 @@
                             <h3 class="card-title">پشتیبانی مشتریان</h3>
                         </header>
                         <ul class="footer-menu">
-                            <li><a href="#">سوالات متداول</a></li>
                             <li><a href="#">مشکل در دانلود فایل</a></li>
                             <li><a href="#">بازگشت وجه</a></li>
                             <li><a href="#">حریم خصوصی</a></li>
@@ -82,8 +81,7 @@
                         <ul class="footer-menu">
                             <li><a href="{{route('about')}}">درباره رابی گرافیک</a></li>
                             <li><a href="#">فروش طرح‌های گرافیکی</a></li>
-                            <li><a href="#">همکاری با طراحان</a></li>
-                            <li><a href="{{route('about')}}#contact-info">تماس با ما</a></li>
+                            <li><a href="tel:{{ config('social.phone') }}#contact-info">تماس با ما</a></li>
                         </ul>
                     </div>
                 </div>
@@ -151,15 +149,31 @@
             <div class="row">
 
                 <div class="site-description col-12 col-lg-8">
-                    <h2 class="site-title" style="font-size: 18px; font-weight: bold;">
-                        فروشگاه فایل‌های گرافیکی، دیجیتال و لایه‌باز
+                    <h2 class="site-title">
+                        رابی گرافیک | جایی که طراحان حرفه‌ای خرید می‌کنند و می‌فروشند
                     </h2>
+
                     <p>
-                        این فروشگاه مرجع دانلود و خرید انواع طرح‌های گرافیکی شامل فایل‌های PSD،
-                        قالب‌های آماده، وکتور، موکاپ و فایل‌های لایه‌باز است.
-                        تمامی فایل‌ها به صورت دیجیتال ارائه شده و پس از خرید، به صورت آنی قابل دانلود هستند.
-                        هدف ما ارائه فایل‌های باکیفیت برای طراحان، کسب‌وکارها و تولیدکنندگان محتوا است.
+                        <strong>رابی گرافیک</strong> از سال <strong>۱۴۰۱</strong> با هدف حمایت از جامعه
+                        طراحان ایرانی فعالیت خود را آغاز کرد و امروز به عنوان
+                        <strong>اولین مارکت‌پلیس چندفروشندگی فایل‌های گرافیکی</strong>،
+                        بستری امن و حرفه‌ای برای خرید و فروش محصولات گرافیکی محسوب می‌شود.
                     </p>
+
+                    <p>
+                        با بیش از
+                        <strong class="text-primary">۱۵٬۰۰۰ محصول تخصصی</strong>،
+                        <strong class="text-success">۵۰۰+ فروشنده فعال</strong>
+                        و هزاران مشتری راضی، هر آنچه برای طراحی، چاپ، برندینگ و تولید محتوا نیاز دارید،
+                        در رابی گرافیک آماده دانلود است.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3 small mt-3 text-muted">
+                        <span><i class="mdi mdi-shield-check text-success"></i> تضمین کیفیت محصولات</span>
+                        <span><i class="mdi mdi-update text-primary"></i> بروزرسانی مادام‌العمر</span>
+                        <span><i class="mdi mdi-license text-warning"></i> لایسنس معتبر تجاری</span>
+                        <span><i class="mdi mdi-cloud-download text-info"></i> دانلود سریع و دائمی</span>
+                    </div>
                 </div>
 
                 <div class="symbol col-12 col-lg-4">
