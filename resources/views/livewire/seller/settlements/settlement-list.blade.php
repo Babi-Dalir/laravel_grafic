@@ -2,14 +2,14 @@
 
     {{-- نمایش آلرت موفقیت آمیز تغییر وضعیت مالی --}}
     @if (session()->has('success'))
-        <div class="alert alert-success alert-dismissible fade show text-right mb-4" role="alert">
+        <div class="alert alert-success alert-dismissible fade show text-left mb-4" role="alert">
             <i class="ti-check mr-2"></i> {{ session('success') }}
         </div>
     @endif
 
     {{-- نمایش آلرت خطای احتمالی همپوشانی رکوئست‌ها --}}
     @if (session()->has('error'))
-        <div class="alert alert-danger alert-dismissible fade show text-right mb-4" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show text-left mb-4" role="alert">
             <i class="ti-alert mr-2"></i> {{ session('error') }}
         </div>
     @endif

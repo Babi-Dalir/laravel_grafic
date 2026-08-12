@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->string('brand_name')->nullable();
 
-            $table->string('national_code', 20)->nullable();
+            $table->string('national_code', 20)->unique()->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
 

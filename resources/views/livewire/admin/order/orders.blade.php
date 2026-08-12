@@ -21,7 +21,7 @@
         <thead class="thead-light">
         <tr>
             <th class="text-center align-middle text-primary">ردیف</th>
-            <th class="text-center align-middle text-primary">نام کاربر</th>
+            <th class="text-center align-middle text-primary">نام خریدار</th>
             <th class="text-center align-middle text-primary">کد سفارش</th>
             <th class="text-center align-middle text-primary">مبلغ پرداختی (بانک)</th>
             <th class="text-center align-middle text-primary">جزئیات تخفیف و آفرها</th> {{-- 🟢 ستون آینده‌نگرانه و شفاف --}}

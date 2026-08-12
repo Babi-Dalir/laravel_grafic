@@ -118,7 +118,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="10" class="text-center py-5" style="background-color: #f9f9f966;">
+                <td colspan="12" class="text-center py-5" style="background-color: #f9f9f966;">
                     <div class="empty-state">
                         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3">
                             <circle cx="11" cy="11" r="8"></circle>

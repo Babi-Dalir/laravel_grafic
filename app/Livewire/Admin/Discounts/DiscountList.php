@@ -31,7 +31,7 @@ class DiscountList extends Component
 
         // 🔒 گارد امنیتی روز-محور کدهای تخفیف
         if ($discount->expiration_date && $discount->expiration_date->isBefore(today())) {
-            $this->dispatch('showToastError', message: 'این کد تخفیف منقضی شده و قابل فعال‌سازی نیست.');
+            $this->dispatch('showToastDiscountError', message: 'این کد تخفیف منقضی شده و قابل فعال‌سازی نیست.');
             return;
         }
 

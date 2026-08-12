@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SellerVerificationRequest extends FormRequest
 {
@@ -60,7 +61,11 @@ class SellerVerificationRequest extends FormRequest
             'brand_name'     => ['nullable', 'string', 'max:255'],
 
             // کد ملی (۱۰ رقم)
-            'national_code'  => ['required', 'digits:10'],
+            'national_code'  => [
+                'required',
+                'digits:10',
+                Rule::unique('sellers', 'national_code'),
+                ],
 
             // شماره کارت (۱۶ رقم)
             'card_number'    => ['required', 'digits:16'],
@@ -87,6 +92,7 @@ class SellerVerificationRequest extends FormRequest
 
             'national_code.required'  => 'کد ملی الزامی است',
             'national_code.digits'    => 'کد ملی باید ۱۰ رقم باشد',
+            'national_code.unique' => 'این کد ملی قبلاً ثبت شده است لطفا کدملی خود را به درستی وارد کنید',
 
             'card_number.required'    => 'شماره کارت الزامی است',
             'card_number.digits'      => 'شماره کارت باید ۱۶ رقم باشد',
