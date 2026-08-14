@@ -1,88 +1,57 @@
 <?php
 
-use App\Services\SellerSettlementService;
+use App\Jobs\CleanExpiredUploadChunksJob;
+use App\Jobs\DispatchSellerSettlementsJob;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 
-/*
-|--------------------------------------------------------------------------
-| Console Routes & Scheduler
-|--------------------------------------------------------------------------
-*/
-
-// دستور پیش‌فرض لایت‌ویت لاراول
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-/**
- * ۱. جاب روزانه تسویه‌حساب اتوماتیک کیف‌پول فروشندگان
- */
-Schedule::call(function () {
-    SellerSettlementService::run();
-})
-    ->name('seller-settlement')
-    ->withoutOverlapping()
-    ->daily();
+/*
+|--------------------------------------------------------------------------
+| 1. Seller Settlements (تسویه‌حساب فروشندگان)
+|--------------------------------------------------------------------------
+*/
+Schedule::job(new DispatchSellerSettlementsJob)
+    ->dailyAt('00:30')
+    ->onQueue('settlements')
+    ->name('dispatch-seller-settlements')
+    ->withoutOverlapping();
 
-/**
- * ۲. پاکسازی کدهای تایید منقضی شده از دیتابیس (هر ۱۰ دقیقه)
- */
+/*
+|--------------------------------------------------------------------------
+| 2. Verification Codes (کدهای تایید)
+|--------------------------------------------------------------------------
+*/
 Schedule::command('verification-codes:clean')
     ->everyTenMinutes();
 
-/**
- * ۳. 👑 کنترلر هوشمند کش کمپین‌های شگفت‌انگیز صفحه اصلی (هر دقیقه)
- */
+/*
+|--------------------------------------------------------------------------
+| 3. Campaign Cache (کش کمپین‌ها)
+|--------------------------------------------------------------------------
+*/
 Schedule::command('campaigns:clean-cache')
     ->everyMinute();
 
-/**
- * ۴. جاب روزانه پاکسازی فایل‌های چانک آپلود‌های رها شده و ناقص
- */
-Schedule::call(function () {
-    $disk = Storage::disk('digital_files');
-    $targetFolder = 'tmp/products';
+/*
+|--------------------------------------------------------------------------
+| 4. Campaign Expiry (انقضای کمپین‌ها)
+|--------------------------------------------------------------------------
+*/
+Schedule::command('campaigns:check-expiry')
+    ->everyMinute();
 
-    if (!$disk->exists($targetFolder)) {
-        return;
-    }
-
-    $directories = $disk->directories($targetFolder);
-
-    foreach ($directories as $dir) {
-        try {
-            $files = $disk->files($dir);
-
-            if (empty($files)) {
-                $disk->deleteDirectory($dir);
-                continue;
-            }
-
-            $lastModifiedTime = 0;
-            foreach ($files as $file) {
-                $time = $disk->lastModified($file);
-                if ($time > $lastModifiedTime) {
-                    $lastModifiedTime = $time;
-                }
-            }
-
-            // اگر ۲۴ ساعت از آخرین چانک رها شده گذشته باشد
-            if (time() - $lastModifiedTime > 86400) {
-                $disk->deleteDirectory($dir);
-            }
-        } catch (\Throwable $e) {
-            Log::error("خطا در پاکسازی چانک موقت در مسیر: {$dir}", ['error' => $e->getMessage()]);
-        }
-    }
-})
-    ->daily()
+/*
+|--------------------------------------------------------------------------
+| 5. Expired Upload Chunks (پاکسازی آپلودهای ناقص)
+|--------------------------------------------------------------------------
+*/
+Schedule::job(new CleanExpiredUploadChunksJob)
+    ->dailyAt('03:00')
+    ->onQueue('uploads')
     ->name('cleanup-expired-upload-chunks')
-    ->withoutOverlapping(); // 🟢 گارد امنیتی عدم همپوشانی برای جلوگیری از درگیری شدید I/O سرور
-
-
-// اجرای کامند بررسی انقضای کمپین‌ها به صورت هر ساعت
-Schedule::command('campaigns:check-expiry')->everyMinute();
+    ->withoutOverlapping();
