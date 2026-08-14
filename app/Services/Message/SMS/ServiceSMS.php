@@ -6,25 +6,30 @@ use App\Services\Message\MessageInterface;
 
 class ServiceSMS implements MessageInterface
 {
-    private $reciever;
-    private $content;
-
-    // اضافه کردن اکستنشن سازنده برای راحتی کار در Listener
-    public function __construct($reciever = null, $content = null)
-    {
-        $this->reciever = $reciever;
-        $this->content = $content;
+    public function __construct(
+        private ?string $receiver = null,
+        private ?string $content = null
+    ) {
     }
 
-    public function getContent() { return $this->content; }
-    public function setContent($content): void { $this->content = $content; }
-
-    public function getReciever() { return $this->reciever; }
-    public function setReciever($reciever): void { $this->reciever = $reciever; }
-
-    public function sendMessage()
+    public function sendMessage(): void
     {
+        // Kill Switch کلی SMS
+        if (! config('services.sms.enabled')) {
+            return;
+        }
+
         $melipayamak = new ServiceMelipayamak();
-        $melipayamak->sendSMS($this->reciever, $this->content);
+
+        $success = $melipayamak->sendSMS(
+            $this->receiver,
+            $this->content
+        );
+
+        if (! $success) {
+            throw new \RuntimeException(
+                'SMS provider failed to send message.'
+            );
+        }
     }
 }

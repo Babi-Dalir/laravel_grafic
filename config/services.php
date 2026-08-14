@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'sms' => [
+        'enabled' => env('SMS_ENABLED', true),
+    ],
+
+    'order_payment_sms' => [
+        'enabled' => env('ORDER_PAYMENT_SMS_ENABLED', true),
+    ],
+
 ];

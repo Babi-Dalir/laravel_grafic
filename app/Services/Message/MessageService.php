@@ -4,13 +4,12 @@ namespace App\Services\Message;
 
 class MessageService
 {
-    private $message;
-    public function __construct(MessageInterface $message)
-    {
-        $this->message=$message;
+    public function __construct(
+        private MessageInterface $message
+    ) {
     }
 
-    public function send()
+    public function send(): void
     {
         $this->message->sendMessage();
     }

@@ -1,29 +1,15 @@
 <?php
 
 namespace App\Services\Message\SMS;
+
 use Illuminate\Support\Facades\Log;
 use Melipayamak;
+
 class ServiceMelipayamak
 {
-//    public function sendSMS($reciever,$content)
-//    {
-//        try{
-//            $sms = Melipayamak::sms();
-//            $to = $reciever;
-//            $from = '50004001014554';
-//            $text = $content;
-//            $response = $sms->send($to,$from,$text);
-//            $json = json_decode($response);
-//            echo $json->Value; //RecId or Error Number
-//        }catch(\Exception $e){
-//            echo $e->getMessage();
-//        }
-//    }
-
-    public function sendSMS($receiver, $content): bool
+    public function sendSMS(string $receiver, string $content): bool
     {
         try {
-
             $sms = Melipayamak::sms();
 
             $response = $sms->send(
@@ -32,18 +18,29 @@ class ServiceMelipayamak
                 $content
             );
 
-            Log::info('SMS Sent Successfully', [
+            // 🟢 بررسی پاسخ ملی‌پیامک: کد خروجی موفقیت معمولاً یک RecId بزرگ است (طول بیشتر از ۱۵ رقم یا عدد مثبت بزرگ)
+            // اگر پاسخ عددی منفی یا حاوی خطا باشد، ارسال ناموفق بوده است.
+            if (! $response || (is_numeric($response) && (int) $response < 15)) {
+                Log::error('SMS provider returned error response', [
+                    'receiver' => $receiver,
+                    'response' => $response,
+                ]);
+
+                return false;
+            }
+
+            Log::info('SMS sent successfully', [
                 'receiver' => $receiver,
-                'response' => $response
+                'response' => $response,
             ]);
 
             return true;
 
         } catch (\Throwable $e) {
 
-            Log::error('SMS Failed', [
+            Log::error('SMS provider failed', [
                 'receiver' => $receiver,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
             return false;
