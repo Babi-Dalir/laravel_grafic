@@ -12,18 +12,20 @@ Artisan::command('inspire', function () {
 
 /*
 |--------------------------------------------------------------------------
-| 1. Seller Settlements (تسویه‌حساب فروشندگان)
+| 1. Seller Settlements - تسویه‌حساب فروشندگان
 |--------------------------------------------------------------------------
+|
+| خود Job در صف settlements قرار می‌گیرد.
+|
 */
 Schedule::job(new DispatchSellerSettlementsJob)
     ->dailyAt('00:30')
-    ->onQueue('settlements')
     ->name('dispatch-seller-settlements')
     ->withoutOverlapping();
 
 /*
 |--------------------------------------------------------------------------
-| 2. Verification Codes (کدهای تایید)
+| 2. Verification Codes - کدهای تایید
 |--------------------------------------------------------------------------
 */
 Schedule::command('verification-codes:clean')
@@ -31,7 +33,7 @@ Schedule::command('verification-codes:clean')
 
 /*
 |--------------------------------------------------------------------------
-| 3. Campaign Cache (کش کمپین‌ها)
+| 3. Campaign Cache - کش کمپین‌ها
 |--------------------------------------------------------------------------
 */
 Schedule::command('campaigns:clean-cache')
@@ -39,7 +41,7 @@ Schedule::command('campaigns:clean-cache')
 
 /*
 |--------------------------------------------------------------------------
-| 4. Campaign Expiry (انقضای کمپین‌ها)
+| 4. Campaign Expiry - انقضای کمپین‌ها
 |--------------------------------------------------------------------------
 */
 Schedule::command('campaigns:check-expiry')
@@ -47,11 +49,13 @@ Schedule::command('campaigns:check-expiry')
 
 /*
 |--------------------------------------------------------------------------
-| 5. Expired Upload Chunks (پاکسازی آپلودهای ناقص)
+| 5. Expired Upload Chunks - پاکسازی آپلودهای ناقص
 |--------------------------------------------------------------------------
+|
+| خود Job در صف uploads قرار می‌گیرد.
+|
 */
 Schedule::job(new CleanExpiredUploadChunksJob)
     ->dailyAt('03:00')
-    ->onQueue('uploads')
     ->name('cleanup-expired-upload-chunks')
     ->withoutOverlapping();

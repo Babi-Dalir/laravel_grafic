@@ -22,37 +22,56 @@ class ProcessSingleSellerSettlementJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * اختصاص به صف مجزا برای تداخل نداشتن با کارهای دیگر
+     * تعداد تلاش مجدد در صورت خطا
      */
-    public string $queue = 'settlements';
-
     public int $tries = 3;
+
+    /**
+     * حداکثر زمان اجرای Job بر حسب ثانیه
+     */
     public int $timeout = 120;
 
+    /**
+     * زمان‌های انتظار بین تلاش‌های مجدد
+     */
     public function backoff(): array
     {
         return [30, 120];
     }
 
-    public function __construct(public int $sellerId)
-    {
+    public function __construct(
+        public int $sellerId
+    ) {
+        $this->onQueue('settlements');
     }
 
     public function handle(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
 
-            // 🔐 ۱. قفل فروشنده برای جلوگیری از Race Condition
+            /*
+             * 1. قفل فروشنده
+             *
+             * این قفل باعث می‌شود اگر همزمان چند Job
+             * برای یک فروشنده اجرا شدند، عملیات تسویه
+             * به صورت همزمان روی همان فروشنده انجام نشود.
+             */
             $seller = Seller::query()
-                ->where('id', $this->sellerId)
+                ->whereKey($this->sellerId)
                 ->lockForUpdate()
                 ->first();
 
             if (! $seller) {
+                Log::warning(
+                    "فروشنده {$this->sellerId} برای تسویه پیدا نشد."
+                );
+
                 return;
             }
 
-            // 🔐 ۲. قفل اتمیک ردیف‌های ولت کاندیدای تسویه
+            /*
+             * 2. پیدا کردن تراکنش‌های آماده تسویه
+             */
             $transactions = SellerWalletTransaction::query()
                 ->where('seller_id', $seller->id)
                 ->where('type', TransactionType::Sale->value)
@@ -66,23 +85,37 @@ class ProcessSingleSellerSettlementJob implements ShouldQueue
                 return;
             }
 
+            /*
+             * 3. محاسبه مجموع تراکنش‌ها
+             */
             $totalAmount = $transactions->sum('amount');
 
-            // حد نصاب تسویه (مثلاً ۱۰۰ هزار تومان)
+            /*
+             * حداقل مبلغ مورد نیاز برای ایجاد تسویه
+             */
             if ($totalAmount < 100000) {
                 return;
             }
 
+            /*
+             * 4. شناسه مرجع تسویه ماه جاری
+             */
             $period = now()->format('Y-m');
+
             $referenceId = "seller_{$seller->id}_{$period}";
 
-            // 🔐 ۳. قفل لایه دیتابیس روی سند تسویه
+            /*
+             * 5. پیدا کردن تسویه Pending موجود
+             */
             $settlement = SellerSettlement::query()
                 ->where('reference_id', $referenceId)
                 ->where('status', SettlementStatus::Pending->value)
                 ->lockForUpdate()
                 ->first();
 
+            /*
+             * اگر تسویه‌ای وجود نداشت، ایجاد می‌کنیم.
+             */
             if (! $settlement) {
                 $settlement = SellerSettlement::query()->create([
                     'reference_id' => $referenceId,
@@ -92,27 +125,48 @@ class ProcessSingleSellerSettlementJob implements ShouldQueue
                 ]);
             }
 
-            // 🔥 افزایش اتمیک موجودی فاکتور تسویه
+            /*
+             * 6. افزایش مبلغ تسویه
+             */
             $settlement->increment('amount', $totalAmount);
 
-            // 🔥 اتصال شناسه فاکتور به تراکنش‌ها
+            /*
+             * 7. اتصال تراکنش‌ها به سند تسویه
+             */
             SellerWalletTransaction::query()
                 ->whereIn('id', $transactions->pluck('id'))
                 ->update([
                     'settlement_id' => $settlement->id,
                 ]);
 
-            Log::info("تسویه حساب ماهانه برای فروشنده {$seller->id} با موفقیت محاسبه شد.", [
-                'amount' => $totalAmount,
-                'settlement_id' => $settlement->id
-            ]);
+            /*
+             * 8. ثبت Log
+             */
+            Log::info(
+                "تسویه حساب فروشنده {$seller->id} با موفقیت محاسبه شد.",
+                [
+                    'seller_id' => $seller->id,
+                    'amount' => $totalAmount,
+                    'settlement_id' => $settlement->id,
+                    'transactions_count' => $transactions->count(),
+                    'reference_id' => $referenceId,
+                ]
+            );
         });
     }
 
+    /**
+     * زمانی که Job بعد از تمام تلاش‌ها شکست بخورد.
+     */
     public function failed(Throwable $exception): void
     {
-        Log::error("خطای قطعی در پردازش تسویه‌حساب فروشنده {$this->sellerId}", [
-            'error' => $exception->getMessage()
-        ]);
+        Log::error(
+            "خطای قطعی در پردازش تسویه‌حساب فروشنده {$this->sellerId}",
+            [
+                'seller_id' => $this->sellerId,
+                'error' => $exception->getMessage(),
+                'exception' => $exception::class,
+            ]
+        );
     }
 }
