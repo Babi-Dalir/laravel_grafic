@@ -19,31 +19,31 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $categories = Cache::remember(
-            'categories',
-            now()->addDays(10),
-            fn() => Category::query()
-                ->with('childCategory.childCategory')
-                ->withCount('subProducts') // 🟢 جایگزین شدن متد جدید برای شمارش دقیق زنجیره‌ای
-                ->where('parent_id', 0)
-                ->get()
-        );
-
-        $banners = Cache::remember(
-            'banners',
-            now()->addDays(10),
-            fn() => Banner::query()->get()
-        );
-
-        View::share([
-            'categories' => $categories,
-            'banners' => $banners
-        ]);
-
-        Paginator::useBootstrap();
-
-        View::composer('frontend.index', function ($view) {
-            $view->with('activeDiscountCampaign', DiscountCampaign::getActiveBannerCampaign());
-        });
+//        $categories = Cache::remember(
+//            'categories',
+//            now()->addDays(10),
+//            fn() => Category::query()
+//                ->with('childCategory.childCategory')
+//                ->withCount('subProducts') // 🟢 جایگزین شدن متد جدید برای شمارش دقیق زنجیره‌ای
+//                ->where('parent_id', 0)
+//                ->get()
+//        );
+//
+//        $banners = Cache::remember(
+//            'banners',
+//            now()->addDays(10),
+//            fn() => Banner::query()->get()
+//        );
+//
+//        View::share([
+//            'categories' => $categories,
+//            'banners' => $banners
+//        ]);
+//
+//        Paginator::useBootstrap();
+//
+//        View::composer('frontend.index', function ($view) {
+//            $view->with('activeDiscountCampaign', DiscountCampaign::getActiveBannerCampaign());
+//        });
     }
 }

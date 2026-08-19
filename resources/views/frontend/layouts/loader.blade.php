@@ -47,7 +47,7 @@
         </div>
 
         <div class="loader-brand">
-            RUBI
+            RUBY
         </div>
 
         <div class="progress-wrap">
