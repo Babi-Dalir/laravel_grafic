@@ -1,8 +1,17 @@
 <header class="main-header">
     <!-- Start ads -->
+    @php
+        $topBanner = $banners->where('type', 'top_banner')->first();
+    @endphp
+
     <div class="ads-header-wrapper">
-        <a href="{{route('home')}}" class="ads-header hidden-sm" target="_blank"
-           style="background-image: url({{ url('images/banners/big/' . $banners->where('type', 'top_banner')->first()->image) }})"></a>
+        <a href="{{ route('home') }}"
+           class="ads-header hidden-sm"
+           target="_blank"
+           @if($topBanner)
+               style="background-image: url('{{ url('images/banners/big/' . $topBanner->image) }}')"
+            @endif>
+        </a>
     </div>
     <!-- End ads -->
     <!-- Start topbar -->
