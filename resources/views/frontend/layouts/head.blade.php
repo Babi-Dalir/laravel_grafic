@@ -5,7 +5,7 @@
     <meta name="theme-color" content="#f7858d">
     <meta name="msapplication-navbutton-color" content="#f7858d">
     <meta name="apple-mobile-web-app-status-bar-style" content="#f7858d">
-    <title>Babi_Shop | Index Page</title>
+    <title>رابی گرافیک</title>
     <!-- Font Icon -->
     <link rel="stylesheet" href="{{url('frontend/css/vendor/font-awesome.min.css')}}">
     <link rel="stylesheet" href="{{url('frontend/css/vendor/materialdesignicons.min.css')}}">

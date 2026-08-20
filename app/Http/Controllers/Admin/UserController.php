@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\createUserRequest;
 use App\Http\Requests\EditUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
