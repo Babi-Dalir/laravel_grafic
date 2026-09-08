@@ -88,7 +88,7 @@
 
                                 {{-- وب سایت --}}
                                 <div class="col-12 mb-3">
-                                    <label class="form-label">وب سایت</label>
+                                    <label class="form-label">وب سایت(درصورت موجودیت)</label>
                                     <input type="text"
                                            class="form-control input-ui text-left"
                                            dir="ltr"

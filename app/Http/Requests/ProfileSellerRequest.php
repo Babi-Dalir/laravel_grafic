@@ -30,11 +30,11 @@ class ProfileSellerRequest extends FormRequest
                 'max:255',
             ],
 
-            'portfolio' => [
-                'required',
-                'url',
-                'max:500',
-            ],
+//            'portfolio' => [
+//                'required',
+//                'url',
+//                'max:500',
+//            ],
 
             'reason' => [
                 'required',
@@ -58,7 +58,7 @@ class ProfileSellerRequest extends FormRequest
             'brand_name.required' => 'نام برند الزامی است',
             'brand_name.min' => 'نام برند باید حداقل 3 کاراکتر باشد',
 
-            'portfolio.required' => 'لینک نمونه کار الزامی است',
+//            'portfolio.required' => 'لینک نمونه کار الزامی است',
             'portfolio.url' => 'لینک نمونه کار معتبر نیست',
 
             'reason.required' => 'توضیحات الزامی است',
