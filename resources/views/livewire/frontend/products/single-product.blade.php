@@ -162,7 +162,7 @@
                     <div class="d-flex align-items-center mb-3 pb-3 border-bottom font-14 text-dark-75">
                         <i class="mdi mdi-storefront-outline text-primary fs-4 me-2"></i>
                         <div>
-                            <span class="d-block font-weight-bold">فروشگاه: بابی شاپ</span>
+                            <span class="d-block font-weight-bold">فروشگاه: رابی گرافیک </span>
                             <small class="text-success font-12"><i class="mdi mdi-check-decagram"></i>
                                 فروشنده : رابی گرافیک</small>
                         </div>

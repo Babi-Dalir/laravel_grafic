@@ -36,7 +36,7 @@ class PropertyGroupList extends Component
         $property_groups = $this->getGroupsQuery()->paginate(20);
 
         // 🟢 اصلاح ۲: کاربر فقط در صورتی به صفحه قبل هدایت می‌شود که صفحه فعلی کاملاً خالی شده باشد
-        if ($this->page > $property_groups->lastPage()) {
+        if ($this->getPage() > $property_groups->lastPage()) {
             $this->resetPage();
         }
     }

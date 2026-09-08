@@ -57,9 +57,10 @@ class RegisteredUserController extends Controller
             $code
         );
 
-        $serviceSMS = new ServiceSMS();
-        $serviceSMS->setReciever($request->mobile);
-        $serviceSMS->setContent($code);
+        $serviceSMS = new ServiceSMS(
+            $request->mobile,
+            (string) $code
+        );
 
         $messageService = new MessageService($serviceSMS);
         $messageService->send();

@@ -14,14 +14,14 @@ class ServiceMelipayamak
 
             $response = $sms->send(
                 $receiver,
-                '50004001014554',
+                '50004001516624',
                 $content
             );
 
-            // 🟢 بررسی پاسخ ملی‌پیامک: کد خروجی موفقیت معمولاً یک RecId بزرگ است (طول بیشتر از ۱۵ رقم یا عدد مثبت بزرگ)
-            // اگر پاسخ عددی منفی یا حاوی خطا باشد، ارسال ناموفق بوده است.
-            if (! $response || (is_numeric($response) && (int) $response < 15)) {
-                Log::error('SMS provider returned error response', [
+            $data = json_decode($response, true);
+
+            if (!is_array($data)) {
+                Log::error('Invalid SMS provider response', [
                     'receiver' => $receiver,
                     'response' => $response,
                 ]);
@@ -29,15 +29,24 @@ class ServiceMelipayamak
                 return false;
             }
 
-            Log::info('SMS sent successfully', [
+            if (($data['RetStatus'] ?? null) != 1) {
+                Log::error('SMS provider rejected message', [
+                    'receiver' => $receiver,
+                    'response' => $data,
+                ]);
+
+                return false;
+            }
+
+            Log::info('SMS accepted by provider', [
                 'receiver' => $receiver,
-                'response' => $response,
+                'rec_id' => $data['Value'] ?? null,
+                'status' => $data['StrRetStatus'] ?? null,
             ]);
 
             return true;
 
         } catch (\Throwable $e) {
-
             Log::error('SMS provider failed', [
                 'receiver' => $receiver,
                 'message' => $e->getMessage(),
