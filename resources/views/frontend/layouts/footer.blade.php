@@ -176,9 +176,16 @@
                     </div>
                 </div>
 
-                <div class="symbol col-12 col-lg-4">
-                    <a href="#"><img src="{{url('frontend/img/symbol-01.png')}}"></a>
-                    <a href="#"><img src="{{url('frontend/img/symbol-02.png')}}"></a>
+                <div class="symbol col-12 col-lg-4 d-flex align-items-center justify-content-center gap-3 flex-wrap">
+
+                    <a href="#">
+                        <img src="{{ url('frontend/img/symbol-01.png') }}" alt="نماد">
+                    </a>
+
+                    <a href="https://trustseal.enamad.ir/?id=7522175&Code=JNNWqNgWxUNQgdQQBaJCMuFG84EYDtek">
+                        <img src="https://trustseal.enamad.ir/logo.aspx?id=7522175&Code=JNNWqNgWxUNQgdQQBaJCMuFG84EYDtek" alt="نماد اعتماد الکترونیکی">
+                    </a>
+
                 </div>
 
             </div>
