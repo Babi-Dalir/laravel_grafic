@@ -374,20 +374,44 @@ $(document).ready(function (l) {
     .addClass("open")
     .children("ul")
     .show();
-  $("header.main-header .side-menu li.sub-menu> a").on("click", function () {
-    $(this).removeAttr("href");
-    var e = $(this).parent("li");
-    if (e.hasClass("open")) {
-      e.removeClass("open");
-      e.find("li").removeClass("open");
-      e.find("ul").slideUp(400);
-    } else {
-      e.addClass("open");
-      e.children("ul").slideDown(400);
-      e.siblings("li").children("ul").slideUp(400);
-      e.siblings("li").removeClass("open");
-    }
-  });
+    $("#categoryMenu").on("click", ".submenu-toggle", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $button = $(this);
+        var $parent = $button.closest(".sub-menu");
+        var $submenu = $parent.children("ul");
+
+        if (!$submenu.length) {
+            return;
+        }
+
+        if ($parent.hasClass("open")) {
+
+            // بستن
+            $parent.removeClass("open");
+
+            $submenu.stop(true, true).slideUp(350);
+
+        } else {
+
+            // بستن سایر زیرمنوهای هم‌سطح
+            $parent
+                .siblings(".sub-menu")
+                .removeClass("open")
+                .children("ul")
+                .stop(true, true)
+                .slideUp(350);
+
+            // باز کردن
+            $parent.addClass("open");
+
+            $submenu
+                .stop(true, true)
+                .hide()
+                .slideDown(350);
+        }
+    });
 
   /* ************** favorites product */
   $("ul.gallery-options button.add-favorites").on("click", function () {
