@@ -164,21 +164,53 @@
                     <ul class="navbar-nav dt-sl" id="categoryMenu">
                         @foreach ($categories as $category1)
                             <li class="sub-menu">
-                                <a href="{{ route('main.category.product.list', $category1->slug) }}">{{ $category1->name }}</a>
-                                <ul>
-                                    @foreach ($category1->childCategory as $category2)
-                                        <li class="sub-menu">
-                                            <a href="{{ route('search.category.product.list', $category2->slug) }}">{{ $category2->name }}</a>
-                                            <ul>
-                                                @foreach ($category2->childCategory as $category3)
-                                                    <li>
-                                                        <a href="{{ route('search.category.product.list', [$category2->slug, $category3->slug]) }}"> {{ $category3->name }}</a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </li>
-                                    @endforeach
-                                </ul>
+
+                                <div class="mobile-menu-item">
+                                    <a href="{{ route('main.category.product.list', $category1->slug) }}">
+                                        {{ $category1->name }}
+                                    </a>
+
+                                    @if($category1->childCategory->count())
+                                        <button type="button" class="submenu-toggle" aria-label="نمایش زیر دسته‌ها">
+                                            <i class="mdi mdi-chevron-down"></i>
+                                        </button>
+                                    @endif
+                                </div>
+
+                                @if($category1->childCategory->count())
+                                    <ul>
+                                        @foreach ($category1->childCategory as $category2)
+                                            <li class="sub-menu">
+
+                                                <div class="mobile-menu-item">
+                                                    <a href="{{ route('search.category.product.list', $category2->slug) }}">
+                                                        {{ $category2->name }}
+                                                    </a>
+
+                                                    @if($category2->childCategory->count())
+                                                        <button type="button" class="submenu-toggle" aria-label="نمایش زیر دسته‌ها">
+                                                            <i class="mdi mdi-chevron-down"></i>
+                                                        </button>
+                                                    @endif
+                                                </div>
+
+                                                @if($category2->childCategory->count())
+                                                    <ul>
+                                                        @foreach ($category2->childCategory as $category3)
+                                                            <li>
+                                                                <a href="{{ route('search.category.product.list', [$category2->slug, $category3->slug]) }}">
+                                                                    {{ $category3->name }}
+                                                                </a>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
+
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+
                             </li>
                         @endforeach
                     </ul>
