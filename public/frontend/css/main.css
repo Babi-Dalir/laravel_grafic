@@ -12626,51 +12626,53 @@ button.profile-btn.active-btn {
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
 }
+/* زیر دسته های منوی همبرگری برای حالت موبایل */
 
-/* زیر دسته های منوی همبرگری برای حالت موبایل*/
-.mobile-menu-item {
+#categoryMenu .mobile-menu-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
 }
 
-.mobile-menu-item > a {
+#categoryMenu .mobile-menu-item > a {
     flex: 1;
 }
 
-.submenu-toggle {
+#categoryMenu .submenu-toggle {
     width: 40px;
     height: 40px;
     padding: 0;
+    margin: 0;
+
     border: 0;
+    outline: none;
     background: transparent;
-    cursor: pointer;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     flex-shrink: 0;
+    cursor: pointer;
+
+    appearance: none;
+    -webkit-appearance: none;
 }
 
-.submenu-toggle i {
+#categoryMenu .submenu-toggle i {
     font-size: 20px;
+    line-height: 1;
 
     transition: transform 0.35s ease;
 }
 
-/* چرخش نرم فلش */
-.sub-menu.open > .mobile-menu-item .submenu-toggle i {
+#categoryMenu .sub-menu.open > .mobile-menu-item .submenu-toggle i {
     transform: rotate(180deg);
 }
 
-/* انیمیشن باز و بسته شدن */
 #categoryMenu .sub-menu > ul {
     display: none;
     overflow: hidden;
-}
-
-#categoryMenu .sub-menu > ul {
     will-change: height;
 }
