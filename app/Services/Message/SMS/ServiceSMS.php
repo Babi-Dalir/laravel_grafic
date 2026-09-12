@@ -3,6 +3,7 @@
 namespace App\Services\Message\SMS;
 
 use App\Services\Message\MessageInterface;
+use Illuminate\Support\Facades\Log;
 
 class ServiceSMS implements MessageInterface
 {
@@ -14,8 +15,10 @@ class ServiceSMS implements MessageInterface
 
     public function sendMessage(): void
     {
-        // Kill Switch کلی SMS
         if (! config('services.sms.enabled')) {
+
+            Log::warning('SMS is disabled');
+
             return;
         }
 

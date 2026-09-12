@@ -36,7 +36,13 @@ return [
     ],
 
     'sms' => [
+
         'enabled' => env('SMS_ENABLED', true),
+
+        'melipayamak' => [
+            'otp_url' => env('MELIPAYAMAK_OTP_URL'),
+        ],
+
     ],
 
     'order_payment_sms' => [

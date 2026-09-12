@@ -39,8 +39,8 @@ Route::middleware('guest')->group(function () {
     Route::get('verify_mobile', [VerifyMobileController::class, 'verifyMobile'])
         ->name('verify.mobile');
     Route::post('verify_code', [VerifyMobileController::class, 'verifyCode'])
+        ->middleware('throttle:10,1')
         ->name('verify.code');
-
     // ⚡ روت جدید ارسال مجدد کد (محدود شده با تراتل لاراول جهت جلوگیری از اسپم اس‌ام‌اس)
     Route::post('resend_otp', [VerifyMobileController::class, 'resendOtp'])
         ->middleware('throttle:3,1') // حداکثر ۳ بار ارسال مجدد در دقیقه

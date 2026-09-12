@@ -5,21 +5,25 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\VerificationCode;
-use App\Services\Message\MessageService;
-use App\Services\Message\SMS\ServiceSMS;
+use App\Services\Message\SMS\ServiceMelipayamak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Session;
 
 class ForgotPasswordController extends Controller
 {
-    // ۱. فرم ورود شماره
+    /**
+     * فرم درخواست OTP
+     */
     public function showRequestForm()
     {
         return view('frontend.auth.forgot_password');
     }
 
-    // ۲. بررسی شماره و ارسال پیامک OTP
+    /**
+     * ارسال OTP برای فراموشی رمز
+     */
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -29,104 +33,256 @@ class ForgotPasswordController extends Controller
             'mobile.regex' => 'فرمت شماره موبایل معتبر نیست.',
         ]);
 
-        $mobile = $request->mobile;
+        $mobile = $request->input('mobile');
 
-        // بررسی وجود شماره در دیتابیس
-        if (!User::where('mobile', $mobile)->exists()) {
-            return back()->withErrors(['mobile' => 'کاربری با این شماره موبایل یافت نشد.'])->withInput();
+        /*
+         * Rate limit by mobile + IP.
+         */
+        $rateLimitKey = 'forgot-password:' . $mobile . '|' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            return back()
+                ->withErrors([
+                    'mobile' => 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.',
+                ])
+                ->withInput();
         }
 
-        // چک کردن زمان ارسال (جلوگیری از اسپم)
-        if (!VerificationCode::canSendCode($mobile)) {
-            return back()->withErrors(['mobile' => 'برای ارسال مجدد کد باید ۲ دقیقه صبر کنید.'])->withInput();
+        /*
+         * Only existing users can request password reset.
+         */
+        if (! User::query()->where('mobile', $mobile)->exists()) {
+            return back()
+                ->withErrors([
+                    'mobile' => 'کاربری با این شماره موبایل یافت نشد.',
+                ])
+                ->withInput();
         }
 
-        $code = random_int(10000, 99999);
-        VerificationCode::createVerificationCode($mobile, $code);
+        /*
+         * Minimum 2-minute interval.
+         */
+        if (! VerificationCode::canSendCode($mobile)) {
+            return back()
+                ->withErrors([
+                    'mobile' => 'برای ارسال مجدد کد باید ۲ دقیقه صبر کنید.',
+                ])
+                ->withInput();
+        }
 
-        // ارسال SMS با ملی پیامک
-        $serviceSMS = new ServiceSMS($mobile, $code);
-        (new MessageService($serviceSMS))->send();
+        RateLimiter::hit($rateLimitKey, 120);
 
+        /*
+         * Generate + send OTP by Melipayamak.
+         */
+        $melipayamak = new ServiceMelipayamak();
+
+        $code = $melipayamak->sendOTP($mobile);
+
+        if ($code === null) {
+            return back()
+                ->withErrors([
+                    'mobile' => 'ارسال کد تایید با مشکل مواجه شد. لطفاً دوباره تلاش کنید.',
+                ])
+                ->withInput();
+        }
+
+        /*
+         * Store hashed OTP.
+         */
+        VerificationCode::createOtp(
+            $mobile,
+            $code
+        );
+
+        /*
+         * Store reset flow data.
+         */
         Session::put('reset_mobile', $mobile);
 
-        return redirect()->route('password.verify.form.otp');
+        Session::forget('reset_verified');
+
+        return redirect()
+            ->route('password.verify.form.otp');
     }
 
-    // ۳. ارسال مجدد کد آژاکسی
-    public function resendOtp()
+    /**
+     * ارسال مجدد OTP
+     */
+    public function resendOtp(Request $request)
     {
         $mobile = Session::get('reset_mobile');
 
-        if (!$mobile) {
-            return response()->json(['status' => 'error', 'message' => 'اطلاعات شماره همراه یافت نشد.'], 422);
+        if (! $mobile) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'اطلاعات شماره موبایل یافت نشد.',
+            ], 422);
         }
 
-        if (!VerificationCode::canSendCode($mobile)) {
-            return response()->json(['status' => 'error', 'message' => 'لطفاً ۲ دقیقه صبر کرده و مجدداً تلاش کنید.'], 422);
+        /*
+         * Make sure the user still exists.
+         */
+        if (! User::query()->where('mobile', $mobile)->exists()) {
+            Session::forget([
+                'reset_mobile',
+                'reset_verified',
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'کاربر یافت نشد.',
+            ], 422);
         }
 
-        $newCode = random_int(10000, 99999);
-        VerificationCode::createVerificationCode($mobile, $newCode);
+        /*
+         * Rate limit.
+         */
+        $rateLimitKey =
+            'forgot-password-resend:' .
+            $mobile .
+            '|' .
+            $request->ip();
 
-        $serviceSMS = new ServiceSMS($mobile, $newCode);
-        (new MessageService($serviceSMS))->send();
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'تعداد درخواست‌ها بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.',
+            ], 429);
+        }
 
-        return response()->json(['status' => 'success', 'message' => 'کد جدید ارسال شد.']);
+        /*
+         * Minimum 2-minute interval.
+         */
+        if (! VerificationCode::canSendCode($mobile)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'لطفاً ۲ دقیقه صبر کرده و مجدداً تلاش کنید.',
+            ], 429);
+        }
+
+        RateLimiter::hit($rateLimitKey, 120);
+
+        /*
+         * Send new OTP.
+         */
+        $melipayamak = new ServiceMelipayamak();
+
+        $code = $melipayamak->sendOTP($mobile);
+
+        if ($code === null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'ارسال کد تایید با مشکل مواجه شد.',
+            ], 500);
+        }
+
+        VerificationCode::createOtp(
+            $mobile,
+            $code
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'کد جدید ارسال شد.',
+        ]);
     }
 
-    // ۴. فرم تایید کد OTP
+    /**
+     * فرم تایید OTP
+     */
     public function showVerifyForm()
     {
-        if (!Session::has('reset_mobile')) {
-            return redirect()->route('password.request.otp');
+        if (! Session::has('reset_mobile')) {
+            return redirect()
+                ->route('password.request.otp');
         }
 
         return view('frontend.auth.verify_forgot_otp');
     }
 
-    // ۵. بررسی کد OTP
+    /**
+     * تایید OTP
+     */
     public function verifyOtp(Request $request)
     {
         $request->validate([
             'code' => ['required', 'array', 'size:5'],
-            'code.*' => ['required', 'numeric'],
+            'code.*' => ['required', 'digits:1'],
+        ], [
+            'code.required' => 'لطفاً کد تایید را وارد کنید.',
+            'code.size' => 'کد تایید باید ۵ رقمی باشد.',
         ]);
 
         $mobile = Session::get('reset_mobile');
-        if (!$mobile) {
-            return redirect()->route('password.request.otp')->with('error', 'نشست شما منقضی شده است.');
+
+        if (! $mobile) {
+            return redirect()
+                ->route('password.request.otp')
+                ->with(
+                    'error',
+                    'نشست شما منقضی شده است.'
+                );
         }
 
-        $code = (int) implode('', $request->code);
+        $code = implode('', $request->input('code'));
 
-        if (!VerificationCode::checkVerificationCode($mobile, $code)) {
-            return back()->with('error', 'کد وارد شده صحیح نمی‌باشد یا منقضی شده است.');
+        /*
+         * Verify OTP.
+         */
+        if (! VerificationCode::verifyOtp($mobile, $code)) {
+            return back()
+                ->with(
+                    'error',
+                    'کد وارد شده صحیح نمی‌باشد یا منقضی شده است.'
+                );
         }
 
+        /*
+         * Mark reset flow as verified.
+         */
         Session::put('reset_verified', true);
 
-        return redirect()->route('password.reset.form.otp');
+        return redirect()
+            ->route('password.reset.form.otp');
     }
 
-    // ۶. فرم ثبت رمز جدید
+    /**
+     * فرم تعیین رمز جدید
+     */
     public function showResetForm()
     {
-        if (!Session::has('reset_mobile') || !Session::get('reset_verified')) {
-            return redirect()->route('password.request.otp');
+        if (
+            ! Session::has('reset_mobile') ||
+            ! Session::get('reset_verified')
+        ) {
+            return redirect()
+                ->route('password.request.otp');
         }
 
         return view('frontend.auth.reset_password');
     }
 
+    /**
+     * تغییر رمز
+     */
     public function resetPassword(Request $request)
     {
-        if (!Session::has('reset_mobile') || !Session::get('reset_verified')) {
-            return redirect()->route('password.request.otp');
+        if (
+            ! Session::has('reset_mobile') ||
+            ! Session::get('reset_verified')
+        ) {
+            return redirect()
+                ->route('password.request.otp');
         }
 
         $request->validate([
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+            ],
         ], [
             'password.required' => 'لطفاً رمز عبور جدید را وارد کنید.',
             'password.min' => 'رمز عبور باید حداقل ۸ کاراکتر باشد.',
@@ -135,17 +291,53 @@ class ForgotPasswordController extends Controller
 
         $mobile = Session::get('reset_mobile');
 
-        // ۱. به‌روزرسانی رمز عبور
-        User::where('mobile', $mobile)->update([
-            'password' => Hash::make($request->password),
+        $user = User::query()
+            ->where('mobile', $mobile)
+            ->first();
+
+        if (! $user) {
+            Session::forget([
+                'reset_mobile',
+                'reset_verified',
+            ]);
+
+            return redirect()
+                ->route('password.request.otp')
+                ->with(
+                    'error',
+                    'کاربر یافت نشد.'
+                );
+        }
+
+        /*
+         * Change password.
+         */
+        $user->update([
+            'password' => Hash::make(
+                $request->input('password')
+            ),
         ]);
 
-        // ۲. پاک‌سازی کامل دیتابیس و سشن‌ها
-        VerificationCode::query()->where('mobile', $mobile)->delete();
-        Session::forget(['reset_mobile', 'reset_verified']);
+        /*
+         * Delete OTP.
+         */
+        VerificationCode::query()
+            ->where('mobile', $mobile)
+            ->delete();
 
-        // ۳. هدایت به لاگین
-        return redirect()->route('login')
-            ->with('success', 'رمز عبور شما با موفقیت تغییر یافت. اکنون می‌توانید وارد شوید.');
+        /*
+         * Destroy reset session.
+         */
+        Session::forget([
+            'reset_mobile',
+            'reset_verified',
+        ]);
+
+        return redirect()
+            ->route('login')
+            ->with(
+                'success',
+                'رمز عبور شما با موفقیت تغییر یافت. اکنون می‌توانید وارد شوید.'
+            );
     }
 }

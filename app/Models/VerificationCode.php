@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class VerificationCode extends Model
 {
@@ -10,52 +12,122 @@ class VerificationCode extends Model
         'mobile',
         'email',
         'code',
-
+        'expires_at',
+        'attempts',
+        'consumed_at',
     ];
 
-    public static function canSendCode($entry)
+    protected $casts = [
+        'expires_at' => 'datetime',
+        'consumed_at' => 'datetime',
+    ];
+
+    /**
+     * بررسی امکان ارسال OTP جدید
+     */
+    public static function canSendCode(string $entry): bool
     {
         return ! self::query()
             ->where(function ($query) use ($entry) {
-                $query->where('mobile', $entry)
+                $query
+                    ->where('mobile', $entry)
                     ->orWhere('email', $entry);
             })
-            ->where('created_at', '>=', now()->subMinutes(2))
+            ->where(
+                'created_at',
+                '>=',
+                now()->subMinutes(2)
+            )
             ->exists();
     }
 
-    //ساخت کد جدید
-    public static function createVerificationCode($entry,$code)
-    {
-        self::query()
-            ->where('mobile',$entry)
-            ->orWhere('email', $entry)
-            ->delete();
+    /**
+     * ایجاد OTP جدید
+     */
+    public static function createOtp(
+        string $mobile,
+        string $code
+    ): self {
+        return DB::transaction(function () use ($mobile, $code) {
 
-        if (filter_var($entry, FILTER_VALIDATE_EMAIL)){
-            self::query()->create([
-                'email'=>$entry,
-                'code'=>$code
+            /*
+             * Only the previous OTP for this mobile is removed.
+             */
+            self::query()
+                ->where('mobile', $mobile)
+                ->delete();
+
+            return self::query()->create([
+                'mobile' => $mobile,
+
+                /*
+                 * Never store the raw OTP.
+                 */
+                'code' => Hash::make($code),
+
+                /*
+                 * OTP validity: 5 minutes.
+                 */
+                'expires_at' => now()->addMinutes(5),
+
+                'attempts' => 0,
+
+                'consumed_at' => null,
             ]);
-        }else {
-            self::query()->create([
-                'mobile'=>$entry,
-                'code'=>$code
-            ]);
-        }
+        });
     }
 
-    //بررسی اعتبار کد
-    public static function checkVerificationCode($entry,$code)
-    {
-        return self::query()
-            ->where(function ($query) use ($entry) {
-                $query->where('mobile', $entry)
-                    ->orWhere('email', $entry);
-            })
-            ->where('code', $code)
-            ->where('created_at', '>=', now()->subMinutes(5))
-            ->exists();
+    /**
+     * بررسی OTP
+     */
+    public static function verifyOtp(
+        string $mobile,
+        string $code
+    ): bool {
+        return DB::transaction(function () use ($mobile, $code) {
 
+            /*
+             * Lock the row to prevent concurrent verification.
+             */
+            $verification = self::query()
+                ->where('mobile', $mobile)
+                ->whereNull('consumed_at')
+                ->where('expires_at', '>', now())
+                ->latest('id')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $verification) {
+                return false;
+            }
+
+            /*
+             * Maximum 5 attempts.
+             */
+            if ($verification->attempts >= 5) {
+                return false;
+            }
+
+            /*
+             * Count this attempt.
+             */
+            $verification->increment('attempts');
+
+            /*
+             * Check hashed OTP.
+             */
+            if (! Hash::check($code, $verification->code)) {
+                return false;
+            }
+
+            /*
+             * Mark OTP as consumed.
+             */
+            $verification->update([
+                'consumed_at' => now(),
+            ]);
+
+            return true;
+        });
     }
 }
