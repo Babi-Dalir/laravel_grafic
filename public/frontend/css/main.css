@@ -12647,17 +12647,18 @@ button.profile-btn.active-btn {
 
     border: 0;
     outline: none;
-    background: transparent;
+    /*background: transparent;*/
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /*display: flex;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
 
-    flex-shrink: 0;
-    cursor: pointer;
+    /*flex-shrink: 0;*/
+    /*cursor: pointer;*/
 
-    appearance: none;
-    -webkit-appearance: none;
+    /*appearance: none;*/
+
+    background: red !important;
 }
 
 #categoryMenu .submenu-toggle i {
