@@ -12677,3 +12677,157 @@ button.profile-btn.active-btn {
     overflow: hidden;
     will-change: height;
 }
+
+
+
+/* =========================================================
+   MOBILE CATEGORY MENU
+   Main color: #a855f7
+   ========================================================= */
+
+#categoryMenu .mobile-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* =========================
+   Category Link
+   ========================= */
+
+#categoryMenu .mobile-menu-item > a {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+
+    color: #252a34 !important;
+
+    transition:
+        color 0.25s ease,
+        padding-right 0.25s ease !important;
+}
+
+/* Hover روی اسم دسته */
+#categoryMenu .mobile-menu-item > a:hover {
+    color: #a855f7 !important;
+    padding-right: 4px !important;
+}
+
+
+/* =========================
+   Submenu Toggle Button
+   ========================= */
+
+#categoryMenu button.submenu-toggle {
+    all: unset !important;
+
+    width: 34px !important;
+    height: 34px !important;
+
+    min-width: 34px !important;
+    max-width: 34px !important;
+
+    min-height: 34px !important;
+    max-height: 34px !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 6px !important;
+    padding: 0 !important;
+
+    border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    border-radius: 9px !important;
+
+    background: #ffffff !important;
+
+    color: #a855f7 !important;
+
+    cursor: pointer !important;
+
+    appearance: none !important;
+    -webkit-appearance: none !important;
+
+    box-shadow: 0 2px 7px rgba(168, 85, 247, 0.12) !important;
+
+    transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease !important;
+}
+
+
+/* =========================
+   Arrow
+   ========================= */
+
+#categoryMenu button.submenu-toggle i {
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 17px !important;
+    line-height: 1 !important;
+
+    color: #a855f7 !important;
+
+    transition: transform 0.3s ease !important;
+}
+
+
+/* =========================
+   Hover Button
+   ========================= */
+
+#categoryMenu button.submenu-toggle:hover {
+    background: #a855f7 !important;
+
+    border-color: #a855f7 !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 4px 12px rgba(168, 85, 247, 0.30) !important;
+
+    transform: translateY(-1px) !important;
+}
+
+#categoryMenu button.submenu-toggle:hover i {
+    color: #ffffff !important;
+}
+
+
+/* =========================
+   Open State
+   ========================= */
+
+#categoryMenu .sub-menu.open > .mobile-menu-item button.submenu-toggle {
+    background: #a855f7 !important;
+
+    border-color: #a855f7 !important;
+
+    color: #ffffff !important;
+
+    box-shadow:
+        0 4px 12px rgba(168, 85, 247, 0.30) !important;
+}
+
+#categoryMenu .sub-menu.open > .mobile-menu-item button.submenu-toggle i {
+    color: #ffffff !important;
+
+    transform: rotate(180deg) !important;
+}
+
+
+/* =========================
+   Submenu
+   ========================= */
+
+#categoryMenu .sub-menu > ul {
+    overflow: hidden !important;
+}
