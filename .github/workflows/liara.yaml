@@ -30,12 +30,6 @@ jobs:
           npm install -g @liara/cli@9
           liara --version
 
-      - name: Test Liara authentication
-        env:
-          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
-        run: |
-          liara account ls --api-token="$LIARA_TOKEN"
-
       - name: Deploy to Liara
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
@@ -44,5 +38,4 @@ jobs:
             --app=amazing-jennings-gic1pmrib \
             --port=3000 \
             --api-token="$LIARA_TOKEN" \
-            --detach \
-            --debug
+            --detach
