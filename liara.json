@@ -15,10 +15,6 @@
         {
             "name": "storage",
             "mountTo": "/var/www/html/storage"
-        },
-        {
-            "name": "data",
-            "mountTo": "/mnt/data-old"
         }
     ]
 }
