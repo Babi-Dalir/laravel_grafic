@@ -20,6 +20,67 @@
 <script src="{{url('frontend/js/main.js')}}"></script>
 @stack('scripts')
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const categoryMenu = document.getElementById('categoryMenu');
+
+        if (!categoryMenu || typeof $ === 'undefined') {
+            return;
+        }
+
+        $('#categoryMenu').on('click', '.submenu-toggle', function (e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const $button = $(this);
+            const $parent = $button.closest('.sub-menu');
+            const $submenu = $parent.children('ul');
+
+            if (!$submenu.length) {
+                return;
+            }
+
+            /*
+             * اگر باز است → نرم بسته شود
+             */
+            if ($parent.hasClass('open')) {
+
+                $parent.removeClass('open');
+
+                $submenu
+                    .stop(true, true)
+                    .slideUp(300);
+
+                return;
+            }
+
+            /*
+             * بستن نرم زیرمنوهای هم‌سطح
+             */
+            $parent
+                .siblings('.sub-menu.open')
+                .removeClass('open')
+                .children('ul')
+                .stop(true, true)
+                .slideUp(300);
+
+            /*
+             * باز کردن نرم زیرمنوی انتخاب‌شده
+             */
+            $parent.addClass('open');
+
+            $submenu
+                .stop(true, true)
+                .hide()
+                .slideDown(300);
+
+        });
+
+    });
+</script>
+
 
 
 

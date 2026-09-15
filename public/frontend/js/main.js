@@ -370,49 +370,6 @@ $(document).ready(function (l) {
     }
     $(this).fadeOut(200);
   });
-  $("header.main-header .side-menu li.active")
-    .addClass("open")
-    .children("ul")
-    .show();
-    $("#categoryMenu").on("click", ".submenu-toggle", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $button = $(this);
-        var $parent = $button.closest(".sub-menu");
-        var $submenu = $parent.children("ul");
-
-        if (!$submenu.length) {
-            return;
-        }
-
-        if ($parent.hasClass("open")) {
-
-            // بستن
-            $parent.removeClass("open");
-
-            $submenu.stop(true, true).slideUp(350);
-
-        } else {
-
-            // بستن سایر زیرمنوهای هم‌سطح
-            $parent
-                .siblings(".sub-menu")
-                .removeClass("open")
-                .children("ul")
-                .stop(true, true)
-                .slideUp(350);
-
-            // باز کردن
-            $parent.addClass("open");
-
-            $submenu
-                .stop(true, true)
-                .hide()
-                .slideDown(350);
-        }
-    });
-
   /* ************** favorites product */
   $("ul.gallery-options button.add-favorites").on("click", function () {
     $(this).toggleClass("favorites");
