@@ -38,4 +38,6 @@ jobs:
             --app=amazing-jennings-gic1pmrib \
             --port=3000 \
             --api-token="$LIARA_TOKEN" \
+            --disks storage:/var/www/html/storage \
+            --disks data:/mnt/data-old \
             --detach
