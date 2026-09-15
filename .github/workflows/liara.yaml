@@ -9,16 +9,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: "22"
 
-      - name: update-liara
+      - name: Check Liara token
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
+          if [ -z "$LIARA_TOKEN" ]; then
+            echo "ERROR: LIARA_API_TOKEN is empty or not available."
+            exit 1
+          fi
+          echo "LIARA_API_TOKEN is available."
+
+      - name: Install Liara CLI
+        run: |
           npm install -g @liara/cli@9
           liara --version
-          liara deploy --app=amazing-jennings-gic1pmrib --port=3000 --api-token="$LIARA_TOKEN" --detach
+
+      - name: Test Liara authentication
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: |
+          liara account ls --api-token="$LIARA_TOKEN"
+
+      - name: Deploy to Liara
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: |
+          liara deploy \
+            --app=amazing-jennings-gic1pmrib \
+            --port=3000 \
+            --api-token="$LIARA_TOKEN" \
+            --detach \
+            --debug
