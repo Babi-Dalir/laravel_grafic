@@ -19,4 +19,6 @@ jobs:
         env:
           LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
         run: |
-          npx @liara/cli@9 deploy --app=amazing-jennings-gic1pmrib --port=3000 --api-token="$LIARA_TOKEN" --detach
+          npm install -g @liara/cli@9
+          liara --version
+          liara deploy --app=amazing-jennings-gic1pmrib --port=3000 --api-token="$LIARA_TOKEN" --detach
